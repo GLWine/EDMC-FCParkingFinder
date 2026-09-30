@@ -1,6 +1,6 @@
 # EDMC Fleet Carrier Parking Finder (EDR Ported)
 
-![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.1--rc.1-orange.svg)
 ![EDMC Compatible](https://img.shields.io/badge/EDMC-Compatible-success.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 ![CI/CD Pipeline](https://github.com/GLWine/EDR-Ported-Parking-Finder/actions/workflows/release.yml/badge.svg)
