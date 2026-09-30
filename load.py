@@ -10,11 +10,11 @@ import plug
 
 from parking_finder import EDRParkingSystemFinder
 
-# Inizializzazione degli standard EDMC per logging e traduzioni
+# Initialization of EDMC standards for logging and translations
 _ = plug.get_translation(__file__)
 logger = plug.get_logger(__name__)
 
-# Istanza globale dell'interfaccia utente del plugin
+# Global plugin user interface instance
 plugin_ui_instance = None
 
 
@@ -43,16 +43,16 @@ class ParkingPluginUI:
         self.frame = ttk.LabelFrame(self.parent, text=_("Carrier Parking Finder"))
         self.frame.pack(fill=tk.X, padx=5, pady=5, ipadx=5, ipady=5)
 
-        # Campo di inserimento del sistema stellare
+        # Star system input field
         ttk.Label(self.frame, text=_("System:")).grid(row=0, column=0, sticky=tk.W, padx=2, pady=2)
         self.system_entry = ttk.Entry(self.frame, width=18)
         self.system_entry.grid(row=0, column=1, padx=2, pady=2)
 
-        # Pulsante per avviare la ricerca manuale
+        # Button to trigger manual search
         self.search_btn = ttk.Button(self.frame, text=_("Search"), command=self.start_search)
         self.search_btn.grid(row=0, column=2, padx=2, pady=2)
 
-        # Etichetta per mostrare lo stato e i risultati della ricerca
+        # Label to display search status and results
         self.result_label = ttk.Label(self.frame, text=_("Waiting for game data..."), foreground="gray")
         self.result_label.grid(row=1, column=0, columnspan=3, sticky=tk.W, padx=2, pady=4)
 
@@ -80,7 +80,7 @@ class ParkingPluginUI:
         )
         self.search_btn.config(state="disabled")
 
-        # Esecuzione asincrona della ricerca
+        # Asynchronous execution of the search
         threading.Thread(
             target=self._run_query,
             args=(system_name,),
@@ -96,7 +96,7 @@ class ParkingPluginUI:
         """
         finder = EDRParkingSystemFinder(system_name, callback=None)
         result = finder.search_sync()
-        # Aggiornamento sicuro dell'interfaccia sul thread principale di Tkinter
+        # Safe UI update on the main Tkinter thread
         self.frame.after(0, lambda: self._update_result(result))
 
     def _update_result(self, result: dict) -> None:
