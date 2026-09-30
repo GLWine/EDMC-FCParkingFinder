@@ -3,15 +3,16 @@ EDMC Standalone Plugin: Fleet Carrier Parking Finder.
 Adapts the EDR parking search logic to identify available parking slots nearby.
 """
 
+import functools
 import logging
 import os
 import threading
 import tkinter as tk
 from tkinter import ttk
-import functools
 
 import l10n
 from config import appname, config
+
 from parking_finder import EDRParkingSystemFinder
 
 # Official EDMC localization setup for plugins
@@ -19,7 +20,7 @@ plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
 
 # Official EDMC logging configuration for plugins
 plugin_name = os.path.basename(os.path.dirname(__file__))
-logger = logging.getLogger(f'{appname}.{plugin_name}')
+logger = logging.getLogger(f"{appname}.{plugin_name}")
 
 # Global plugin user interface instance
 plugin_ui_instance = None
@@ -48,21 +49,31 @@ class ParkingPluginUI:
 
     def _setup_ui(self) -> None:
         """Set up the layout and widgets following EDMC styling guidelines."""
-        self.frame = ttk.LabelFrame(self.parent, text=plugin_tl("Carrier Parking Finder"))
+        self.frame = ttk.LabelFrame(
+            self.parent, text=plugin_tl("Carrier Parking Finder")
+        )
         self.frame.pack(fill=tk.X, padx=5, pady=5, ipadx=5, ipady=5)
 
         # Star system input field
-        ttk.Label(self.frame, text=plugin_tl("System:")).grid(row=0, column=0, sticky=tk.W, padx=2, pady=2)
+        ttk.Label(self.frame, text=plugin_tl("System:")).grid(
+            row=0, column=0, sticky=tk.W, padx=2, pady=2
+        )
         self.system_entry = ttk.Entry(self.frame, width=18)
         self.system_entry.grid(row=0, column=1, padx=2, pady=2)
 
         # Button to trigger manual search
-        self.search_btn = ttk.Button(self.frame, text=plugin_tl("Search"), command=self.start_search)
+        self.search_btn = ttk.Button(
+            self.frame, text=plugin_tl("Search"), command=self.start_search
+        )
         self.search_btn.grid(row=0, column=2, padx=2, pady=2)
 
         # Label to display search status and results
-        self.result_label = ttk.Label(self.frame, text=plugin_tl("Waiting for game data..."), foreground="gray")
-        self.result_label.grid(row=1, column=0, columnspan=3, sticky=tk.W, padx=2, pady=4)
+        self.result_label = ttk.Label(
+            self.frame, text=plugin_tl("Waiting for game data..."), foreground="gray"
+        )
+        self.result_label.grid(
+            row=1, column=0, columnspan=3, sticky=tk.W, padx=2, pady=4
+        )
 
     def update_current_system(self, system_name: str) -> None:
         """
@@ -84,15 +95,13 @@ class ParkingPluginUI:
 
         self.result_label.config(
             text=plugin_tl("Searching around {system}...").format(system=system_name),
-            foreground="blue"
+            foreground="blue",
         )
         self.search_btn.config(state="disabled")
 
         # Asynchronous execution of the search via a managed worker thread
         thread = threading.Thread(
-            target=self._run_query,
-            args=(system_name,),
-            daemon=True
+            target=self._run_query, args=(system_name,), daemon=True
         )
         active_threads.append(thread)
         thread.start()
@@ -106,7 +115,7 @@ class ParkingPluginUI:
         """
         finder = EDRParkingSystemFinder(system_name, callback=None)
         result = finder.search_sync()
-        
+
         # Check shutdown state before triggering tkinter updates to avoid hanging
         if not config.shutting_down and self.frame:
             try:
@@ -133,7 +142,7 @@ class ParkingPluginUI:
         else:
             self.result_label.config(
                 text=plugin_tl("No suitable parking system found within range."),
-                foreground="red"
+                foreground="red",
             )
 
 
@@ -177,7 +186,9 @@ def plugin_stop() -> None:
             thread.join(timeout=1.0)
 
 
-def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: dict, state: dict) -> None:
+def journal_entry(
+    cmdr: str, is_beta: bool, system: str, station: str, entry: dict, state: dict
+) -> None:
     """
     Hook called by EDMC on every journal event (e.g., FSDJump, Location).
 
