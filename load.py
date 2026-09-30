@@ -13,9 +13,9 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 
-import l10n
 from config import appname, config
 
+import l10n
 from parking_finder import EDRParkingSystemFinder
 
 # Semantic Versioning compliance for EDMC Plugin Registry
