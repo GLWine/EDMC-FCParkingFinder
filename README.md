@@ -3,7 +3,7 @@
 ![Version](https://img.shields.io/badge/version-1.1.1--rc.1-orange.svg)
 ![EDMC Compatible](https://img.shields.io/badge/EDMC-Compatible-success.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-![CI/CD Pipeline](https://github.com/GLWine/EDMC-Fleet-Carrier-Parking-Finder-EDR-Ported/blob/main/.github/workflows/release.yml/badge.svg)
+![CI/CD Pipeline](https://github.com/GLWine/EDMC-Fleet-Carrier-Parking-Finder-EDR-Ported/actions/workflows/release.yml/badge.svg)
 
 A lightweight, standalone plugin for **EDMC (Elite Dangerous Market Connector)** designed to help commanders identify potential Fleet Carrier parking availability in nearby star systems.
 
