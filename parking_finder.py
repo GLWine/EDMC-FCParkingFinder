@@ -52,7 +52,7 @@ class EDRParkingSystemFinder:
             dict: System details including parking data, or None if not found.
         """
         try:
-            # 1. Controlla prima il sistema di partenza se il rank è 0
+            # 1. Check the starting system first if rank is 0
             sys_resp = requests.get(
                 "https://www.edsm.net/api-v1/system",
                 params={
@@ -77,7 +77,7 @@ class EDRParkingSystemFinder:
                         the_system["parking"] = {"slots": slots}
                         return the_system
 
-            # 2. Cerca all'interno della sfera di raggio specificato
+            # 2. Search within the sphere of the specified radius
             sphere_resp = requests.get(
                 "https://www.edsm.net/api-v1/sphere-systems",
                 params={
@@ -91,7 +91,7 @@ class EDRParkingSystemFinder:
 
             if isinstance(sphere_resp, list):
                 candidates = []
-                # Ordinamento dei sistemi per distanza crescente
+                # Sort systems by increasing distance
                 sorted_systems = sorted(sphere_resp, key=lambda s: s.get('distance', 0))
 
                 for system in sorted_systems:
@@ -118,7 +118,7 @@ class EDRParkingSystemFinder:
         if not system:
             return False
 
-        # Evita falsi positivi con sistemi distanti restituiti con distanza 0
+        # Avoid false positives with distant systems incorrectly returned with distance 0
         if system.get("distance", 0) == 0 and system.get("name", "") != self.star_system:
             return False
 
@@ -151,3 +151,4 @@ class EDRParkingSystemFinder:
             body_count = 1
 
         return min(128, body_count * 16)
+        
