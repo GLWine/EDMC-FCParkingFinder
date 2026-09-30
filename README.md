@@ -1,9 +1,9 @@
-# EDMC Fleet Carrier Parking Finder (EDR Ported)
+# ED Fleet Carrier Parking Finder (EDR Ported)
 
 ![Version](https://img.shields.io/badge/version-1.1.1--rc.1-orange.svg)
 ![EDMC Compatible](https://img.shields.io/badge/EDMC-Compatible-success.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-![CI/CD Pipeline](https://github.com/GLWine/EDMC-Fleet-Carrier-Parking-Finder-EDR-Ported/actions/workflows/release.yml/badge.svg)
+![CI/CD Pipeline](https://github.com/GLWine/ED-Parking-Finder/actions/workflows/release.yml/badge.svg)
 
 A lightweight, standalone plugin for **EDMC (Elite Dangerous Market Connector)** designed to help commanders identify potential Fleet Carrier parking availability in nearby star systems.
 
@@ -28,8 +28,8 @@ This project extracts and adapts the parking search logic from the renowned **ED
 ## Installation
 
 ### Method 1: Automatic (Recommended)
-1. Go to the [Releases](https://github.com/GLWine/EDMC-Fleet-Carrier-Parking-Finder-EDR-Ported/releases/latest) page.
-2. Download the latest `EDR-Ported-Parking-Finder-v*.zip` asset.
+1. Go to the [Releases](https://github.com/GLWine/ED-Parking-Finder/releases/latest) page.
+2. Download the latest `ED-Parking-Finder.zip` asset.
 3. Extract the contents directly into your EDMC plugins directory:
    * **Windows**: `%LOCALAPPDATA%\EDMarketConnector\plugins`
    * **Linux/Mac**: Check your EDMC configuration paths.
