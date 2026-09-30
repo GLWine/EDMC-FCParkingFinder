@@ -4,12 +4,13 @@ Core parking search logic based on EDR algorithms and EDSM API integration.
 
 import logging
 import os
+
 import requests
 from config import appname
 
 # Official EDMC logging configuration for plugins
 plugin_name = os.path.basename(os.path.dirname(__file__))
-logger = logging.getLogger(f'{appname}.{plugin_name}')
+logger = logging.getLogger(f"{appname}.{plugin_name}")
 
 
 class EDRParkingSystemFinder:
@@ -62,9 +63,9 @@ class EDRParkingSystemFinder:
                 params={
                     "systemName": self.star_system,
                     "showInformation": 1,
-                    "showPermit": 1
+                    "showPermit": 1,
                 },
-                timeout=10
+                timeout=10,
             ).json()
 
             if sys_resp and "name" in sys_resp:
@@ -73,7 +74,7 @@ class EDRParkingSystemFinder:
                     "name": sys_resp["name"],
                     "requirePermit": info.get("requirePermit", False),
                     "bodyCount": info.get("bodyCount", 0),
-                    "distance": 0
+                    "distance": 0,
                 }
                 if self.rank == 0 and not the_system["requirePermit"]:
                     slots = self._theoretical_parking_slots(the_system)
@@ -88,15 +89,15 @@ class EDRParkingSystemFinder:
                     "systemName": self.star_system,
                     "radius": self.radius,
                     "showInformation": 1,
-                    "showPermit": 1
+                    "showPermit": 1,
                 },
-                timeout=15
+                timeout=15,
             ).json()
 
             if isinstance(sphere_resp, list):
                 candidates = []
                 # Sort systems by increasing distance
-                sorted_systems = sorted(sphere_resp, key=lambda s: s.get('distance', 0))
+                sorted_systems = sorted(sphere_resp, key=lambda s: s.get("distance", 0))
 
                 for system in sorted_systems:
                     if self._check_system(system):
@@ -123,10 +124,13 @@ class EDRParkingSystemFinder:
             return False
 
         # Avoid false positives with distant systems incorrectly returned with distance 0
-        if system.get("distance", 0) == 0 and system.get("name", "") != self.star_system:
+        if (
+            system.get("distance", 0) == 0
+            and system.get("name", "") != self.star_system
+        ):
             return False
 
-        accessible = not system.get('information', {}).get('requirePermit', False)
+        accessible = not system.get("information", {}).get("requirePermit", False)
         slots = self._theoretical_parking_slots(system)
 
         if accessible and slots > 0:
