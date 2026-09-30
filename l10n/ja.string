@@ -1,26 +1,26 @@
-# Label for the user's current star system
-"Current System" = "現在のシステム"
+# General ellipsis or placeholder text
+"..." = "..."
 
-# Label for the target or searched star system
-"Target System" = "ターゲットシステム"
+# Name of the plugin or UI title
+"Carrier Parking Finder" = "キャリア駐車場ファインダー"
 
-# Button text to trigger the parking calculation search
-"Search Parking" = "駐車場を検索"
+# Result format showing carrier name, distance, and available slots
+"Found: {name} ({dist:.1f} ly) - Slots: {slots}" = "発見: {name} ({dist:.1f} ly) - 空き: {slots}"
 
-# Status message when parking spots are available
-"Parking Available" = "駐車可能"
+# Error message when no valid parking location is found in range
+"No suitable parking system found within range." = "範囲内に適切な駐車可能システムが見つかりません。"
 
-# Status message when no parking slots are free
-"No Parking Slots" = "駐車スペースなし"
+# Button or action label to trigger a search
+"Search" = "検索"
 
-# Label showing the total stellar bodies count
-"Stellar Bodies" = "天体数"
+# Status message shown while querying around a specific star system
+"Searching around {system}..." = "{system} の周辺を検索中..."
 
-# Default ready status of the plugin
-"Ready" = "準備完了"
+# Log message when the plugin initializes
+"Starting EDR Parking Finder plugin." = "EDR Parking Finder プラグインを開始しています。"
 
-# Status message while querying the EDSM API
-"Searching EDSM..." = "EDSMを検索中..."
+# Label for star system input or display
+"System:" = "システム:"
 
-# Error message when the EDSM connection fails
-"Error connecting to EDSM API" = "EDSM APIへの接続エラー"
+# Status message while waiting for client/journal updates
+"Waiting for game data..." = "ゲームデータを待っています..."

@@ -1,26 +1,26 @@
-# Label for the user's current star system
-"Current System" = "Текущая система"
+# General ellipsis or placeholder text
+"..." = "..."
 
-# Label for the target or searched star system
-"Target System" = "Целевая система"
+# Name of the plugin or UI title
+"Carrier Parking Finder" = "Поиск парковки авианосца"
 
-# Button text to trigger the parking calculation search
-"Search Parking" = "Найти парковку"
+# Result format showing carrier name, distance, and available slots
+"Found: {name} ({dist:.1f} ly) - Slots: {slots}" = "Найдено: {name} ({dist:.1f} св. лет) - Свободно: {slots}"
 
-# Status message when parking spots are available
-"Parking Available" = "Парковка доступна"
+# Error message when no valid parking location is found in range
+"No suitable parking system found within range." = "В радиусе действия не найдено подходящей системы для парковки."
 
-# Status message when no parking slots are free
-"No Parking Slots" = "Нет свободных мест"
+# Button or action label to trigger a search
+"Search" = "Поиск"
 
-# Label showing the total stellar bodies count
-"Stellar Bodies" = "Небесные тела"
+# Status message shown while querying around a specific star system
+"Searching around {system}..." = "Поиск вокруг системы {system}..."
 
-# Default ready status of the plugin
-"Ready" = "Готов"
+# Log message when the plugin initializes
+"Starting EDR Parking Finder plugin." = "Запуск плагина поиска парковки EDR."
 
-# Status message while querying the EDSM API
-"Searching EDSM..." = "Поиск в EDSM..."
+# Label for star system input or display
+"System:" = "Система:"
 
-# Error message when the EDSM connection fails
-"Error connecting to EDSM API" = "Ошибка подключения к API EDSM"
+# Status message while waiting for client/journal updates
+"Waiting for game data..." = "Ожидание данных игры..."

@@ -1,26 +1,26 @@
-# Label for the user's current star system
-"Current System" = "当前星系"
+# General ellipsis or placeholder text
+"..." = "..."
 
-# Label for the target or searched star system
-"Target System" = "目标星系"
+# Name of the plugin or UI title
+"Carrier Parking Finder" = "航母停泊点查找器"
 
-# Button text to trigger the parking calculation search
-"Search Parking" = "搜索停泊点"
+# Result format showing carrier name, distance, and available slots
+"Found: {name} ({dist:.1f} ly) - Slots: {slots}" = "已找到: {name} ({dist:.1f} 光年) - 剩余泊位: {slots}"
 
-# Status message when parking spots are available
-"Parking Available" = "有可用泊位"
+# Error message when no valid parking location is found in range
+"No suitable parking system found within range." = "在范围内未找到合适的停泊星系。"
 
-# Status message when no parking slots are free
-"No Parking Slots" = "无可用泊位"
+# Button or action label to trigger a search
+"Search" = "搜索"
 
-# Label showing the total stellar bodies count
-"Stellar Bodies" = "天体数量"
+# Status message shown while querying around a specific star system
+"Searching around {system}..." = "正在 {system} 周边搜索..."
 
-# Default ready status of the plugin
-"Ready" = "就绪"
+# Log message when the plugin initializes
+"Starting EDR Parking Finder plugin." = "正在启动 EDR 停泊点查找器插件。"
 
-# Status message while querying the EDSM API
-"Searching EDSM..." = "正在查询 EDSM..."
+# Label for star system input or display
+"System:" = "星系:"
 
-# Error message when the EDSM connection fails
-"Error connecting to EDSM API" = "连接 EDSM API 失败"
+# Status message while waiting for client/journal updates
+"Waiting for game data..." = "正在等待游戏数据..."
