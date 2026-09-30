@@ -30,6 +30,8 @@ class EDRParkingSystemFinder:
         self.radius = 25
         self.rank = 0
         self.callback = callback
+        # Definiamo un User-Agent identificativo per evitare blocchi Cloudflare da parte di EDSM
+        self.headers = {"User-Agent": f"{appname}-{plugin_name}"}
 
     def within_radius(self, radius: int) -> None:
         """
@@ -49,12 +51,12 @@ class EDRParkingSystemFinder:
         """
         self.rank = rank
 
-    def search_sync(self) -> dict:
+    def search_sync(self) -> dict | None:
         """
         Synchronously search for a nearby system suitable for fleet carrier parking.
 
         Returns:
-            dict: System details including parking data, or None if not found.
+            dict | None: System details including parking data, or None if not found.
         """
         try:
             # 1. Check the starting system first if rank is 0
@@ -65,6 +67,7 @@ class EDRParkingSystemFinder:
                     "showInformation": 1,
                     "showPermit": 1,
                 },
+                headers=self.headers,
                 timeout=10,
             ).json()
 
@@ -73,8 +76,8 @@ class EDRParkingSystemFinder:
                 the_system = {
                     "name": sys_resp["name"],
                     "requirePermit": info.get("requirePermit", False),
-                    "bodyCount": info.get("bodyCount", 0),
                     "distance": 0,
+                    "information": info,
                 }
                 if self.rank == 0 and not the_system["requirePermit"]:
                     slots = self._theoretical_parking_slots(the_system)
@@ -91,6 +94,7 @@ class EDRParkingSystemFinder:
                     "showInformation": 1,
                     "showPermit": 1,
                 },
+                headers=self.headers,
                 timeout=15,
             ).json()
 
@@ -105,17 +109,17 @@ class EDRParkingSystemFinder:
                         if len(candidates) > self.rank:
                             return candidates[self.rank]
 
-        except Exception as e:
+        except requests.RequestException as e:
             logger.error(f"[EDR Parking] EDSM API communication error: {e}")
 
         return None
 
-    def _check_system(self, system: dict) -> bool:
+    def _check_system(self, system: dict | None) -> bool:
         """
         Evaluate whether a system is accessible and has available parking slots.
 
         Args:
-            system (dict): System dictionary retrieved from EDSM.
+            system (dict | None): System dictionary retrieved from EDSM.
 
         Returns:
             bool: True if suitable for parking, False otherwise.
@@ -139,12 +143,12 @@ class EDRParkingSystemFinder:
 
         return False
 
-    def _theoretical_parking_slots(self, system: dict) -> int:
+    def _theoretical_parking_slots(self, system: dict | None) -> int:
         """
         Calculate theoretical parking slots based on the body count (16 slots per body, max 128).
 
         Args:
-            system (dict): System dictionary.
+            system (dict | None): System dictionary.
 
         Returns:
             int: Calculated number of available parking slots.
