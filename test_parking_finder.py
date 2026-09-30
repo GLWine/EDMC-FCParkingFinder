@@ -3,7 +3,8 @@ Unit tests for the EDR Parking System Finder plugin logic.
 """
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from parking_finder import EDRParkingSystemFinder
 
 
@@ -16,20 +17,14 @@ class TestEDRParkingSystemFinder(unittest.TestCase):
 
     def test_theoretical_parking_slots_normal(self) -> None:
         """Test parking slot calculation with a standard body count."""
-        system_mock = {
-            "name": "Sol",
-            "information": {"bodyCount": 5}
-        }
+        system_mock = {"name": "Sol", "information": {"bodyCount": 5}}
         # 5 bodies * 16 = 80 slots
         slots = self.finder._theoretical_parking_slots(system_mock)
         self.assertEqual(slots, 80)
 
     def test_theoretical_parking_slots_max_cap(self) -> None:
         """Test parking slot calculation capped at the 128 maximum limit."""
-        system_mock = {
-            "name": "BusySystem",
-            "information": {"bodyCount": 20}
-        }
+        system_mock = {"name": "BusySystem", "information": {"bodyCount": 20}}
         # 20 * 16 = 320, but the maximum limit is 128
         slots = self.finder._theoretical_parking_slots(system_mock)
         self.assertEqual(slots, 128)
@@ -46,7 +41,7 @@ class TestEDRParkingSystemFinder(unittest.TestCase):
         system_mock = {
             "name": "Alpha Centauri",
             "distance": 4.3,
-            "information": {"requirePermit": False, "bodyCount": 4}
+            "information": {"requirePermit": False, "bodyCount": 4},
         }
         result = self.finder._check_system(system_mock)
         self.assertTrue(result)
@@ -57,7 +52,7 @@ class TestEDRParkingSystemFinder(unittest.TestCase):
         system_mock = {
             "name": "Sol",
             "distance": 0.0,
-            "information": {"requirePermit": True, "bodyCount": 10}
+            "information": {"requirePermit": True, "bodyCount": 10},
         }
         result = self.finder._check_system(system_mock)
         self.assertFalse(result)
