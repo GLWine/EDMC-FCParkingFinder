@@ -1,7 +1,10 @@
 """
 EDMC Standalone Plugin: Fleet Carrier Parking Finder.
+
 Adapts the EDR parking search logic to identify available parking slots nearby.
 """
+
+from __future__ import annotations
 
 import functools
 import logging
@@ -15,6 +18,9 @@ from config import appname, config
 
 from parking_finder import EDRParkingSystemFinder
 
+# Semantic Versioning compliance for EDMC Plugin Registry
+__version__ = "1.1.1"
+
 # Official EDMC localization setup for plugins
 plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
 
@@ -23,61 +29,62 @@ plugin_name = os.path.basename(os.path.dirname(__file__))
 logger = logging.getLogger(f"{appname}.{plugin_name}")
 
 # Global plugin user interface instance
-plugin_ui_instance = None
-active_threads = []
+plugin_ui_instance: ParkingPluginUI | None = None
+active_threads: list[threading.Thread] = []
 
 
 class ParkingPluginUI:
-    """
-    Manages the EDMC user interface frame and asynchronous parking queries.
-    """
+    """Manages the EDMC user interface frame and asynchronous parking queries."""
 
     def __init__(self, parent_frame: tk.Widget) -> None:
-        """
-        Initialize the parking plugin UI component.
+        """Initialize the parking plugin UI component.
 
         Args:
             parent_frame (tk.Widget): The parent frame provided by EDMC.
         """
         self.parent = parent_frame
         self.current_system = "Unknown"
-        self.frame = None
-        self.system_entry = None
-        self.search_btn = None
-        self.result_label = None
+
+        # Main container frame strictly complying with EDMC plugin_app return standards (tk.Frame)
+        self.frame: tk.Frame = tk.Frame(self.parent)
+
+        # Styled LabelFrame inside the base frame
+        self.labelframe: ttk.LabelFrame = ttk.LabelFrame(
+            self.frame, text=plugin_tl("Carrier Parking Finder")
+        )
+        self.system_entry: ttk.Entry = ttk.Entry(self.labelframe, width=18)
+        self.search_btn: ttk.Button = ttk.Button(
+            self.labelframe, text=plugin_tl("Search"), command=self.start_search
+        )
+        self.result_label: ttk.Label = ttk.Label(
+            self.labelframe,
+            text=plugin_tl("Waiting for game data..."),
+            foreground="gray",
+        )
+
         self._setup_ui()
 
     def _setup_ui(self) -> None:
         """Set up the layout and widgets following EDMC styling guidelines."""
-        self.frame = ttk.LabelFrame(
-            self.parent, text=plugin_tl("Carrier Parking Finder")
-        )
-        self.frame.pack(fill=tk.X, padx=5, pady=5, ipadx=5, ipady=5)
+        self.frame.pack(fill=tk.X, padx=5, pady=5)
+        self.labelframe.pack(fill=tk.X, padx=2, pady=2, ipadx=5, ipady=5)
 
         # Star system input field
-        ttk.Label(self.frame, text=plugin_tl("System:")).grid(
+        ttk.Label(self.labelframe, text=plugin_tl("System:")).grid(
             row=0, column=0, sticky=tk.W, padx=2, pady=2
         )
-        self.system_entry = ttk.Entry(self.frame, width=18)
         self.system_entry.grid(row=0, column=1, padx=2, pady=2)
 
         # Button to trigger manual search
-        self.search_btn = ttk.Button(
-            self.frame, text=plugin_tl("Search"), command=self.start_search
-        )
         self.search_btn.grid(row=0, column=2, padx=2, pady=2)
 
         # Label to display search status and results
-        self.result_label = ttk.Label(
-            self.frame, text=plugin_tl("Waiting for game data..."), foreground="gray"
-        )
         self.result_label.grid(
             row=1, column=0, columnspan=3, sticky=tk.W, padx=2, pady=4
         )
 
     def update_current_system(self, system_name: str) -> None:
-        """
-        Automatically update the system entry field when the commander jumps.
+        """Automatically update the system entry field when the commander jumps.
 
         Args:
             system_name (str): The name of the current star system.
@@ -107,8 +114,7 @@ class ParkingPluginUI:
         thread.start()
 
     def _run_query(self, system_name: str) -> None:
-        """
-        Execute the synchronous search query via the finder logic.
+        """Execute the synchronous search query via the finder logic.
 
         Args:
             system_name (str): The target star system to search around.
@@ -120,15 +126,14 @@ class ParkingPluginUI:
         if not config.shutting_down and self.frame:
             try:
                 self.frame.after(0, lambda: self._update_result(result))
-            except Exception:
-                pass
+            except RuntimeError as e:
+                logger.debug(f"Error scheduling UI update: {e}")
 
-    def _update_result(self, result: dict) -> None:
-        """
-        Update the UI label with the search outcome.
+    def _update_result(self, result: dict | None) -> None:
+        """Update the UI label with the search outcome.
 
         Args:
-            result (dict): The system information dictionary or None if not found.
+            result (dict | None): The system information dictionary or None if not found.
         """
         self.search_btn.config(state="normal")
         if result:
@@ -147,8 +152,7 @@ class ParkingPluginUI:
 
 
 def plugin_start3(plugin_dir: str) -> str:
-    """
-    Called by EDMC when the plugin is started (Python 3 standard).
+    """Called by EDMC when the plugin is started (Python 3 standard).
 
     Args:
         plugin_dir (str): Path to the plugin directory.
@@ -156,14 +160,12 @@ def plugin_start3(plugin_dir: str) -> str:
     Returns:
         str: Name of the plugin.
     """
-    global plugin_ui_instance
     logger.info(plugin_tl("Starting EDR Parking Finder plugin."))
     return "EDR Parking Finder"
 
 
 def plugin_app(parent: tk.Widget) -> tk.Widget:
-    """
-    Create and return the UI frame embedded inside the EDMC main window.
+    """Create and return the UI frame embedded inside the EDMC main window.
 
     Args:
         parent (tk.Widget): Parent container widget.
@@ -177,9 +179,7 @@ def plugin_app(parent: tk.Widget) -> tk.Widget:
 
 
 def plugin_stop() -> None:
-    """
-    Called when EDMC is closing down. Joins active background threads safely.
-    """
+    """Called when EDMC is closing down. Joins active background threads safely."""
     logger.info("Stopping EDR Parking Finder plugin.")
     for thread in active_threads:
         if thread.is_alive():
@@ -189,8 +189,7 @@ def plugin_stop() -> None:
 def journal_entry(
     cmdr: str, is_beta: bool, system: str, station: str, entry: dict, state: dict
 ) -> None:
-    """
-    Hook called by EDMC on every journal event (e.g., FSDJump, Location).
+    """Hook called by EDMC on every journal event (e.g., FSDJump, Location).
 
     Args:
         cmdr (str): Commander name.
@@ -200,6 +199,5 @@ def journal_entry(
         entry (dict): Raw journal event payload.
         state (dict): Current game state snapshot.
     """
-    global plugin_ui_instance
     if plugin_ui_instance and system:
         plugin_ui_instance.update_current_system(system)
