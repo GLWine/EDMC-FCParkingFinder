@@ -1,0 +1,26 @@
+# Label for the user's current star system
+"Current System" = "当前星系"
+
+# Label for the target or searched star system
+"Target System" = "目标星系"
+
+# Button text to trigger the parking calculation search
+"Search Parking" = "搜索停泊点"
+
+# Status message when parking spots are available
+"Parking Available" = "有可用泊位"
+
+# Status message when no parking slots are free
+"No Parking Slots" = "无可用泊位"
+
+# Label showing the total stellar bodies count
+"Stellar Bodies" = "天体数量"
+
+# Default ready status of the plugin
+"Ready" = "就绪"
+
+# Status message while querying the EDSM API
+"Searching EDSM..." = "正在查询 EDSM..."
+
+# Error message when the EDSM connection fails
+"Error connecting to EDSM API" = "连接 EDSM API 失败"

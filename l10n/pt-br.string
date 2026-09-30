@@ -1,0 +1,26 @@
+# Label for the user's current star system
+"Current System" = "Sistema Atual"
+
+# Label for the target or searched star system
+"Target System" = "Sistema de Destino"
+
+# Button text to trigger the parking calculation search
+"Search Parking" = "Buscar Estacionamento"
+
+# Status message when parking spots are available
+"Parking Available" = "Estacionamento Disponível"
+
+# Status message when no parking slots are free
+"No Parking Slots" = "Sem Vagas Disponíveis"
+
+# Label showing the total stellar bodies count
+"Stellar Bodies" = "Corpos Celestes"
+
+# Default ready status of the plugin
+"Ready" = "Pronto"
+
+# Status message while querying the EDSM API
+"Searching EDSM..." = "Pesquisando no EDSM..."
+
+# Error message when the EDSM connection fails
+"Error connecting to EDSM API" = "Erro ao conectar com a API do EDSM"
