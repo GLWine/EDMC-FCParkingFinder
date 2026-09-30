@@ -30,11 +30,11 @@ class TestEDRParkingSystemFinder(unittest.TestCase):
             "name": "BusySystem",
             "information": {"bodyCount": 20}
         }
-        # 20 * 16 = 320, ma il limite massimo è 128
+        # 20 * 16 = 320, but the maximum limit is 128
         slots = self.finder._theoretical_parking_slots(system_mock)
         self.assertEqual(slots, 128)
 
-    def test_theoretical_parking_slots_missing_info(data) -> None:
+    def test_theoretical_parking_slots_missing_info(self) -> None:
         """Test fallback behavior when body count information is missing."""
         system_mock = {"name": "EmptySystem", "information": {}}
         # Default fallback to 1 body * 16 = 16 slots
@@ -65,3 +65,4 @@ class TestEDRParkingSystemFinder(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+    
