@@ -2,10 +2,14 @@
 Core parking search logic based on EDR algorithms and EDSM API integration.
 """
 
+import logging
+import os
 import requests
-import plug
+from config import appname
 
-logger = plug.get_logger(__name__)
+# Official EDMC logging configuration for plugins
+plugin_name = os.path.basename(os.path.dirname(__file__))
+logger = logging.getLogger(f'{appname}.{plugin_name}')
 
 
 class EDRParkingSystemFinder:
@@ -151,4 +155,3 @@ class EDRParkingSystemFinder:
             body_count = 1
 
         return min(128, body_count * 16)
-        
