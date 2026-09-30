@@ -3,19 +3,27 @@ EDMC Standalone Plugin: Fleet Carrier Parking Finder.
 Adapts the EDR parking search logic to identify available parking slots nearby.
 """
 
+import logging
+import os
 import threading
 import tkinter as tk
 from tkinter import ttk
-import plug
+import functools
 
+import l10n
+from config import appname, config
 from parking_finder import EDRParkingSystemFinder
 
-# Initialization of EDMC standards for logging and translations
-_ = plug.get_translation(__file__)
-logger = plug.get_logger(__name__)
+# Official EDMC localization setup for plugins
+plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
+
+# Official EDMC logging configuration for plugins
+plugin_name = os.path.basename(os.path.dirname(__file__))
+logger = logging.getLogger(f'{appname}.{plugin_name}')
 
 # Global plugin user interface instance
 plugin_ui_instance = None
+active_threads = []
 
 
 class ParkingPluginUI:
@@ -40,20 +48,20 @@ class ParkingPluginUI:
 
     def _setup_ui(self) -> None:
         """Set up the layout and widgets following EDMC styling guidelines."""
-        self.frame = ttk.LabelFrame(self.parent, text=_("Carrier Parking Finder"))
+        self.frame = ttk.LabelFrame(self.parent, text=plugin_tl("Carrier Parking Finder"))
         self.frame.pack(fill=tk.X, padx=5, pady=5, ipadx=5, ipady=5)
 
         # Star system input field
-        ttk.Label(self.frame, text=_("System:")).grid(row=0, column=0, sticky=tk.W, padx=2, pady=2)
+        ttk.Label(self.frame, text=plugin_tl("System:")).grid(row=0, column=0, sticky=tk.W, padx=2, pady=2)
         self.system_entry = ttk.Entry(self.frame, width=18)
         self.system_entry.grid(row=0, column=1, padx=2, pady=2)
 
         # Button to trigger manual search
-        self.search_btn = ttk.Button(self.frame, text=_("Search"), command=self.start_search)
+        self.search_btn = ttk.Button(self.frame, text=plugin_tl("Search"), command=self.start_search)
         self.search_btn.grid(row=0, column=2, padx=2, pady=2)
 
         # Label to display search status and results
-        self.result_label = ttk.Label(self.frame, text=_("Waiting for game data..."), foreground="gray")
+        self.result_label = ttk.Label(self.frame, text=plugin_tl("Waiting for game data..."), foreground="gray")
         self.result_label.grid(row=1, column=0, columnspan=3, sticky=tk.W, padx=2, pady=4)
 
     def update_current_system(self, system_name: str) -> None:
@@ -75,17 +83,19 @@ class ParkingPluginUI:
             return
 
         self.result_label.config(
-            text=_("Searching around {system}...").format(system=system_name),
+            text=plugin_tl("Searching around {system}...").format(system=system_name),
             foreground="blue"
         )
         self.search_btn.config(state="disabled")
 
-        # Asynchronous execution of the search
-        threading.Thread(
+        # Asynchronous execution of the search via a managed worker thread
+        thread = threading.Thread(
             target=self._run_query,
             args=(system_name,),
             daemon=True
-        ).start()
+        )
+        active_threads.append(thread)
+        thread.start()
 
     def _run_query(self, system_name: str) -> None:
         """
@@ -96,8 +106,13 @@ class ParkingPluginUI:
         """
         finder = EDRParkingSystemFinder(system_name, callback=None)
         result = finder.search_sync()
-        # Safe UI update on the main Tkinter thread
-        self.frame.after(0, lambda: self._update_result(result))
+        
+        # Check shutdown state before triggering tkinter updates to avoid hanging
+        if not config.shutting_down and self.frame:
+            try:
+                self.frame.after(0, lambda: self._update_result(result))
+            except Exception:
+                pass
 
     def _update_result(self, result: dict) -> None:
         """
@@ -111,13 +126,13 @@ class ParkingPluginUI:
             name = result.get("name", "Unknown")
             dist = result.get("distance", 0.0)
             slots = result.get("parking", {}).get("slots", 0)
-            text = _("Found: {name} ({dist:.1f} ly) - Slots: {slots}").format(
+            text = plugin_tl("Found: {name} ({dist:.1f} ly) - Slots: {slots}").format(
                 name=name, dist=dist, slots=slots
             )
             self.result_label.config(text=text, foreground="green")
         else:
             self.result_label.config(
-                text=_("No suitable parking system found within range."),
+                text=plugin_tl("No suitable parking system found within range."),
                 foreground="red"
             )
 
@@ -133,7 +148,7 @@ def plugin_start3(plugin_dir: str) -> str:
         str: Name of the plugin.
     """
     global plugin_ui_instance
-    logger.info(_("Starting EDR Parking Finder plugin."))
+    logger.info(plugin_tl("Starting EDR Parking Finder plugin."))
     return "EDR Parking Finder"
 
 
@@ -150,6 +165,16 @@ def plugin_app(parent: tk.Widget) -> tk.Widget:
     global plugin_ui_instance
     plugin_ui_instance = ParkingPluginUI(parent)
     return plugin_ui_instance.frame
+
+
+def plugin_stop() -> None:
+    """
+    Called when EDMC is closing down. Joins active background threads safely.
+    """
+    logger.info("Stopping EDR Parking Finder plugin.")
+    for thread in active_threads:
+        if thread.is_alive():
+            thread.join(timeout=1.0)
 
 
 def journal_entry(cmdr: str, is_beta: bool, system: str, station: str, entry: dict, state: dict) -> None:
