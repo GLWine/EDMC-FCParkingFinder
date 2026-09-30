@@ -29,11 +29,11 @@ jobs:
         run: |
           python -c "
           import os, zipfile
-          tag_version = '${{ github.ref_name }}'.lstrip('v')
-          zip_filename = f'EDR-Ported-Parking-Finder-v{tag_version}.zip'
 
-          # Escludiamo solo test, configurazioni git e cartelle di sistema/sviluppo.
-          # NOTA: README.md e LICENSE NON sono qui, quindi verranno inclusi correttamente nel pacchetto!
+          tag_version = '${{ github.ref_name }}'
+          zip_filename = 'ED-Parking-Finder.zip'
+
+          # Escludiamo test, configurazioni git, file zip precedenti e cartelle di sistema
           exclude_set = {
               '.git',
               '.github',
@@ -42,11 +42,18 @@ jobs:
               '.pytest_cache',
               '.vscode',
               'test_parking_finder.py',
-              '.gitignore'
+              '.gitignore',
+              zip_filename
           }
 
           print(f'Creating package: {zip_filename}')
           with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+              # Aggiunge il file vuoto con il nome della versione direttamente nello ZIP
+              if tag_version:
+                  zipf.writestr(tag_version, '')
+                  print(f'  Added empty version file inside zip: {tag_version}')
+
+              # Aggiunge tutti gli altri file del progetto
               for root, dirs, files in os.walk('.'):
                   dirs[:] = [d for d in dirs if d not in exclude_set]
                   for file in files:
@@ -61,7 +68,7 @@ jobs:
       - name: Create GitHub Release and Upload Asset
         uses: softprops/action-gh-release@v1
         with:
-          files: EDR-Ported-Parking-Finder-v*.zip
+          files: ED-Parking-Finder.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
