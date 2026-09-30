@@ -1,6 +1,6 @@
 # EDMC Fleet Carrier Parking Finder
 
-A lightweight, standalone plugin for **EDMC (Elite Dangerous Market Connector)** designed to help commanders identify potential Fleet Carrier parking availability in nearby star systems. 
+A lightweight, standalone plugin for **EDMC (Elite Dangerous Market Connector)** designed to help commanders identify potential Fleet Carrier parking availability in nearby star systems.
 
 This project extracts and adapts the parking search logic from the renowned **EDR (ED Recon)** project, ensuring high standards of code quality and full API compatibility.
 
