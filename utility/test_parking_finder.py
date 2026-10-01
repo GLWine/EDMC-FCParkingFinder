@@ -1,11 +1,11 @@
 """
-Unit and Integration tests for the EDR Parking System Finder plugin logic.
+Unit and Integration tests for the ED Parking System Finder plugin logic.
 """
 
 import sys
 from unittest.mock import MagicMock
 
-# Mock del modulo `config` di EDMC prima di importare parking_finder
+# Mock EDMC config module before importing parking_finder
 mock_config = MagicMock()
 mock_config.appname = "EDMC"
 mock_config.user_agent = "EDMC/TestEnvironment"
@@ -17,15 +17,15 @@ from unittest.mock import patch
 import requests
 from requests.exceptions import RequestException
 
-from parking_finder import EDRParkingSystemFinder
+from parking_finder import EDParkingSystemFinder
 
 
-class TestEDRParkingSystemFinder(unittest.TestCase):
-    """Test suite for EDRParkingSystemFinder methods covering all functionalities."""
+class TestEDParkingSystemFinder(unittest.TestCase):
+    """Test suite for EDParkingSystemFinder methods covering all functionalities."""
 
     def setUp(self) -> None:
         """Set up test instances before each test."""
-        self.finder = EDRParkingSystemFinder("Sol")
+        self.finder = EDParkingSystemFinder("Sol")
 
     def test_within_radius(self) -> None:
         """Test setting the search radius."""
@@ -110,20 +110,22 @@ class TestEDRParkingSystemFinder(unittest.TestCase):
         self.assertEqual(result["parking"]["slots"], 48)
 
     @patch("parking_finder.requests.get")
-    def test_search_sync_sphere_search(self, mock_get) -> None:
-        """Test search_sync querying sphere-systems when starting system fails or permit required."""
+    def test_search_sync_progressive_fallback_to_sphere(self, mock_get) -> None:
+        """Test search_sync falling back to sphere search when starting system requires a permit."""
+        # Starting system requires a permit, forcing the check to fail and trigger sphere search fallback
         mock_sys_resp = MagicMock()
         mock_sys_resp.json.return_value = {
             "name": "Sol",
-            "information": {"requirePermit": True, "bodyCount": 1},
+            "information": {"requirePermit": True, "bodyCount": 5},
         }
 
+        # Sphere response containing a valid nearby system
         mock_sphere_resp = MagicMock()
         mock_sphere_resp.json.return_value = [
             {
                 "name": "Alpha Centauri",
                 "distance": 4.3,
-                "information": {"requirePermit": False, "bodyCount": 2},
+                "information": {"requirePermit": False, "bodyCount": 3},
             }
         ]
 
@@ -133,7 +135,7 @@ class TestEDRParkingSystemFinder(unittest.TestCase):
         self.assertIsNotNone(result)
         assert result is not None
         self.assertEqual(result["name"], "Alpha Centauri")
-        self.assertEqual(result["parking"]["slots"], 32)
+        self.assertEqual(result["parking"]["slots"], 48)
 
     @patch("parking_finder.requests.get")
     def test_search_sync_request_exception(self, mock_get) -> None:
@@ -144,9 +146,9 @@ class TestEDRParkingSystemFinder(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_live_edsm_api_response_status(self) -> None:
-        """Test 13: Check real EDSM API live response status and basic payload."""
+        """Test live EDSM API response status and basic payload."""
         try:
-            headers = {"User-Agent": "EDMC/TestEnvironment EDR-Parking-Finder"}
+            headers = {"User-Agent": "EDMC/TestEnvironment ED-Parking-Finder"}
             resp = requests.get(
                 "https://www.edsm.net/api-v1/system",
                 params={"systemName": "Sol", "showInformation": 1, "showPermit": 1},
