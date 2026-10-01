@@ -1,0 +1,23 @@
+/* Language name */
+"!Language" = "Українська";
+
+/* load.py: Name of the plugin or UI title; In files: load.py:56:56 */
+"Carrier Parking Finder" = "Пошук парковки для авіаносців";
+
+/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:156:156 */
+"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "Знайдено: {name} ({dist:.1f} св. р.) - Слотів: {slots}";
+
+/* load.py: Error message when no valid parking location is found in range; In files: load.py:163:163 */
+"No suitable parking system found within range." = "У заданому радіусі не знайдено підходящої системи для паркування.";
+
+/* load.py: Button or action label to trigger a search; In files: load.py:63:63 */
+"Search" = "Пошук";
+
+/* load.py: Status message shown while querying around a specific star system; In files: load.py:115:115 */
+"Searching around {system}..." = "Пошук навколо системи {system}...";
+
+/* load.py: Label for star system input or display; In files: load.py:83:83 */
+"System:" = "Система:";
+
+/* load.py: Status message while waiting for client/journal updates; In files: load.py:70:70 */
+"Waiting for game data..." = "Очікування ігрових даних...";
