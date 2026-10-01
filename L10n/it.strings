@@ -5,7 +5,7 @@
 "..." = "...";
 
 /* Name of the plugin or UI title */
-"Carrier Parking Finder" = "Cerca Parcheggi Fleet Carrier";
+"Carrier Parking Finder" = "Carrier Parking Finder";
 
 /* Result format showing carrier name, distance, and available slots */
 ""Found: {name} ({dist:.1f} Ly) - Slots: {slots}"" = "Trovato: {name} ({dist:.1f} Ly) - Posti: {slots}";
