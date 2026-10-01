@@ -1,13 +1,13 @@
 # ED Fleet Carrier Parking Finder (EDR Ported)
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
-[![CodeQL](https://github.com/GLWine/EDMC-FCParkingFinder/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/GLWine/EDMC-FCParkingFinder/actions/workflows/github-code-scanning/codeql)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![EDMC Compatible](https://img.shields.io/badge/EDMC-Compatible-success.svg)
-[![GitHub Latest Version](https://img.shields.io/github/v/release/GLWine/EDMC-FCParkingFinder)](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest)
-[![Github All Releases](https://img.shields.io/github/downloads/GLWine/EDMC-FCParkingFinder/total.svg)](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest)
+[![CodeQL](https://github.com/GLWine/EDMC-FCParkingFinder/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/GLWine/EDMC-FCParkingFinder/actions/workflows/github-code-scanning/codeql)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Gemini Coding](https://img.shields.io/badge/Gemini-Coding%20Assistant-8E75B2?logo=google&logoColor=white)](https://gemini.google.com)
-[![Gemini Localization](https://img.shields.io/badge/Gemini-Localization%20Assistant-4285F4?logo=google&logoColor=white)](https://gemini.google.com)
+[![GitHub Latest Version](https://img.shields.io/github/v/release/GLWine/EDMC-FCParkingFinder?color=orange)](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest)
+[![Github All Releases](https://img.shields.io/github/downloads/GLWine/EDMC-FCParkingFinder/total.svg?color=informational)](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest)
+[![Gemini Coding](https://img.shields.io/badge/Gemini-Coding-6B46C1?logo=google&logoColor=white)](https://gemini.google.com)
+[![Gemini Localization](https://img.shields.io/badge/Gemini-Localization-3B82F6?logo=google&logoColor=white)](https://gemini.google.com)
 
 A lightweight, standalone plugin for **EDMC (Elite Dangerous Market Connector)** designed to help commanders identify potential Fleet Carrier parking availability in nearby star systems.[cite: 1]
 
