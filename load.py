@@ -19,7 +19,7 @@ import l10n
 from parking_finder import EDParkingSystemFinder
 
 # Semantic Versioning compliance for EDMC Plugin Registry
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 # Official EDMC localization setup for plugins
 plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
