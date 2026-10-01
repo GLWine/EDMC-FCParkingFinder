@@ -19,7 +19,7 @@ import l10n
 from parking_finder import EDParkingSystemFinder
 
 # Semantic Versioning compliance for EDMC Plugin Registry
-__version__ = "1.2.0"
+__version__ = "1.2.1"
 
 # Official EDMC localization setup for plugins
 plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
@@ -44,6 +44,8 @@ class ParkingPluginUI:
         """
         self.parent = parent_frame
         self.current_system = "Unknown"
+        # LANG: Placeholder text for the star system entry field
+        self.placeholder = plugin_tl("Enter system name...")
 
         # Main container frame strictly complying with EDMC plugin_app return standards (tk.Frame)
         self.frame: tk.Frame = tk.Frame(self.parent)
@@ -54,12 +56,20 @@ class ParkingPluginUI:
             # LANG: Name of the plugin or UI title
             text=plugin_tl("Carrier Parking Finder"),
         )
-        self.system_entry: ttk.Entry = ttk.Entry(self.labelframe, width=18)
+
+        # StringVar to track input changes reactively
+        self.system_var = tk.StringVar()
+        self.system_var.trace_add("write", self._validate_input)
+
+        self.system_entry: ttk.Entry = ttk.Entry(
+            self.labelframe, width=18, textvariable=self.system_var
+        )
         self.search_btn: ttk.Button = ttk.Button(
             self.labelframe,
             # LANG: Button or action label to trigger a search
             text=plugin_tl("Search"),
             command=self.start_search,
+            state="disabled",  # Starts disabled because field starts with placeholder
         )
         self.result_label: ttk.Label = ttk.Label(
             self.labelframe,
@@ -69,6 +79,7 @@ class ParkingPluginUI:
         )
 
         self._setup_ui()
+        self._init_placeholder()
 
     def _setup_ui(self) -> None:
         """Set up the layout and widgets following EDMC styling guidelines."""
@@ -90,6 +101,34 @@ class ParkingPluginUI:
             row=1, column=0, columnspan=3, sticky=tk.W, padx=2, pady=4
         )
 
+    def _init_placeholder(self) -> None:
+        """Initialize placeholder text and event bindings for the system entry field."""
+        self.system_var.set(self.placeholder)
+        self.system_entry.config(foreground="gray")
+
+        self.system_entry.bind("<FocusIn>", self._on_entry_focus_in)
+        self.system_entry.bind("<FocusOut>", self._on_entry_focus_out)
+
+    def _on_entry_focus_in(self, event) -> None:
+        """Handle entry focus-in event to clear placeholder text."""
+        if self.system_var.get() == self.placeholder:
+            self.system_var.set("")
+            self.system_entry.config(foreground="black")
+
+    def _on_entry_focus_out(self, event) -> None:
+        """Handle entry focus-out event to restore placeholder if empty."""
+        if not self.system_var.get().strip():
+            self.system_var.set(self.placeholder)
+            self.system_entry.config(foreground="gray")
+
+    def _validate_input(self, *args) -> None:
+        """Enable or disable the search button based on whether the entry has valid text."""
+        val = self.system_var.get().strip()
+        if not val or val == self.placeholder:
+            self.search_btn.config(state="disabled")
+        else:
+            self.search_btn.config(state="normal")
+
     def update_current_system(self, system_name: str) -> None:
         """Automatically update the system entry field when the commander jumps.
 
@@ -98,15 +137,19 @@ class ParkingPluginUI:
         """
         if system_name and system_name != self.current_system:
             self.current_system = system_name
-            self.system_entry.delete(0, tk.END)
-            self.system_entry.insert(0, system_name)
+            self.system_var.set(system_name)
+            self.system_entry.config(foreground="black")
 
     def start_search(self) -> None:
         """Initiate the parking search in a separate background thread to avoid freezing EDMC."""
-        system_name = self.system_entry.get().strip()
-        if not system_name:
+        system_name = self.system_var.get().strip()
+        if not system_name or system_name == self.placeholder:
+            logger.debug(
+                "Manual search triggered with empty or placeholder system name. Ignoring."
+            )
             return
 
+        logger.debug("Triggering manual search for system: '%s'", system_name)
         self.result_label.config(
             # LANG: Status message shown while querying around a specific star system
             text=plugin_tl("Searching around {system}...").format(system=system_name),
@@ -134,8 +177,10 @@ class ParkingPluginUI:
         if not config.shutting_down and self.frame:
             try:
                 self.frame.after(0, lambda: self._update_result(result))
-            except RuntimeError as e:
-                logger.debug(f"Error scheduling UI update: {e}")
+            except RuntimeError:
+                logger.exception("RuntimeError scheduling UI update on main thread")
+        else:
+            logger.warning("EDMC is shutting down; skipping UI result update.")
 
     def _update_result(self, result: dict | None) -> None:
         """Update the UI label with the search outcome.
@@ -143,17 +188,25 @@ class ParkingPluginUI:
         Args:
             result (dict | None): The system information dictionary or None if not found.
         """
-        self.search_btn.config(state="normal")
+        # Re-enable button only if there is valid text in the entry
+        self._validate_input()
         if result:
             name = result.get("name", "Unknown")
             dist = result.get("distance", 0.0)
             slots = result.get("parking", {}).get("slots", 0)
+            logger.debug(
+                "Search successful: Found parking at '%s' (%s Ly, %s slots)",
+                name,
+                dist,
+                slots,
+            )
             # LANG: Result format showing carrier name, distance, and available slots
             text = plugin_tl("Found: {name} ({dist:.1f} Ly) - Slots: {slots}").format(
                 name=name, dist=dist, slots=slots
             )
             self.result_label.config(text=text, foreground="green")
         else:
+            logger.debug("Search finished with no suitable parking locations found.")
             self.result_label.config(
                 # LANG: Error message when no valid parking location is found in range
                 text=plugin_tl("No suitable parking system found within range."),
@@ -170,7 +223,7 @@ def plugin_start3(plugin_dir: str) -> str:
     Returns:
         str: Name of the plugin.
     """
-    logger.info("Starting ED Parking Finder plugin.")
+    logger.info("Starting ED Parking Finder plugin v%s.", __version__)
     return "ED Parking Finder"
 
 
@@ -190,10 +243,11 @@ def plugin_app(parent: tk.Widget) -> tk.Widget:
 
 def plugin_stop() -> None:
     """Called when EDMC is closing down. Joins active background threads safely."""
-    logger.info("Stopping ED Parking Finder plugin.")
+    logger.info("Stopping ED Parking Finder plugin. Cleaning up background threads...")
     for thread in active_threads:
         if thread.is_alive():
             thread.join(timeout=1.0)
+    logger.info("ED Parking Finder plugin successfully stopped.")
 
 
 def journal_entry(
