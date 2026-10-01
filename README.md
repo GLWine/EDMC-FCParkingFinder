@@ -13,9 +13,26 @@ This project extracts and adapts the parking search logic from the renowned **[E
 
 ## Features
 * **Automatic System Tracking**: Automatically syncs with your current in-game location via EDMC journal events.
-* **Manual Search**: Allows searching for parking availability around any arbitrary star system by name.
+* **Manual Search & Dynamic UI**: Allows searching for parking availability around any arbitrary star system by name. Features a smart search button that enables/disables automatically based on input validation and clean placeholder support.
 * **Theoretical Parking Calculation**: Estimates available slots based on system body counts retrieved via public EDSM APIs.
+* **Multi-language Support**: Fully localized for global commanders across 11 different languages.
 * **EDMC Native Standards**: Utilizes centralized user-agent configurations and logging standards in full compliance with `PLUGINS.md`.
+
+---
+
+## Supported Languages
+The plugin includes native localization support for:
+- 🇺🇸 English (`en`)
+- 🇮🇹 Italian (`it`)
+- 🇩🇪 German (`de`)
+- 🇪🇸 Spanish (`es`)
+- 🇫🇷 French (`fr`)
+- 🇰🇷 Korean (`ko`)
+- 🇧🇷 Portuguese - Brazil (`pt-BR`)
+- 🇷🇺 Russian (`ru`)
+- 🇹🇷 Turkish (`tr`)
+- 🇺🇦 Ukrainian (`uk`)
+- 🇨🇳 Chinese (`zh`)
 
 ---
 
@@ -44,18 +61,14 @@ The core logic of the plugin adapts the battle-tested search mechanisms from **E
    * **Linux/Mac**: Check your EDMC configuration paths.
 
 ### Method 2: Manual Clone / Copy
-Ensure your plugin folder contains the following production files:
-* `load.py`
-* `parking_finder.py`
-* `README.md`
-* `LICENSE`
+Ensure your plugin folder contains the required production files (`load.py`, `parking_finder.py`, localizations, `README.md`, `LICENSE`).
 
 ---
 
 ## Usage
 1. Launch EDMC.
 2. Go to the **Carrier Parking Finder** tab/panel from the main interface.
-3. View your current system's parking availability or type a target system name to scan nearby stellar bodies.
+3. View your current system's parking availability automatically or type a target system name (guided by the placeholder text) to scan nearby stellar bodies. The "Search" button will activate once valid input is provided.
 
 ---
 
