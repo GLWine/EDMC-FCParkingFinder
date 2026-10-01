@@ -1,23 +1,26 @@
 /* Language name */
 "!Language" = "Türkçe";
 
-/* load.py: Name of the plugin or UI title; In files: load.py:56:56 */
-"Carrier Parking Finder" = "Carrier Park Yeri Bulucu";
+/* load.py: Name of the plugin or UI title; In files: load.py:57:57 */
+"Carrier Parking Finder" = "Taşıyıcı Park Yeri Bulucu";
 
-/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:156:156 */
-"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "Bulundu: {name} ({dist:.1f} Ly) - Boş Yer: {slots}";
+/* load.py: Placeholder text for the star system entry field; In files: load.py:48:48 */
+"Enter system name..." = "Sistem adını girin...";
 
-/* load.py: Error message when no valid parking location is found in range; In files: load.py:163:163 */
+/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:204:204 */
+"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "Bulundu: {name} ({dist:.1f} Ly) - Yuvalar: {slots}";
+
+/* load.py: Error message when no valid parking location is found in range; In files: load.py:212:212 */
 "No suitable parking system found within range." = "Menzil içinde uygun park sistemi bulunamadı.";
 
-/* load.py: Button or action label to trigger a search; In files: load.py:63:63 */
+/* load.py: Button or action label to trigger a search; In files: load.py:70:70 */
 "Search" = "Ara";
 
-/* load.py: Status message shown while querying around a specific star system; In files: load.py:115:115 */
-"Searching around {system}..." = "{system} etrafında aranıyor...";
+/* load.py: Status message shown while querying around a specific star system; In files: load.py:155:155 */
+"Searching around {system}..." = "{system} çevresinde aranıyor...";
 
-/* load.py: Label for star system input or display; In files: load.py:83:83 */
+/* load.py: Label for star system input or display; In files: load.py:91:91 */
 "System:" = "Sistem:";
 
-/* load.py: Status message while waiting for client/journal updates; In files: load.py:70:70 */
+/* load.py: Status message while waiting for client/journal updates; In files: load.py:77:77 */
 "Waiting for game data..." = "Oyun verileri bekleniyor...";

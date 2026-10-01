@@ -1,30 +1,26 @@
 /* Language name */
-"!Language" = "Português Brasileiro";
+"!Language" = "Português (Brasil)";
 
-/* General ellipsis or placeholder text */
-"..." = "...";
+/* load.py: Name of the plugin or UI title; In files: load.py:57:57 */
+"Carrier Parking Finder" = "Buscador de Estacionamento para Porta-Naves";
 
-/* Name of the plugin or UI title */
-"Carrier Parking Finder" = "Localizador de Estacionamento para Porta-Naves";
+/* load.py: Placeholder text for the star system entry field; In files: load.py:48:48 */
+"Enter system name..." = "Digite o nome do sistema...";
 
-/* Result format showing carrier name, distance, and available slots */
-""Found: {name} ({dist:.1f} Ly) - Slots: {slots}"" = "Encontrado: {name} ({dist:.1f} aL) - Vagas: {slots}";
+/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:204:204 */
+"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "Encontrado: {name} ({dist:.1f} aL) - Vagas: {slots}";
 
-/* Error message when no valid parking location is found in range */
+/* load.py: Error message when no valid parking location is found in range; In files: load.py:212:212 */
 "No suitable parking system found within range." = "Nenhum sistema de estacionamento adequado encontrado no alcance.";
 
-/* Button or action label to trigger a search */
+/* load.py: Button or action label to trigger a search; In files: load.py:70:70 */
 "Search" = "Pesquisar";
 
-/* Status message shown while querying around a specific star system */
+/* load.py: Status message shown while querying around a specific star system; In files: load.py:155:155 */
 "Searching around {system}..." = "Pesquisando ao redor de {system}...";
 
-/* Log message when the plugin initializes */
-"Starting EDR Parking Finder plugin." = "Iniciando o plugin EDR Localizador de Estacionamento.";
-
-/* Label for star system input or display */
+/* load.py: Label for star system input or display; In files: load.py:91:91 */
 "System:" = "Sistema:";
 
-/* Status message while waiting for client/journal updates */
+/* load.py: Status message while waiting for client/journal updates; In files: load.py:77:77 */
 "Waiting for game data..." = "Aguardando dados do jogo...";
-

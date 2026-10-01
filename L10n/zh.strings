@@ -1,23 +1,26 @@
 /* Language name */
-"!Language" = "简体中文";
+"!Language" = "中文";
 
-/* load.py: Name of the plugin or UI title; In files: load.py:56:56 */
-"Carrier Parking Finder" = "舰队航母停放点查找器";
+/* load.py: Name of the plugin or UI title; In files: load.py:57:57 */
+"Carrier Parking Finder" = "航空母舰停泊点查找器";
 
-/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:156:156 */
-"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "已找到: {name} ({dist:.1f} Ly) - 剩余泊位: {slots}";
+/* load.py: Placeholder text for the star system entry field; In files: load.py:48:48 */
+"Enter system name..." = "输入星系名称...";
 
-/* load.py: Error message when no valid parking location is found in range; In files: load.py:163:163 */
-"No suitable parking system found within range." = "在范围内未找到合适的停放星系。";
+/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:204:204 */
+"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "找到: {name} ({dist:.1f} Ly) - 剩余泊位: {slots}";
 
-/* load.py: Button or action label to trigger a search; In files: load.py:63:63 */
+/* load.py: Error message when no valid parking location is found in range; In files: load.py:212:212 */
+"No suitable parking system found within range." = "在范围内未找到合适的停泊星系。";
+
+/* load.py: Button or action label to trigger a search; In files: load.py:70:70 */
 "Search" = "搜索";
 
-/* load.py: Status message shown while querying around a specific star system; In files: load.py:115:115 */
-"Searching around {system}..." = "正在 {system} 周边搜索...";
+/* load.py: Status message shown while querying around a specific star system; In files: load.py:155:155 */
+"Searching around {system}..." = "正在搜索 {system} 周边...";
 
-/* load.py: Label for star system input or display; In files: load.py:83:83 */
-"System:" = "星系:";
+/* load.py: Label for star system input or display; In files: load.py:91:91 */
+"System:" = "星系：";
 
-/* load.py: Status message while waiting for client/journal updates; In files: load.py:70:70 */
-"Waiting for game data..." = "正在等待游戏数据...";
+/* load.py: Status message while waiting for client/journal updates; In files: load.py:77:77 */
+"Waiting for game data..." = "等待游戏数据...";
