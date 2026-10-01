@@ -60,10 +60,17 @@ class EDParkingSystemFinder:
         Returns:
             dict | None: System details including parking data, or None if not found.
         """
+        logger.debug(
+            "Starting parking search for system '%s' (Radius: %sLy, Rank: %s)",
+            self.star_system,
+            self.radius,
+            self.rank,
+        )
         try:
             candidates = []
 
             # 1. Check the starting system first if rank is 0
+            logger.debug("Querying EDSM API for starting system: %s", self.star_system)
             sys_resp = requests.get(
                 "https://www.edsm.net/api-v1/system",
                 params={
@@ -73,20 +80,43 @@ class EDParkingSystemFinder:
                 },
                 headers=self.headers,
                 timeout=10,
-            ).json()
+            )
 
-            if sys_resp and "name" in sys_resp:
-                info = sys_resp.get("information", {})
+            if sys_resp.status_code != 200:
+                logger.error(
+                    "EDSM API returned status code %s for system query: %s",
+                    sys_resp.status_code,
+                    self.star_system,
+                )
+
+            sys_data = sys_resp.json()
+
+            if sys_data and "name" in sys_data:
+                info = sys_data.get("information", {})
                 the_system = {
-                    "name": sys_resp["name"],
+                    "name": sys_data["name"],
                     "requirePermit": info.get("requirePermit", False),
                     "distance": 0,
                     "information": info,
                 }
                 if self.rank == 0 and self._check_system(the_system):
+                    logger.debug(
+                        "Starting system '%s' is suitable for parking (Rank 0 match).",
+                        the_system["name"],
+                    )
                     return the_system
+            else:
+                logger.debug(
+                    "Starting system '%s' not found or invalid response.",
+                    self.star_system,
+                )
 
             # 2. Search via spherical systems within the specified radius
+            logger.debug(
+                "Querying EDSM sphere-systems around '%s' (Radius: %sLy)",
+                self.star_system,
+                self.radius,
+            )
             sphere_resp = requests.get(
                 "https://www.edsm.net/api-v1/sphere-systems",
                 params={
@@ -97,24 +127,63 @@ class EDParkingSystemFinder:
                 },
                 headers=self.headers,
                 timeout=15,
-            ).json()
+            )
 
-            if isinstance(sphere_resp, list):
-                # Sort systems by increasing distance from the origin point
-                sorted_systems = sorted(sphere_resp, key=lambda s: s.get("distance", 0))
+            if sphere_resp.status_code != 200:
+                logger.error(
+                    "EDSM API returned status code %s for sphere-systems query.",
+                    sphere_resp.status_code,
+                )
+
+            sphere_data = sphere_resp.json()
+
+            if isinstance(sphere_data, list):
+                logger.debug(
+                    "Sphere search returned %d systems. Sorting...", len(sphere_data)
+                )
+                sorted_systems = sorted(sphere_data, key=lambda s: s.get("distance", 0))
 
                 for system in sorted_systems:
                     if self._check_system(system):
                         candidates.append(system)
                         if len(candidates) > self.rank:
-                            return candidates[self.rank]
+                            chosen = candidates[self.rank]
+                            logger.debug(
+                                "Selected parking system '%s' at %.2fLy (Rank %s)",
+                                chosen.get("name"),
+                                chosen.get("distance", 0),
+                                self.rank,
+                            )
+                            return chosen
 
                 # Fallback if valid candidates were found but are fewer than the requested rank
                 if candidates:
-                    return candidates[-1]
+                    fallback_system = candidates[-1]
+                    logger.debug(
+                        "Rank %s exceeds candidates (%d). Falling back to: '%s'",
+                        self.rank,
+                        len(candidates),
+                        fallback_system.get("name"),
+                    )
+                    return fallback_system
+                else:
+                    logger.debug(
+                        "No suitable parking candidates found within %sLy of '%s'.",
+                        self.radius,
+                        self.star_system,
+                    )
+            else:
+                logger.error(
+                    "Unexpected response format from EDSM sphere-systems API: %s",
+                    type(sphere_data),
+                )
 
+        except requests.Timeout as e:
+            logger.error("EDSM API request timed out: %s", e)
         except requests.RequestException as e:
-            logger.error(f"[ED Parking Finder] EDSM API communication error: {e}")
+            logger.error("EDSM API communication error: %s", e)
+        except Exception:
+            logger.exception("Unexpected critical error during search_sync")
 
         return None
 
@@ -131,21 +200,27 @@ class EDParkingSystemFinder:
         if not system:
             return False
 
+        sys_name = system.get("name", "Unknown")
+        distance = system.get("distance", 0.0)
+
         # Prevent false positives with distant systems incorrectly returned with distance 0
-        if (
-            system.get("distance", 0) == 0
-            and system.get("name", "") != self.star_system
-        ):
+        if distance == 0 and sys_name != self.star_system:
+            logger.debug("System '%s' rejected: false positive distance 0.", sys_name)
             return False
 
         accessible = not system.get("information", {}).get("requirePermit", False)
+        if not accessible:
+            logger.debug("System '%s' rejected: permit required.", sys_name)
+            return False
+
         slots = self._theoretical_parking_slots(system)
+        if slots <= 0:
+            logger.debug("System '%s' rejected: 0 available slots.", sys_name)
+            return False
 
-        if accessible and slots > 0:
-            system["parking"] = {"slots": slots}
-            return True
-
-        return False
+        system["parking"] = {"slots": slots}
+        logger.debug("System '%s' passed check with %s slots.", sys_name, slots)
+        return True
 
     def _theoretical_parking_slots(self, system: dict | None) -> int:
         """
