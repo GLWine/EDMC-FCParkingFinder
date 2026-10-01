@@ -16,10 +16,10 @@ from tkinter import ttk
 from config import appname, config
 
 import l10n
-from parking_finder import EDRParkingSystemFinder
+from parking_finder import EDParkingSystemFinder
 
 # Semantic Versioning compliance for EDMC Plugin Registry
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 # Official EDMC localization setup for plugins
 plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
@@ -50,14 +50,20 @@ class ParkingPluginUI:
 
         # Styled LabelFrame inside the base frame
         self.labelframe: ttk.LabelFrame = ttk.LabelFrame(
-            self.frame, text=plugin_tl("Carrier Parking Finder")
+            self.frame,
+            # LANG: Name of the plugin or UI title
+            text=plugin_tl("Carrier Parking Finder"),
         )
         self.system_entry: ttk.Entry = ttk.Entry(self.labelframe, width=18)
         self.search_btn: ttk.Button = ttk.Button(
-            self.labelframe, text=plugin_tl("Search"), command=self.start_search
+            self.labelframe,
+            # LANG: Button or action label to trigger a search
+            text=plugin_tl("Search"),
+            command=self.start_search,
         )
         self.result_label: ttk.Label = ttk.Label(
             self.labelframe,
+            # LANG: Status message while waiting for client/journal updates
             text=plugin_tl("Waiting for game data..."),
             foreground="gray",
         )
@@ -70,6 +76,7 @@ class ParkingPluginUI:
         self.labelframe.pack(fill=tk.X, padx=2, pady=2, ipadx=5, ipady=5)
 
         # Star system input field
+        # LANG: Label for star system input or display
         ttk.Label(self.labelframe, text=plugin_tl("System:")).grid(
             row=0, column=0, sticky=tk.W, padx=2, pady=2
         )
@@ -101,6 +108,7 @@ class ParkingPluginUI:
             return
 
         self.result_label.config(
+            # LANG: Status message shown while querying around a specific star system
             text=plugin_tl("Searching around {system}...").format(system=system_name),
             foreground="blue",
         )
@@ -119,7 +127,7 @@ class ParkingPluginUI:
         Args:
             system_name (str): The target star system to search around.
         """
-        finder = EDRParkingSystemFinder(system_name, callback=None)
+        finder = EDParkingSystemFinder(system_name, callback=None)
         result = finder.search_sync()
 
         # Check shutdown state before triggering tkinter updates to avoid hanging
@@ -140,12 +148,14 @@ class ParkingPluginUI:
             name = result.get("name", "Unknown")
             dist = result.get("distance", 0.0)
             slots = result.get("parking", {}).get("slots", 0)
-            text = plugin_tl("Found: {name} ({dist:.1f} ly) - Slots: {slots}").format(
+            # LANG: Result format showing carrier name, distance, and available slots
+            text = plugin_tl("Found: {name} ({dist:.1f} Ly) - Slots: {slots}").format(
                 name=name, dist=dist, slots=slots
             )
             self.result_label.config(text=text, foreground="green")
         else:
             self.result_label.config(
+                # LANG: Error message when no valid parking location is found in range
                 text=plugin_tl("No suitable parking system found within range."),
                 foreground="red",
             )
@@ -160,8 +170,8 @@ def plugin_start3(plugin_dir: str) -> str:
     Returns:
         str: Name of the plugin.
     """
-    logger.info(plugin_tl("Starting EDR Parking Finder plugin."))
-    return "EDR Parking Finder"
+    logger.info("Starting ED Parking Finder plugin.")
+    return "ED Parking Finder"
 
 
 def plugin_app(parent: tk.Widget) -> tk.Widget:
@@ -180,7 +190,7 @@ def plugin_app(parent: tk.Widget) -> tk.Widget:
 
 def plugin_stop() -> None:
     """Called when EDMC is closing down. Joins active background threads safely."""
-    logger.info("Stopping EDR Parking Finder plugin.")
+    logger.info("Stopping ED Parking Finder plugin.")
     for thread in active_threads:
         if thread.is_alive():
             thread.join(timeout=1.0)
