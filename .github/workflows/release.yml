@@ -1,16 +1,22 @@
-name: Release EDMC Plugin
+name: Build Release
 
 on:
-  push:
-    tags:
-      - 'v*' # Si attiva ad ogni tag che inizia per 'v' (es. v1.1.1)
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,12 +31,29 @@ jobs:
       - name: Run Unit Tests
         run: python test_parking_finder.py
 
+      - name: Get the Release Tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Update release file
+        run: |
+          # Overwrite the file 'version' with the tag name (removing the 'v' prefix)
+          echo "${{ env.VERSION }}" | sed 's/^v//' > version
+
+      - name: Commit and push updated version file
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add version
+          git diff --cached --quiet || git commit -m "Update version to ${{ env.VERSION }}"
+          git push origin HEAD:main
+
       - name: Build Plugin ZIP Package
         run: |
           python -c "
           import os, zipfile
 
-          tag_version = '${{ github.ref_name }}'
+          tag_version = '${{ env.VERSION }}'
           zip_filename = 'ED-Parking-Finder.zip'
 
           # Escludiamo test, configurazioni git, file zip precedenti e cartelle di sistema
@@ -49,10 +72,10 @@ jobs:
 
           print(f'Creating package: {zip_filename}')
           with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
-              # Aggiunge il file vuoto con il nome della versione direttamente nello ZIP
-              if tag_version:
-                  zipf.writestr(tag_version, '')
-                  print(f'  Added empty version file inside zip: {tag_version}')
+              # Aggiunge il file versione generato prima
+              if os.path.exists('version'):
+                  zipf.write('version', 'version')
+                  print('  Added version file inside zip')
 
               # Aggiunge tutti gli altri file del progetto
               for root, dirs, files in os.walk('.'):
@@ -66,10 +89,21 @@ jobs:
                       print(f'  Added: {arcname}')
           "
 
-      - name: Create GitHub Release and Upload Asset
-        uses: softprops/action-gh-release@v1
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
           files: ED-Parking-Finder.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List files for debugging
+        run: ls -R
+
+      - name: VirusTotal Scan
+        uses: cssnr/virustotal-action@v1
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          file_globs: ED-Parking-Finder.zip
+          release_heading: '### Virus Scan'
+          update_release: true
