@@ -30,7 +30,7 @@ class EDParkingSystemFinder:
         self.radius = 25
         self.rank = 0
         self.callback = callback
-        # Definiamo un User-Agent identificativo per evitare blocchi Cloudflare da parte di EDSM
+        # Set an identifying User-Agent to avoid EDSM Cloudflare blocks
         self.headers = {"User-Agent": f"{appname}-{plugin_name}"}
 
     def within_radius(self, radius: int) -> None:
@@ -54,11 +54,15 @@ class EDParkingSystemFinder:
     def search_sync(self) -> dict | None:
         """
         Synchronously search for a nearby system suitable for fleet carrier parking.
+        If the target system doesn't have parking, it falls back to searching
+        progressively through nearby systems within the radius.
 
         Returns:
             dict | None: System details including parking data, or None if not found.
         """
         try:
+            candidates = []
+
             # 1. Check the starting system first if rank is 0
             sys_resp = requests.get(
                 "https://www.edsm.net/api-v1/system",
@@ -79,13 +83,10 @@ class EDParkingSystemFinder:
                     "distance": 0,
                     "information": info,
                 }
-                if self.rank == 0 and not the_system["requirePermit"]:
-                    slots = self._theoretical_parking_slots(the_system)
-                    if slots > 0:
-                        the_system["parking"] = {"slots": slots}
-                        return the_system
+                if self.rank == 0 and self._check_system(the_system):
+                    return the_system
 
-            # 2. Search within the sphere of the specified radius
+            # 2. Search via spherical systems within the specified radius
             sphere_resp = requests.get(
                 "https://www.edsm.net/api-v1/sphere-systems",
                 params={
@@ -99,8 +100,7 @@ class EDParkingSystemFinder:
             ).json()
 
             if isinstance(sphere_resp, list):
-                candidates = []
-                # Sort systems by increasing distance
+                # Sort systems by increasing distance from the origin point
                 sorted_systems = sorted(sphere_resp, key=lambda s: s.get("distance", 0))
 
                 for system in sorted_systems:
@@ -108,6 +108,10 @@ class EDParkingSystemFinder:
                         candidates.append(system)
                         if len(candidates) > self.rank:
                             return candidates[self.rank]
+
+                # Fallback if valid candidates were found but are fewer than the requested rank
+                if candidates:
+                    return candidates[-1]
 
         except requests.RequestException as e:
             logger.error(f"[ED Parking Finder] EDSM API communication error: {e}")
@@ -127,7 +131,7 @@ class EDParkingSystemFinder:
         if not system:
             return False
 
-        # Avoid false positives with distant systems incorrectly returned with distance 0
+        # Prevent false positives with distant systems incorrectly returned with distance 0
         if (
             system.get("distance", 0) == 0
             and system.get("name", "") != self.star_system
