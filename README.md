@@ -6,7 +6,8 @@
 [![GitHub Latest Version](https://img.shields.io/github/v/release/GLWine/EDMC-FCParkingFinder)](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest)
 [![Github All Releases](https://img.shields.io/github/downloads/GLWine/EDMC-FCParkingFinder/total.svg)](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Gemini Assisted](https://img.shields.io/badge/Gemini-Assisted%20Coding%20%26%20Localization-8E75B2?logo=google&logoColor=white)](https://gemini.google.com)
+[![Gemini Coding](https://img.shields.io/badge/Gemini-Coding%20Assistant-8E75B2?logo=google&logoColor=white)](https://gemini.google.com)
+[![Gemini Localization](https://img.shields.io/badge/Gemini-Localization%20Assistant-4285F4?logo=google&logoColor=white)](https://gemini.google.com)
 
 A lightweight, standalone plugin for **EDMC (Elite Dangerous Market Connector)** designed to help commanders identify potential Fleet Carrier parking availability in nearby star systems.[cite: 1]
 
@@ -81,7 +82,7 @@ If you encounter 403 errors or connectivity issues with EDSM, ensure your EDMC i
 ---
 
 ## Acknowledgments & AI Assistance
-This project was developed, optimized, and localized with the assistance of **Google Gemini**, providing active support for modern Python practices (Pathlib, Ruff zero-warning compliance) and multi-language translations.
+This project was developed and optimized with the assistance of **Google Gemini** for software engineering/coding practices and multi-language localization.
 
 ---
 
