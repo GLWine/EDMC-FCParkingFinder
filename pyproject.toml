@@ -1,8 +1,8 @@
 [tool.ruff]
-# Custom Ruff configuration for EDMC Parking Finder
+# Unified Ruff configuration for EDMC Parking Finder
 
 [tool.ruff.lint]
-# Complete set of selected rules
+# Complete set of activated rules
 select = [
     "E",    # pycodestyle: style errors
     "W",    # pycodestyle: style warnings
@@ -20,8 +20,8 @@ select = [
     "RET",  # flake8-return: return statement issues
     "ERA",  # eradicate: commented-out code
     "ARG",  # flake8-unused-arguments: unused arguments
-    "D",    # pydocstyle: docstring rules
-    "ANN",  # flake8-annotations: type annotations
+    "D",    # pydocstyle: docstrings
+    "ANN",  # flake8-annotations: type hints
     "PL",   # pylint: useful pylint rules
     "RUF",  # Ruff-native: Ruff-specific rules
     "PT",   # flake8-pytest-style: pytest best practices
@@ -43,37 +43,40 @@ select = [
     "CPY"   # copyright headers
 ]
 
-# Rules to ignore to prevent false positives or unnecessary blocks
+# Rules to ignore (without deprecated rules removed by Ruff)
 ignore = [
-    # Formatting and documentation string rules (D...)
+    "UP032",  # do not force f-strings
+    "E501",   # line-too-long (handled by the formatter)
+    
+    # Docstrings not strictly required everywhere
     "D100", "D101", "D102", "D103", "D104", "D105", "D107",
     "D200", "D203", "D205", "D212", "D213", "D401", "D413",
-    "E501", # Handled by the formatter
     
-    # Type hints not strictly required everywhere (ANN...)
-    "ANN001", "ANN002", "ANN201",
-    
-    # Unused parameters (e.g., tkinter events or EDMC hooks) (ARG...)
-    "ARG001", "ARG002",
-    
-    # Pylint metrics (complexity and argument counts) (PLR...)
+    # Pylint and Pylint-like metrics
     "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004",
     
-    # Pytest style guidelines (PT...)
-    "PT009",
+    # Trailing commas handled by the formatter
+    "COM812",
     
-    # Other specific rules raised by the recent logs
-    "COM812", "TRY003", "TRY400", "RET505", "B905", "T201", "CPY001", "INP001"
+    # Other specific rules raised by logs
+    "TRY003", "TRY400", "RET505", "B905", "CPY001", "INP001", "PT009"
 ]
 
 # Allowed automatic fixes
 fixable = [
     "E", "W", "F", "I",
     "SIM", "C4", "PIE", "Q", "COM", "ISC",
-    "UP037", "RUF019", "RUF100"
+    "UP037",
+    "RUF019", "RUF100"
 ]
 
 # Blocked automatic fixes for safety
 unfixable = [
     "F401", "F403", "F405", "S", "ANN", "D", "PL", "TRY", "RSE", "LOG", "PERF", "PTH", "N", "A", "RET"
 ]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
