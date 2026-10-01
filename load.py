@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import functools
 import logging
-import os
 import threading
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 
 from config import appname, config
@@ -25,7 +25,7 @@ __version__ = "1.2.1"
 plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
 
 # Official EDMC logging configuration for plugins
-plugin_name = os.path.basename(os.path.dirname(__file__))
+plugin_name = Path(__file__).parent.name
 logger = logging.getLogger(f"{appname}.{plugin_name}")
 
 # Global plugin user interface instance
@@ -41,6 +41,7 @@ class ParkingPluginUI:
 
         Args:
             parent_frame (tk.Widget): The parent frame provided by EDMC.
+
         """
         self.parent = parent_frame
         self.current_system = "Unknown"
