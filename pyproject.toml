@@ -1,0 +1,87 @@
+[tool.ruff]
+# Configurazione Ruff specchiata dalle tue impostazioni di VS Code
+
+[tool.ruff.lint]
+# Set completo di regole selezionate
+select = [
+    "E",    # pycodestyle: errori di stile
+    "W",    # pycodestyle: warning di stile
+    "F",    # Pyflakes: errori sintassi e nomi non definiti
+    "I",    # isort: ordinamento import
+    "UP",   # pyupgrade: sintassi Python moderna
+    "B",    # flake8-bugbear: bug comuni
+    "SIM",  # flake8-simplify: semplificazioni
+    "C4",   # flake8-comprehensions: ottimizzazioni comprehension
+    "N",    # pep8-naming: convenzioni naming
+    "PTH",  # flake8-use-pathlib: usa pathlib
+    "A",    # flake8-builtins: shadowing built-in
+    "S",    # flake8-bandit: sicurezza
+    "T20",  # flake8-print: print/pdb nel codice
+    "RET",  # flake8-return: problemi con return
+    "ERA",  # eradicate: codice commentato
+    "ARG",  # flake8-unused-arguments: argomenti inutilizzati
+    "D",    # pydocstyle: docstring (base, non troppo severo)
+    "ANN",  # flake8-annotations: type hint (essenziali)
+    "PL",   # pylint: regole pylint utili
+    "RUF",  # Ruff-native: regole specifiche Ruff
+    "PT",   # flake8-pytest-style: best practice pytest
+    "COM",  # flake8-commas: virgole finali
+    "C90",  # mccabe: complessità ciclomatica
+    "PERF", # perflint: ottimizzazioni prestazioni
+    "LOG",  # flake8-logging: logging best practice
+    "TRY",  # tryceratops: gestione eccezioni
+    "RSE",  # flake8-raise: stile del raise
+    "ISC",  # flake8-implicit-str-concat: concatenazione implicita stringhe
+    "INP",  # flake8-no-pep420: pacchetti senza __init__.py
+    "PIE",  # flake8-pie: varie regole di stile
+    "Q",    # flake8-quotes: stile quote
+    "TCH",  # flake8-type-checking: import per type checking
+    "FLY",  # flynt: conversione .format() → f-string (parziale)
+    "ICN",  # flake8-import-conventions: convenzioni import (es. np, pd)
+    "YTT",  # flake8-2020: compatibilità Python futuro
+    "EXE",  # flake8-executable: shebang e permessi
+    "FAST", # FastAPI: regole specifiche
+    "AIR",  # Airflow: regole specifiche
+    "DOC",  # pydoclint: docstring avanzati
+    "CPY"   # copyright: header copyright
+]
+
+# Regole da ignorare
+ignore = [
+    "UP032",   # non forzare f-string
+    "E501",    # line-too-long (gestito dal formatter)
+    "D100",    # missing docstring in public module
+    "D101",    # missing docstring in public class
+    "D102",    # missing docstring in public method
+    "D103",    # missing docstring in public function
+    "D104",    # missing docstring in public package
+    "D105",    # missing docstring in magic method
+    "D107",    # missing docstring in __init__
+    "ANN101",  # missing type annotation for self
+    "ANN102",  # missing type annotation for cls
+    "PLR0911", # too many return statements
+    "PLR0912", # too many branches
+    "PLR0913", # too many arguments
+    "PLR0915", # too many statements
+    "COM812"   # missing trailing comma
+]
+
+# Correzioni automatiche consentite al salvataggio/esecuzione
+fixable = [
+    "E", "W", "F", "I",
+    "SIM", "C4", "PIE", "Q", "COM", "ISC",
+    "UP037", "UP038",
+    "RUF019", "RUF100"
+]
+
+# Correzioni automatiche bloccate per sicurezza o revisione manuale
+unfixable = [
+    "F401", "F403", "F405",
+    "ARG001", "ARG002",
+    "ERA001",
+    "T201", "T203",
+    "S",
+    "ANN", "D",
+    "PL", "TRY", "RSE", "LOG", "PERF",
+    "PTH", "N", "A", "RET", "C90", "TCH", "ICN", "INP", "YTT", "EXE", "FAST", "AIR", "DOC", "CPY"
+]
