@@ -204,7 +204,7 @@ class EDParkingSystemFinder:
         distance = system.get("distance", 0.0)
 
         # Prevent false positives with distant systems incorrectly returned with distance 0
-        if distance == 0 and sys_name != self.star_system:
+        if distance == 0 and sys_name.lower() != self.star_system.lower():
             logger.debug("System '%s' rejected: false positive distance 0.", sys_name)
             return False
 
