@@ -47,22 +47,51 @@ select = [
 ignore = [
     "UP032",  # do not force f-strings
     "E501",   # line-too-long (handled by the formatter)
-    
-    # Docstrings not strictly required everywhere
-    "D100", "D101", "D102", "D103", "D104", "D105", "D107",
-    "D200", "D203", "D205", "D401",
-    
-    # Pylint and Pylint-like metrics
-    "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004",
-    
+
+    # Docstrings not strictly required everywhere / handling conflicts
+    "D100",   # pydocstyle: undocumented public module
+    "D101",   # pydocstyle: undocumented public class
+    "D102",   # pydocstyle: undocumented public method
+    "D103",   # pydocstyle: undocumented public function
+    "D104",   # pydocstyle: undocumented public package
+    "D105",   # pydocstyle: undocumented magic method
+    "D107",   # pydocstyle: undocumented public init
+    "D200",   # pydocstyle: one-line docstring should fit on one line
+    "D203",   # pydocstyle: 1 blank line required before class docstring (ignored to prevent conflicts)
+    "D205",   # pydocstyle: 1 blank line required between summary line and description
+    "D213",   # pydocstyle: multi-line summary second line (ignored to prevent conflicts)
+    "D401",   # pydocstyle: first line should be in imperative mood
+    "D413",   # pydocstyle: missing blank line after last section
+
+    # Pylint and Pylint-like metrics / complexity thresholds
+    "PLR0911", # pylint: too-many-return-statements
+    "PLR0912", # pylint: too-many-branches
+    "PLR0913", # pylint: too-many-arguments
+    "PLR0915", # pylint: too-many-statements
+    "PLR0917", # pylint: too-many-positional-arguments
+    "PLR2004", # pylint: magic-value-comparison
+    "PLW0603", # pylint: global-statement (allowed for plugin state lifecycle)
+
+    # Type annotations and unused argument relaxations for plugin hooks
+    "ANN001", # flake8-annotations: missing type annotation for function argument
+    "ANN002", # flake8-annotations: missing type annotation for *args
+    "ARG001", # flake8-unused-arguments: unused function argument
+    "ARG002", # flake8-unused-arguments: unused method argument
+
     # Trailing commas handled by the formatter
-    "COM812",
-    
+    "COM812", # flake8-commas: missing trailing comma
+
     # Other specific rules raised by logs
-    "TRY003", "TRY400", "RET505", "B905", "CPY001", "INP001", "PT009"
+    "TRY003", # tryceratops: avoid specifying long messages outside exception class
+    "TRY400", # tryceratops: use logging.exception instead of logging.error
+    "RET505", # flake8-return: superfluous-else-return
+    "B905",   # flake8-bugbear: zip-builtin-without-strict
+    "CPY001", # copyright: missing copyright notice
+    "INP001", # flake8-no-pep420: implicit namespace package
+    "PT009"   # flake8-pytest-style: use-pytest-assert
 ]
 
-# Allowed automatic fixes (D and PTH are now included for auto-fixing)
+# Allowed automatic fixes
 fixable = [
     "E", "W", "F", "I",
     "SIM", "C4", "PIE", "Q", "COM", "ISC", "PTH", "D",
