@@ -45,9 +45,6 @@ select = [
 
 # Rules to ignore to prevent false positives or unnecessary blocks
 ignore = [
-    # Obsolete or removed rules from recent Ruff versions
-    "UP038", "ANN101", "ANN102",
-    
     # Formatting and documentation string rules (D...)
     "D100", "D101", "D102", "D103", "D104", "D105", "D107",
     "D200", "D203", "D205", "D212", "D213", "D401", "D413",
