@@ -2,7 +2,7 @@
 # Unified Ruff configuration for EDMC Parking Finder
 
 [tool.ruff.lint]
-# Complete set of activated rules (PTH flags os.path and open() usage)
+# Complete set of activated rules (conflicting docstring rules and preview-only categories removed)
 select = [
     "E",    # pycodestyle: style errors
     "W",    # pycodestyle: style warnings
@@ -50,7 +50,7 @@ ignore = [
     
     # Docstrings not strictly required everywhere
     "D100", "D101", "D102", "D103", "D104", "D105", "D107",
-    "D200", "D203", "D205", "D212", "D213", "D401", "D413",
+    "D200", "D203", "D205", "D212", "D401", "D413",
     
     # Pylint and Pylint-like metrics
     "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004",
@@ -62,7 +62,7 @@ ignore = [
     "TRY003", "TRY400", "RET505", "B905", "CPY001", "INP001", "PT009"
 ]
 
-# Allowed automatic fixes (PTH is now included so ruff check --fix can resolve os.path)
+# Allowed automatic fixes
 fixable = [
     "E", "W", "F", "I",
     "SIM", "C4", "PIE", "Q", "COM", "ISC", "PTH",
