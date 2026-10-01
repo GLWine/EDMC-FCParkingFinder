@@ -13,7 +13,7 @@ plugin_name = os.path.basename(os.path.dirname(__file__))
 logger = logging.getLogger(f"{appname}.{plugin_name}")
 
 
-class EDRParkingSystemFinder:
+class EDParkingSystemFinder:
     """
     Finds systems with available fleet carrier parking slots nearby using EDSM data.
     """
@@ -110,7 +110,7 @@ class EDRParkingSystemFinder:
                             return candidates[self.rank]
 
         except requests.RequestException as e:
-            logger.error(f"[EDR Parking] EDSM API communication error: {e}")
+            logger.error(f"[ED Parking Finder] EDSM API communication error: {e}")
 
         return None
 
