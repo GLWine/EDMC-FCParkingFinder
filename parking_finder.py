@@ -3,13 +3,13 @@ Core parking search logic based on EDR algorithms and EDSM API integration.
 """
 
 import logging
-import os
+from pathlib import Path
 
 import requests
 from config import appname
 
 # Official EDMC logging configuration for plugins
-plugin_name = os.path.basename(os.path.dirname(__file__))
+plugin_name = Path(__file__).parent.name
 logger = logging.getLogger(f"{appname}.{plugin_name}")
 
 
@@ -51,7 +51,7 @@ class EDParkingSystemFinder:
         """
         self.rank = rank
 
-    def search_sync(self) -> dict | None:
+    def search_sync(self) -> dict | None:  # noqa: C901
         """
         Synchronously search for a nearby system suitable for fleet carrier parking.
         If the target system doesn't have parking, it falls back to searching
