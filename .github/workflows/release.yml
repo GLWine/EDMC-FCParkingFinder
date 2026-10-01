@@ -41,6 +41,7 @@ jobs:
               '__pycache__',
               '.pytest_cache',
               '.vscode',
+              'script',
               'test_parking_finder.py',
               '.gitignore',
               zip_filename
