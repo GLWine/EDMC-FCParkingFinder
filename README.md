@@ -1,9 +1,11 @@
 # ED Fleet Carrier Parking Finder (EDR Ported)
 
-![Version](https://img.shields.io/badge/version-1.2.1-green.svg)
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
+[![CodeQL](https://github.com/GLWine/EDMC-FCParkingFinder/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/GLWine/EDMC-FCParkingFinder/actions/workflows/github-code-scanning/codeql)
 ![EDMC Compatible](https://img.shields.io/badge/EDMC-Compatible-success.svg)
+[![GitHub Latest Version](https://img.shields.io/github/v/release/GLWine/EDMC-FCParkingFinder)](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest)
+[![Github All Releases](https://img.shields.io/github/downloads/GLWine/EDMC-FCParkingFinder/total.svg)](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-![CI/CD Pipeline](https://github.com/GLWine/ED-Parking-Finder/actions/workflows/release.yml/badge.svg)
 
 A lightweight, standalone plugin for **EDMC (Elite Dangerous Market Connector)** designed to help commanders identify potential Fleet Carrier parking availability in nearby star systems.
 
@@ -54,8 +56,8 @@ The core logic of the plugin adapts the battle-tested search mechanisms from **E
 ## Installation
 
 ### Method 1: Automatic (Recommended)
-1. Go to the [Releases](https://github.com/GLWine/ED-Parking-Finder/releases/latest) page.
-2. Download the latest `ED-Parking-Finder.zip` asset.
+1. Go to the [Releases](https://github.com/GLWine/EDMC-FCParkingFinder/releases/latest) page.
+2. Download the latest `EDMC-FCParkingFinder.zip` asset.
 3. Extract the contents directly into your EDMC plugins directory:
    * **Windows**: `%LOCALAPPDATA%\EDMarketConnector\plugins`
    * **Linux/Mac**: Check your EDMC configuration paths.
@@ -67,7 +69,7 @@ Ensure your plugin folder contains the required production files (`load.py`, `pa
 
 ## Usage
 1. Launch EDMC.
-2. Go to the **Carrier Parking Finder** tab/panel from the main interface.
+2. Go to the **FC Parking Finder** tab/panel from the main interface.
 3. View your current system's parking availability automatically or type a target system name (guided by the placeholder text) to scan nearby stellar bodies. The "Search" button will activate once valid input is provided.
 
 ---
