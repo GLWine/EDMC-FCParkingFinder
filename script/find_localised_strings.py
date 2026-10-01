@@ -9,6 +9,7 @@ import json
 import pathlib
 import re
 import sys
+from pathlib import Path
 
 
 def get_func_name(thing: ast.AST) -> str:
@@ -24,7 +25,7 @@ def get_func_name(thing: ast.AST) -> str:
 def get_arg(call: ast.Call) -> str:
     """Extract the argument string to the translate function."""
     if len(call.args) > 1:
-        print("??? > 1 args", call.args, file=sys.stderr)
+        print("??? > 1 args", call.args, file=sys.stderr)  # noqa: T201
 
     arg = call.args[0]
     if isinstance(arg, ast.Constant):
@@ -122,10 +123,10 @@ def extract_comments(
     elif above_comment is not None:
         out = above_comment
     elif bad_comment is not None:
-        print(bad_comment, file=sys.stderr)
+        print(bad_comment, file=sys.stderr)  # noqa: T201
 
     if out is None:
-        print(f"No comment for {file}:{call.lineno} {current_line}", file=sys.stderr)
+        print(f"No comment for {file}:{call.lineno} {current_line}", file=sys.stderr)  # noqa: T201
     return out
 
 
@@ -181,7 +182,7 @@ def parse_template(path) -> set[str]:
     """
     lang_re = re.compile(r'\s*"([^"]+)"\s*=\s*"([^"]+)"\s*;\s*$')
     out = set()
-    with open(path, encoding="utf-8") as file:
+    with Path(path).open(encoding="utf-8") as file:
         for line in file:
             match = lang_re.match(line.strip())
             if match and match.group(1) != "!Language":
@@ -273,7 +274,7 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
 "!Language" = "English";
 
 """
-    print(f"Done Deduping entries {len(entries)=}  {len(deduped)=}", file=sys.stderr)
+    print(f"Done Deduping entries {len(entries)=}  {len(deduped)=}", file=sys.stderr)  # noqa: T201
 
     for entry in sorted(deduped, key=lambda e: e.string.lower()):
         if len(entry.comments) != len(entry.locations):
@@ -297,7 +298,7 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
     return out
 
 
-def main():  # noqa: CCR001
+def main() -> None:  # noqa: C901
     """Run the Translation Checker."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", help="Directory to search from", default=".")
@@ -333,7 +334,7 @@ def main():  # noqa: CCR001
                     output.append(f"NEW! {file}:{c.lineno}: {arg!r}")
 
         for old in set(template) ^ seen:
-            output.append(f"No longer used: {old!r}")
+            output.extend(f"No longer used: {old!r}" for old in set(template) ^ seen)
 
     elif args.json:
         to_print_data = [
@@ -357,7 +358,9 @@ def main():  # noqa: CCR001
         if args.lang == "-":
             output.append(lang_template)
         else:
-            with open(args.lang, mode="w+", newline="\n", encoding="UTF-8") as langfile:
+            with Path(args.lang).open(
+                mode="w+", newline="\n", encoding="UTF-8"
+            ) as langfile:
                 langfile.writelines(lang_template)
 
     else:
@@ -366,14 +369,15 @@ def main():  # noqa: CCR001
                 continue
             output.append(str(path))
             for c in calls:
-                output.append(
+                output.extend(
                     f"    {c.lineno:4d}({c.col_offset:3d}):{c.end_lineno:4d}({c.end_col_offset:3d})\t{ast.unparse(c)}"
+                    for c in calls
                 )
             output.append("")
 
     # Print all collected output at the end
     if output:
-        print("\n".join(output))
+        print("\n".join(output))  # noqa: T201
         sys.exit(1)
 
 
