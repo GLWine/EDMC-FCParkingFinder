@@ -11,13 +11,13 @@ mock_config.appname = "EDMC"
 mock_config.user_agent = "EDMC/TestEnvironment"
 sys.modules["config"] = mock_config
 
-import unittest
-from unittest.mock import patch
+import unittest  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import requests
-from requests.exceptions import RequestException
+import requests  # noqa: E402
+from requests.exceptions import RequestException  # noqa: E402
 
-from parking_finder import EDParkingSystemFinder
+from parking_finder import EDParkingSystemFinder  # noqa: E402
 
 
 class TestEDParkingSystemFinder(unittest.TestCase):
@@ -105,7 +105,7 @@ class TestEDParkingSystemFinder(unittest.TestCase):
 
         result = self.finder.search_sync()
         self.assertIsNotNone(result)
-        assert result is not None
+        assert result is not None  # noqa: S101
         self.assertEqual(result["name"], "Sol")
         self.assertEqual(result["parking"]["slots"], 48)
 
@@ -133,7 +133,7 @@ class TestEDParkingSystemFinder(unittest.TestCase):
 
         result = self.finder.search_sync()
         self.assertIsNotNone(result)
-        assert result is not None
+        assert result is not None  # noqa: S101
         self.assertEqual(result["name"], "Alpha Centauri")
         self.assertEqual(result["parking"]["slots"], 48)
 
