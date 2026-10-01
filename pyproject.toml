@@ -2,7 +2,7 @@
 # Unified Ruff configuration for EDMC Parking Finder
 
 [tool.ruff.lint]
-# Complete set of activated rules
+# Complete set of activated rules (PTH is included to flag os.path usage)
 select = [
     "E",    # pycodestyle: style errors
     "W",    # pycodestyle: style warnings
@@ -13,7 +13,7 @@ select = [
     "SIM",  # flake8-simplify: code simplifications
     "C4",   # flake8-comprehensions: comprehension optimizations
     "N",    # pep8-naming: naming conventions
-    "PTH",  # flake8-use-pathlib: use pathlib
+    "PTH",  # flake8-use-pathlib: use pathlib (flags os.path and open())
     "A",    # flake8-builtins: built-in shadowing
     "S",    # flake8-bandit: security
     "T20",  # flake8-print: print/pdb checks
@@ -43,7 +43,7 @@ select = [
     "CPY"   # copyright headers
 ]
 
-# Rules to ignore (without deprecated rules removed by Ruff)
+# Rules to ignore (PTH is intentionally omitted so os.path/open() warnings remain active)
 ignore = [
     "UP032",  # do not force f-strings
     "E501",   # line-too-long (handled by the formatter)
@@ -70,7 +70,7 @@ fixable = [
     "RUF019", "RUF100"
 ]
 
-# Blocked automatic fixes for safety
+# Blocked automatic fixes for safety (PTH is kept here so fixes like os.path -> pathlib require your review)
 unfixable = [
     "F401", "F403", "F405", "S", "ANN", "D", "PL", "TRY", "RSE", "LOG", "PERF", "PTH", "N", "A", "RET"
 ]
