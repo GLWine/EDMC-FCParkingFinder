@@ -13,10 +13,10 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
 
+import l10n
 from config import appname, config
 
-import l10n
-from parking_finder import EDParkingSystemFinder
+from parking_finder import ParkingSystemFinder
 
 # Semantic Versioning compliance for EDMC Plugin Registry
 __version__ = "1.2.2"
@@ -171,7 +171,7 @@ class ParkingPluginUI:
         Args:
             system_name (str): The target star system to search around.
         """
-        finder = EDParkingSystemFinder(system_name, callback=None)
+        finder = ParkingSystemFinder(system_name, callback=None)
         result = finder.search_sync()
 
         # Check shutdown state before triggering tkinter updates to avoid hanging

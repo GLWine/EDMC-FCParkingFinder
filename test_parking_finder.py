@@ -17,7 +17,7 @@ from unittest.mock import patch  # noqa: E402
 import requests  # noqa: E402
 from requests.exceptions import RequestException  # noqa: E402
 
-from parking_finder import EDParkingSystemFinder  # noqa: E402
+from parking_finder import ParkingSystemFinder  # noqa: E402
 
 
 class TestEDParkingSystemFinder(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestEDParkingSystemFinder(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test instances before each test."""
-        self.finder = EDParkingSystemFinder("Sol")
+        self.finder = ParkingSystemFinder("Sol")
 
     def test_within_radius(self) -> None:
         """Test setting the search radius."""

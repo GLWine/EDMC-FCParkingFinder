@@ -13,7 +13,7 @@ plugin_name = Path(__file__).parent.name
 logger = logging.getLogger(f"{appname}.{plugin_name}")
 
 
-class EDParkingSystemFinder:
+class ParkingSystemFinder:
     """
     Finds systems with available fleet carrier parking slots nearby using EDSM data.
     """
