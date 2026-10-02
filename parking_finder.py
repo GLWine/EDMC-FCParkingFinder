@@ -1,11 +1,10 @@
-"""
-Core parking search logic based on EDR algorithms and EDSM API integration.
-"""
+"""Core parking search logic based on EDR algorithms and EDSM API integration."""
 
 from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 
 import requests
@@ -19,17 +18,21 @@ logger = logging.getLogger(f"{appname}.{plugin_name}")
 class ParkingSystemFinder:
     """Finds systems with available fleet carrier parking slots nearby using EDSM data."""
 
-    def __init__(self, star_system: str, callback=None) -> None:
+    def __init__(
+        self, star_system: str, callback=None, fc_data: dict | None = None
+    ) -> None:
         """Initialize the parking system finder.
 
         Args:
             star_system (str): The name of the reference star system.
             callback (callable, optional): Optional callback function upon completion.
+            fc_data (dict | None, optional): Fleet carrier position and saturation data from journal.
         """
         self.star_system = star_system
         self.radius = 25
         self.rank = 0
         self.callback = callback
+        self.fc_data = fc_data
         # Set an identifying User-Agent to avoid EDSM Cloudflare blocks
         self.headers = {"User-Agent": f"{appname}-{plugin_name}"}
         self.known_permits = self._load_known_permits()
@@ -127,6 +130,7 @@ class ParkingSystemFinder:
                 "systemName": self.star_system,
                 "showInformation": 1,
                 "showPermit": 1,
+                "showBodies": 1,
             },
             headers=self.headers,
             timeout=10,
@@ -152,7 +156,13 @@ class ParkingSystemFinder:
             "requirePermit": False,
             "distance": 0,
             "information": info,
+            "bodies": sys_data.get("bodies", []),
         }
+
+        # Attach telemetry if available
+        if self.fc_data:
+            the_system["fc_telemetry"] = self.fc_data
+
         if self.rank == 0 and self._check_system(the_system):
             logger.debug(
                 "Starting system '%s' is suitable for parking (Rank 0 match).",
@@ -180,6 +190,7 @@ class ParkingSystemFinder:
                 "radius": self.radius,
                 "showInformation": 1,
                 "showPermit": 1,
+                "showBodies": 1,
             },
             headers=self.headers,
             timeout=15,
@@ -203,6 +214,13 @@ class ParkingSystemFinder:
         candidates = []
 
         for system in sorted_systems:
+            if (
+                self.fc_data
+                and system.get("name", "").strip().lower()
+                == self.star_system.strip().lower()
+            ):
+                system["fc_telemetry"] = self.fc_data
+
             if self._check_system(system):
                 candidates.append(system)
                 if len(candidates) > self.rank:
@@ -253,9 +271,75 @@ class ParkingSystemFinder:
             logger.debug("System '%s' rejected: 0 available slots.", sys_name)
             return False
 
-        system["parking"] = {"slots": slots}
-        logger.debug("System '%s' passed check with %s slots.", sys_name, slots)
+        body_name_list, is_empirical = self._extract_body_names(system, sys_name)
+
+        system["parking"] = {
+            "slots": slots,
+            "body_name_list": body_name_list,
+            "is_empirical": is_empirical,
+        }
+
+        logger.debug(
+            "System '%s' passed check with %s slots (Bodies: %s).",
+            sys_name,
+            slots,
+            body_name_list,
+        )
         return True
+
+    def _clean_body_name(self, raw_name: str, sys_name: str) -> str:
+        """Clean and shorten a body name by removing system prefix and whitespace.
+
+        Args:
+            raw_name (str): Raw body name from data.
+            sys_name (str): Star system name.
+
+        Returns:
+            str: Cleaned short body name string.
+        """
+        cleaned = raw_name
+        if cleaned.lower().startswith(sys_name.lower()):
+            cleaned = cleaned[len(sys_name) :].strip()
+        return re.sub(r"\s+", "", cleaned)
+
+    def _extract_body_names(
+        self, system: dict, sys_name: str
+    ) -> tuple[str | None, bool]:
+        """Extract and format short body names from telemetry or bodies list.
+
+        Args:
+            system (dict): System dictionary.
+            sys_name (str): Name of the star system.
+
+        Returns:
+            tuple[str | None, bool]: Formatted body names string and empirical status flag.
+        """
+        fc_telemetry = system.get("fc_telemetry")
+        if (
+            not fc_telemetry
+            or fc_telemetry.get("system", "").strip().lower()
+            != sys_name.strip().lower()
+        ):
+            return None, False
+
+        bodies = system.get("bodies", [])
+        if bodies:
+            short_names = [
+                self._clean_body_name(b.get("name", ""), sys_name)
+                for b in bodies
+                if b.get("name")
+            ]
+            valid_names = [n for n in short_names if n]
+            if valid_names:
+                return ", ".join(valid_names), True
+
+        single_body = fc_telemetry.get("body_name")
+        if single_body:
+            cleaned = self._clean_body_name(single_body, sys_name)
+            if cleaned:
+                return cleaned, True
+
+        return None, False
 
     def _theoretical_parking_slots(self, system: dict | None) -> int:
         """Calculate theoretical parking slots based on the body count (16 slots per body, max 128).
