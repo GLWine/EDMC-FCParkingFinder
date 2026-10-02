@@ -33,6 +33,45 @@ active_threads: list[threading.Thread] = []
 latest_carrier_journal_data: dict = {}
 
 
+class ToolTip:
+    """Lightweight tooltip management integrated with EDMC's native style."""
+
+    def __init__(self, widget, text: str) -> None:
+        self.widget = widget
+        self.text = text
+        self.tooltip_window = None
+        self.widget.bind("<Enter>", self.show_tooltip)
+        self.widget.bind("<Leave>", self.hide_tooltip)
+
+    def show_tooltip(self, event=None) -> None:
+        if self.tooltip_window or not self.text:
+            return
+        x = self.widget.winfo_rootx() + 10
+        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 2
+
+        self.tooltip_window = tk.Toplevel(self.widget)
+        self.tooltip_window.wm_overrideredirect(True)
+        self.tooltip_window.wm_geometry(f"+{x}+{y}")
+
+        # Uses standard widgets to correctly inherit the graphic theme context
+        label = ttk.Label(
+            self.tooltip_window,
+            text=self.text,
+            relief="solid",
+            borderwidth=1,
+            padding=3,
+        )
+        label.pack()
+
+    def hide_tooltip(self, event=None) -> None:
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
+
+    def update_text(self, new_text: str) -> None:
+        self.text = new_text
+
+
 class ParkingPluginUI:
     """Manages the EDMC user interface frame and asynchronous parking queries."""
 
@@ -77,6 +116,15 @@ class ParkingPluginUI:
             # LANG: Status message while waiting for client/journal updates
             text=plugin_tl("Waiting for game data..."),
             foreground="gray",
+        )
+
+        # Explanatory default tooltip detailing how theoretical slot fallback works
+        self.result_tooltip = ToolTip(
+            self.result_label,
+            plugin_tl(
+                # LANG: Explanatory tooltip for theoretical max slots fallback
+                "Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots."
+            ),
         )
 
         self._setup_ui()
@@ -158,6 +206,14 @@ class ParkingPluginUI:
         )
         self.search_btn.config(state="disabled")
 
+        # Explanatory tooltip for ongoing search process
+        self.result_tooltip.update_text(
+            plugin_tl(
+                # LANG: Explanatory tooltip during background search query
+                "Querying regional databases and evaluating gravitational body capacities in the background."
+            )
+        )
+
         # Asynchronous execution of the search via a managed worker thread
         thread = threading.Thread(
             target=self._run_query, args=(system_name,), daemon=True
@@ -211,6 +267,12 @@ class ParkingPluginUI:
                     "System {name} is permit-locked: parking is not possible here!"
                 ).format(name=name)
                 self.result_label.config(text=text, foreground="orange")
+                self.result_tooltip.update_text(
+                    plugin_tl(
+                        # LANG: Explanatory tooltip for permit-locked restriction
+                        "Access to this star system is restricted by a regional permit. You cannot jump or park here without acquiring it first."
+                    )
+                )
                 return
 
             name = result.get("name", "Unknown")
@@ -231,20 +293,39 @@ class ParkingPluginUI:
             # Inform user about specific short body list if available, otherwise show theoretical max slots
             if is_empirical and body_name_list:
                 text = plugin_tl(
+                    # LANG: Status message showing the found parking body name and distance
                     "Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}"
                 ).format(name=name, dist=dist, body_name_list=body_name_list)
+                self.result_tooltip.update_text(
+                    plugin_tl(
+                        # LANG: Explanatory tooltip for empirical data confirmation
+                        "Verified using precise, real-time player journal telemetry reported for specific celestial bodies in this system."
+                    )
+                )
             else:
                 text = plugin_tl(
+                    # LANG: Status message showing the max theoretical parking slots and distance
                     "Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}"
                 ).format(name=name, dist=dist, slots=slots)
+
+                self.result_tooltip.update_text(
+                    plugin_tl(
+                        # LANG: Explanatory tooltip for theoretical max slots fallback
+                        "Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots."
+                    )
+                )
 
             self.result_label.config(text=text, foreground="green")
         else:
             logger.debug("Search finished with no suitable parking locations found.")
-            self.result_label.config(
-                # LANG: Error message when no valid parking location is found in range
-                text=plugin_tl("No suitable parking system found within range."),
-                foreground="red",
+            # LANG: Error message when no valid parking location is found in range
+            text = plugin_tl("No suitable parking system found within range.")
+            self.result_label.config(text=text, foreground="red")
+            self.result_tooltip.update_text(
+                plugin_tl(
+                    # LANG: Explanatory tooltip when search yields no matches
+                    "No systems matching safety and distance criteria were found within your configured jump radius."
+                )
             )
 
 
