@@ -54,9 +54,9 @@ jobs:
           import os, zipfile
 
           tag_version = '${{ env.VERSION }}'
-          zip_filename = 'ED-Parking-Finder.zip'
+          zip_filename = 'EDMC-FCParkingFinder.zip'
 
-          # Escludiamo test, configurazioni git, file zip precedenti e cartelle di sistema
+          # Define files and directories to exclude from the archive
           exclude_set = {
               '.git',
               '.github',
@@ -72,12 +72,7 @@ jobs:
 
           print(f'Creating package: {zip_filename}')
           with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
-              # Aggiunge il file versione generato prima
-              if os.path.exists('version'):
-                  zipf.write('version', 'version')
-                  print('  Added version file inside zip')
-
-              # Aggiunge tutti gli altri file del progetto
+              # Walk through the project directory and add files matching criteria
               for root, dirs, files in os.walk('.'):
                   dirs[:] = [d for d in dirs if d not in exclude_set]
                   for file in files:
@@ -92,7 +87,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ED-Parking-Finder.zip
+          files: EDMS-FCParkingFinder.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -104,6 +99,6 @@ jobs:
         uses: cssnr/virustotal-action@v1
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
-          file_globs: ED-Parking-Finder.zip
+          file_globs: EDMC-FCParkingFinder.zip
           release_heading: '### Virus Scan'
           update_release: true
