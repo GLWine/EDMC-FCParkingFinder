@@ -1,5 +1,6 @@
 name: Build Release
 
+# Automatically triggered whenever a new GitHub release is published
 on:
   release:
     types:
@@ -13,33 +14,39 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Check out the repository code targeting the main branch with full history depth
       - uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
 
+      # Set up the specified Python version for packaging and testing
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
+      # Upgrade pip and install required lightweight runtime dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install requests
 
+      # Execute core unit tests to validate plugin functionality before packaging
       - name: Run Unit Tests
         run: python test_parking_finder.py
 
+      # Extract version identifier directly from the release git tag
       - name: Get the Release Tag
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
+      # Write the normalized version string (stripping the 'v' prefix) into the version file
       - name: Update release file
         run: |
-          # Overwrite the file 'version' with the tag name (removing the 'v' prefix)
           echo "${{ env.VERSION }}" | sed 's/^v//' > version
 
+      # Configure git user and push the updated version tracking file back to the repository
       - name: Commit and push updated version file
         run: |
           git config --global user.name "github-actions[bot]"
@@ -48,6 +55,7 @@ jobs:
           git diff --cached --quiet || git commit -m "Update version to ${{ env.VERSION }}"
           git push origin HEAD:main
 
+      # Create a clean zip archive of the plugin, excluding development and hidden files
       - name: Build Plugin ZIP Package
         run: |
           python -c "
@@ -56,7 +64,6 @@ jobs:
           tag_version = '${{ env.VERSION }}'
           zip_filename = 'EDMC-FCParkingFinder.zip'
 
-          # Define files and directories to exclude from the archive
           exclude_set = {
               '.git',
               '.github',
@@ -72,7 +79,6 @@ jobs:
 
           print(f'Creating package: {zip_filename}')
           with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
-              # Walk through the project directory and add files matching criteria
               for root, dirs, files in os.walk('.'):
                   dirs[:] = [d for d in dirs if d not in exclude_set]
                   for file in files:
@@ -84,6 +90,7 @@ jobs:
                       print(f'  Added: {arcname}')
           "
 
+      # Upload the compiled zip package to the current GitHub release assets
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
@@ -92,9 +99,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # List repository contents recursively for troubleshooting and verification purposes
       - name: List files for debugging
         run: ls -R
 
+      # Perform an automated security scan on the release package using VirusTotal
       - name: VirusTotal Scan
         uses: cssnr/virustotal-action@v1
         with:
