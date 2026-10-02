@@ -1,5 +1,4 @@
-"""
-EDMC Standalone Plugin: Fleet Carrier Parking Finder.
+"""EDMC Standalone Plugin: Fleet Carrier Parking Finder.
 
 Adapts the EDR parking search logic to identify available parking slots nearby.
 """
@@ -28,9 +27,10 @@ plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
 plugin_name = Path(__file__).parent.name
 logger = logging.getLogger(f"{appname}.{plugin_name}")
 
-# Global plugin user interface instance
+# Global plugin user interface instance and runtime journal state for FC data
 plugin_ui_instance: ParkingPluginUI | None = None
 active_threads: list[threading.Thread] = []
+latest_carrier_journal_data: dict = {}
 
 
 class ParkingPluginUI:
@@ -171,7 +171,16 @@ class ParkingPluginUI:
         Args:
             system_name (str): The target star system to search around.
         """
-        finder = ParkingSystemFinder(system_name, callback=None)
+        # Insert Fleet Carrier position and saturation info from the journal as filters
+        # only if the current system matches the one being verified.
+        fc_filter_data = None
+        if (
+            latest_carrier_journal_data
+            and system_name.strip().lower() == self.current_system.strip().lower()
+        ):
+            fc_filter_data = latest_carrier_journal_data
+
+        finder = ParkingSystemFinder(system_name, callback=None, fc_data=fc_filter_data)
         result = finder.search_sync()
 
         # Check shutdown state before triggering tkinter updates to avoid hanging
@@ -206,17 +215,29 @@ class ParkingPluginUI:
 
             name = result.get("name", "Unknown")
             dist = result.get("distance", 0.0)
-            slots = result.get("parking", {}).get("slots", 0)
+            parking = result.get("parking", {})
+            slots = parking.get("slots", 0)
+            body_name_list = parking.get("body_name_list")
+            is_empirical = parking.get("is_empirical", False)
+
             logger.debug(
-                "Search successful: Found parking at '%s' (%s Ly, %s slots)",
+                "Search successful: Found parking at '%s' (%s Ly, Slots: %s, Bodies: %s)",
                 name,
                 dist,
                 slots,
+                body_name_list,
             )
-            # LANG: Result format showing carrier name, distance, and available slots
-            text = plugin_tl("Found: {name} ({dist:.1f} Ly) - Slots: {slots}").format(
-                name=name, dist=dist, slots=slots
-            )
+
+            # Inform user about specific short body list if available, otherwise show theoretical max slots
+            if is_empirical and body_name_list:
+                text = plugin_tl(
+                    "Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}"
+                ).format(name=name, dist=dist, body_name_list=body_name_list)
+            else:
+                text = plugin_tl(
+                    "Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}"
+                ).format(name=name, dist=dist, slots=slots)
+
             self.result_label.config(text=text, foreground="green")
         else:
             logger.debug("Search finished with no suitable parking locations found.")
@@ -276,5 +297,20 @@ def journal_entry(
         entry (dict): Raw journal event payload.
         state (dict): Current game state snapshot.
     """
-    if plugin_ui_instance and system:
-        plugin_ui_instance.update_current_system(system)
+    global latest_carrier_journal_data
+    if system:
+        if plugin_ui_instance:
+            plugin_ui_instance.update_current_system(system)
+
+        # Extract Fleet Carrier information (e.g., CarrierJump or CarrierStats events) if available
+        event_type = entry.get("event")
+        if event_type in ("CarrierJump", "CarrierStats", "Location"):
+            position_info = {
+                "system": system,
+                "body_id": entry.get("BodyID"),
+                "body_name": entry.get("Body"),
+                "station": station,
+                "saturation": entry.get("Saturation") or entry.get("CarrierSpace"),
+            }
+            latest_carrier_journal_data = position_info
+            logger.debug("Captured updated FC journal telemetry for system: %s", system)
