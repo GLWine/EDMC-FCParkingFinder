@@ -1,17 +1,19 @@
 name: VirusTotal Scan
+
+# Triggers the workflow manually via the GitHub Actions UI
 on:
   workflow_dispatch:
+
 jobs:
   vt_scan:
     permissions:
       contents: write
-      pull-requests: write  
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - name: VirusTotal Scan
+      - name: Scan distribution files with VirusTotal
         uses: cssnr/virustotal-action@v1
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
-          # Scan all files in the 'dist' folder
+          # Scan all files located in the distribution scope
           update_release: true
- 
