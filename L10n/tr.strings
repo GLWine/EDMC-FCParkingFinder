@@ -1,26 +1,47 @@
 /* Language name */
 "!Language" = "Türkçe";
 
-/* load.py: Name of the plugin or UI title; In files: load.py:57:57 */
+/* load.py: Explanatory tooltip for permit-locked restriction; In files: load.py:272:274 */
+"Access to this star system is restricted by a regional permit. You cannot jump or park here without acquiring it first." = "Bu yıldız sistemine erişim bölge izniyle kısıtlanmıştır. Önce izni almadan buraya atlayamaz veya park edemezsiniz.";
+
+/* load.py: Name of the plugin or UI title; In files: load.py:97:97 */
 "Carrier Parking Finder" = "Taşıyıcı Park Yeri Bulucu";
 
-/* load.py: Placeholder text for the star system entry field; In files: load.py:48:48 */
+/* load.py: Placeholder text for the star system entry field; In files: load.py:88:88 */
 "Enter system name..." = "Sistem adını girin...";
 
-/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:204:204 */
-"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "Bulundu: {name} ({dist:.1f} Ly) - Yuvalar: {slots}";
+/* load.py: Status message showing the max theoretical parking slots and distance; In files: load.py:307:309 */
+"Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}" = "Bulundu: {name} ({dist:.1f} Ly) - Maks Teorik Yuvalar: {slots}";
 
-/* load.py: Error message when no valid parking location is found in range; In files: load.py:212:212 */
+/* load.py: Status message showing the found parking body name and distance; In files: load.py:296:298 */
+"Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}" = "Bulundu: {name} ({dist:.1f} Ly) - Gök cismi üzerine park et: {body_name_list}";
+
+/* load.py: Explanatory tooltip for theoretical max slots fallback; In files: load.py:125:127; load.py:313:315 */
+"Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots." = "Bu sistem için canlı taşıyıcı telemetrisi kullanılamıyor. Yuva sayısı, şu anda dolu olan yuvaları filtrelemeden maksimum teorik cisim kapasitesini yansıtır.";
+
+/* load.py: Error message when no valid parking location is found in range; In files: load.py:322:322 */
 "No suitable parking system found within range." = "Menzil içinde uygun park sistemi bulunamadı.";
 
-/* load.py: Button or action label to trigger a search; In files: load.py:70:70 */
+/* load.py: Explanatory tooltip when search yields no matches; In files: load.py:326:328 */
+"No systems matching safety and distance criteria were found within your configured jump radius." = "Yapılandırılmış atlama yarıçapınız içinde güvenlik ve mesafe kriterlerini karşılayan sistem bulunamadı.";
+
+/* load.py: Explanatory tooltip during background search query; In files: load.py:212:214 */
+"Querying regional databases and evaluating gravitational body capacities in the background." = "Arka planda bölge veritabanları sorgulanıyor ve kütleçekimsel cisim kapasiteleri değerlendiriliyor.";
+
+/* load.py: Button or action label to trigger a search; In files: load.py:110:110 */
 "Search" = "Ara";
 
-/* load.py: Status message shown while querying around a specific star system; In files: load.py:155:155 */
+/* load.py: Status message shown while querying around a specific star system; In files: load.py:204:204 */
 "Searching around {system}..." = "{system} çevresinde aranıyor...";
 
-/* load.py: Label for star system input or display; In files: load.py:91:91 */
+/* load.py: Warning message when the system is permit-locked and parking is impossible; In files: load.py:266:268 */
+"System {name} is permit-locked: parking is not possible here!" = "{name} sistemi izin kilidi gerektiriyor: burada park etmek mümkün değil!";
+
+/* load.py: Label for star system input or display; In files: load.py:140:140 */
 "System:" = "Sistem:";
 
-/* load.py: Status message while waiting for client/journal updates; In files: load.py:77:77 */
+/* load.py: Explanatory tooltip for empirical data confirmation; In files: load.py:301:303 */
+"Verified using precise, real-time player journal telemetry reported for specific celestial bodies in this system." = "Bu sistemdeki belirli gök cisimleri için bildirilen hassas, gerçek zamanlı oyuncu günlüğü telemetrisi kullanılarak doğrulandı.";
+
+/* load.py: Status message while waiting for client/journal updates; In files: load.py:117:117 */
 "Waiting for game data..." = "Oyun verileri bekleniyor...";

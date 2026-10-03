@@ -121,8 +121,8 @@ class ParkingPluginUI:
         # Explanatory default tooltip detailing how theoretical slot fallback works
         self.result_tooltip = ToolTip(
             self.result_label,
+            # LANG: Explanatory tooltip for theoretical max slots fallback
             plugin_tl(
-                # LANG: Explanatory tooltip for theoretical max slots fallback
                 "Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots."
             ),
         )
@@ -208,8 +208,8 @@ class ParkingPluginUI:
 
         # Explanatory tooltip for ongoing search process
         self.result_tooltip.update_text(
+            # LANG: Explanatory tooltip during background search query
             plugin_tl(
-                # LANG: Explanatory tooltip during background search query
                 "Querying regional databases and evaluating gravitational body capacities in the background."
             )
         )
@@ -268,8 +268,8 @@ class ParkingPluginUI:
                 ).format(name=name)
                 self.result_label.config(text=text, foreground="orange")
                 self.result_tooltip.update_text(
+                    # LANG: Explanatory tooltip for permit-locked restriction
                     plugin_tl(
-                        # LANG: Explanatory tooltip for permit-locked restriction
                         "Access to this star system is restricted by a regional permit. You cannot jump or park here without acquiring it first."
                     )
                 )
@@ -292,25 +292,25 @@ class ParkingPluginUI:
 
             # Inform user about specific short body list if available, otherwise show theoretical max slots
             if is_empirical and body_name_list:
+                # LANG: Status message showing the found parking body name and distance
                 text = plugin_tl(
-                    # LANG: Status message showing the found parking body name and distance
                     "Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}"
                 ).format(name=name, dist=dist, body_name_list=body_name_list)
                 self.result_tooltip.update_text(
+                    # LANG: Explanatory tooltip for empirical data confirmation
                     plugin_tl(
-                        # LANG: Explanatory tooltip for empirical data confirmation
                         "Verified using precise, real-time player journal telemetry reported for specific celestial bodies in this system."
                     )
                 )
             else:
+                # LANG: Status message showing the max theoretical parking slots and distance
                 text = plugin_tl(
-                    # LANG: Status message showing the max theoretical parking slots and distance
                     "Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}"
                 ).format(name=name, dist=dist, slots=slots)
 
                 self.result_tooltip.update_text(
+                    # LANG: Explanatory tooltip for theoretical max slots fallback
                     plugin_tl(
-                        # LANG: Explanatory tooltip for theoretical max slots fallback
                         "Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots."
                     )
                 )
@@ -322,8 +322,8 @@ class ParkingPluginUI:
             text = plugin_tl("No suitable parking system found within range.")
             self.result_label.config(text=text, foreground="red")
             self.result_tooltip.update_text(
+                # LANG: Explanatory tooltip when search yields no matches
                 plugin_tl(
-                    # LANG: Explanatory tooltip when search yields no matches
                     "No systems matching safety and distance criteria were found within your configured jump radius."
                 )
             )

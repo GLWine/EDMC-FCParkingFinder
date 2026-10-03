@@ -1,26 +1,47 @@
 /* Language name */
 "!Language" = "中文";
 
-/* load.py: Name of the plugin or UI title; In files: load.py:57:57 */
+/* load.py: Explanatory tooltip for permit-locked restriction; In files: load.py:272:274 */
+"Access to this star system is restricted by a regional permit. You cannot jump or park here without acquiring it first." = "该星系受区域通行证限制。在未获得通行证之前，你无法进行跳跃或在此停泊。";
+
+/* load.py: Name of the plugin or UI title; In files: load.py:97:97 */
 "Carrier Parking Finder" = "航空母舰停泊点查找器";
 
-/* load.py: Placeholder text for the star system entry field; In files: load.py:48:48 */
+/* load.py: Placeholder text for the star system entry field; In files: load.py:88:88 */
 "Enter system name..." = "输入星系名称...";
 
-/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:204:204 */
-"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "找到: {name} ({dist:.1f} Ly) - 剩余泊位: {slots}";
+/* load.py: Status message showing the max theoretical parking slots and distance; In files: load.py:307:309 */
+"Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}" = "找到: {name} ({dist:.1f} Ly) - 最大理论泊位: {slots}";
 
-/* load.py: Error message when no valid parking location is found in range; In files: load.py:212:212 */
+/* load.py: Status message showing the found parking body name and distance; In files: load.py:296:298 */
+"Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}" = "找到: {name} ({dist:.1f} Ly) - 停泊于天体: {body_name_list}";
+
+/* load.py: Explanatory tooltip for theoretical max slots fallback; In files: load.py:125:127; load.py:313:315 */
+"Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots." = "此星系无法获取实时航母遥测数据。泊位数量反映了天体的最大理论容量，未过滤当前已占用的泊位。";
+
+/* load.py: Error message when no valid parking location is found in range; In files: load.py:322:322 */
 "No suitable parking system found within range." = "在范围内未找到合适的停泊星系。";
 
-/* load.py: Button or action label to trigger a search; In files: load.py:70:70 */
+/* load.py: Explanatory tooltip when search yields no matches; In files: load.py:326:328 */
+"No systems matching safety and distance criteria were found within your configured jump radius." = "在您配置的跳跃半径内未找到符合安全和距离条件的星系。";
+
+/* load.py: Explanatory tooltip during background search query; In files: load.py:212:214 */
+"Querying regional databases and evaluating gravitational body capacities in the background." = "正在后台查询区域数据库并评估引力天体容量。";
+
+/* load.py: Button or action label to trigger a search; In files: load.py:110:110 */
 "Search" = "搜索";
 
-/* load.py: Status message shown while querying around a specific star system; In files: load.py:155:155 */
+/* load.py: Status message shown while querying around a specific star system; In files: load.py:204:204 */
 "Searching around {system}..." = "正在搜索 {system} 周边...";
 
-/* load.py: Label for star system input or display; In files: load.py:91:91 */
+/* load.py: Warning message when the system is permit-locked and parking is impossible; In files: load.py:266:268 */
+"System {name} is permit-locked: parking is not possible here!" = "星系 {name} 已锁定通行证：无法在此停泊！";
+
+/* load.py: Label for star system input or display; In files: load.py:140:140 */
 "System:" = "星系：";
 
-/* load.py: Status message while waiting for client/journal updates; In files: load.py:77:77 */
+/* load.py: Explanatory tooltip for empirical data confirmation; In files: load.py:301:303 */
+"Verified using precise, real-time player journal telemetry reported for specific celestial bodies in this system." = "已通过该星系特定天体上报的精确、实时的玩家日志遥测数据进行验证。";
+
+/* load.py: Status message while waiting for client/journal updates; In files: load.py:117:117 */
 "Waiting for game data..." = "等待游戏数据...";

@@ -1,26 +1,47 @@
 /* Language name */
 "!Language" = "한국어";
 
-/* load.py: Name of the plugin or UI title; In files: load.py:57:57 */
+/* load.py: Explanatory tooltip for permit-locked restriction; In files: load.py:272:274 */
+"Access to this star system is restricted by a regional permit. You cannot jump or park here without acquiring it first." = "이 성계에 대한 접근은 지역 허가증으로 제한됩니다. 허가증을 먼저 획득하지 않으면 여기로 도약하거나 주차할 수 없습니다.";
+
+/* load.py: Name of the plugin or UI title; In files: load.py:97:97 */
 "Carrier Parking Finder" = "함대 항공모함 주차장 찾기";
 
-/* load.py: Placeholder text for the star system entry field; In files: load.py:48:48 */
+/* load.py: Placeholder text for the star system entry field; In files: load.py:88:88 */
 "Enter system name..." = "성계 이름 입력...";
 
-/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:204:204 */
-"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "발견됨: {name} ({dist:.1f} Ly) - 슬롯: {slots}";
+/* load.py: Status message showing the max theoretical parking slots and distance; In files: load.py:307:309 */
+"Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}" = "발견됨: {name} ({dist:.1f} Ly) - 최대 이론적 슬롯: {slots}";
 
-/* load.py: Error message when no valid parking location is found in range; In files: load.py:212:212 */
+/* load.py: Status message showing the found parking body name and distance; In files: load.py:296:298 */
+"Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}" = "발견됨: {name} ({dist:.1f} Ly) - 천체에 주차: {body_name_list}";
+
+/* load.py: Explanatory tooltip for theoretical max slots fallback; In files: load.py:125:127; load.py:313:315 */
+"Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots." = "이 성계에서는 실시간 캐리어 원격 측정을 사용할 수 없습니다. 슬롯 수는 현재 점유된 슬롯을 필터링하지 않고 최대 이론적 천체 용량을 반영합니다.";
+
+/* load.py: Error message when no valid parking location is found in range; In files: load.py:322:322 */
 "No suitable parking system found within range." = "범위 내에 적합한 주차 성계를 찾을 수 없습니다.";
 
-/* load.py: Button or action label to trigger a search; In files: load.py:70:70 */
+/* load.py: Explanatory tooltip when search yields no matches; In files: load.py:326:328 */
+"No systems matching safety and distance criteria were found within your configured jump radius." = "설정된 도약 반경 내에서 안전 및 거리 기준과 일치하는 성계를 찾을 수 없습니다.";
+
+/* load.py: Explanatory tooltip during background search query; In files: load.py:212:214 */
+"Querying regional databases and evaluating gravitational body capacities in the background." = "백그라운드에서 지역 데이터베이스를 조회하고 중력 천체 용량을 평가하는 중입니다.";
+
+/* load.py: Button or action label to trigger a search; In files: load.py:110:110 */
 "Search" = "검색";
 
-/* load.py: Status message shown while querying around a specific star system; In files: load.py:155:155 */
+/* load.py: Status message shown while querying around a specific star system; In files: load.py:204:204 */
 "Searching around {system}..." = "{system} 주변 검색 중...";
 
-/* load.py: Label for star system input or display; In files: load.py:91:91 */
+/* load.py: Warning message when the system is permit-locked and parking is impossible; In files: load.py:266:268 */
+"System {name} is permit-locked: parking is not possible here!" = "{name} 성계는 허가증이 필요합니다: 여기에는 주차할 수 없습니다!";
+
+/* load.py: Label for star system input or display; In files: load.py:140:140 */
 "System:" = "성계:";
 
-/* load.py: Status message while waiting for client/journal updates; In files: load.py:77:77 */
+/* load.py: Explanatory tooltip for empirical data confirmation; In files: load.py:301:303 */
+"Verified using precise, real-time player journal telemetry reported for specific celestial bodies in this system." = "이 성계의 특정 천체에 대해 보고된 정확하고 실시간인 플레이어 일지 원격 측정을 사용하여 확인되었습니다.";
+
+/* load.py: Status message while waiting for client/journal updates; In files: load.py:117:117 */
 "Waiting for game data..." = "게임 데이터를 기다리는 중...";

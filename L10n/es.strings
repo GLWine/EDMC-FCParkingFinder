@@ -1,26 +1,47 @@
 /* Language name */
 "!Language" = "Español";
 
-/* load.py: Name of the plugin or UI title; In files: load.py:57:57 */
+/* load.py: Explanatory tooltip for permit-locked restriction; In files: load.py:272:274 */
+"Access to this star system is restricted by a regional permit. You cannot jump or park here without acquiring it first." = "El acceso a este sistema estelar está restringido por un permiso regional. No puedes saltar o estacionar aquí sin obtenerlo primero.";
+
+/* load.py: Name of the plugin or UI title; In files: load.py:97:97 */
 "Carrier Parking Finder" = "Buscador de Estacionamiento para Portanaves";
 
-/* load.py: Placeholder text for the star system entry field; In files: load.py:48:48 */
+/* load.py: Placeholder text for the star system entry field; In files: load.py:88:88 */
 "Enter system name..." = "Introduce el nombre del sistema...";
 
-/* load.py: Result format showing carrier name, distance, and available slots; In files: load.py:204:204 */
-"Found: {name} ({dist:.1f} Ly) - Slots: {slots}" = "Encontrado: {name} ({dist:.1f} aL) - Espacios: {slots}";
+/* load.py: Status message showing the max theoretical parking slots and distance; In files: load.py:307:309 */
+"Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}" = "Encontrado: {name} ({dist:.1f} aL) - Espacios teóricos máximos: {slots}";
 
-/* load.py: Error message when no valid parking location is found in range; In files: load.py:212:212 */
+/* load.py: Status message showing the found parking body name and distance; In files: load.py:296:298 */
+"Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}" = "Encontrado: {name} ({dist:.1f} aL) - Estacionar en cuerpo: {body_name_list}";
+
+/* load.py: Explanatory tooltip for theoretical max slots fallback; In files: load.py:125:127; load.py:313:315 */
+"Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots." = "La telemetría en vivo del portanaves no está disponible para este sistema. El conteo de espacios refleja la capacidad teórica máxima del cuerpo sin filtrar los espacios actualmente ocupados.";
+
+/* load.py: Error message when no valid parking location is found in range; In files: load.py:322:322 */
 "No suitable parking system found within range." = "No se encontró ningún sistema de estacionamiento adecuado en el rango.";
 
-/* load.py: Button or action label to trigger a search; In files: load.py:70:70 */
+/* load.py: Explanatory tooltip when search yields no matches; In files: load.py:326:328 */
+"No systems matching safety and distance criteria were found within your configured jump radius." = "No se encontraron sistemas que cumplan con los criterios de seguridad y distancia dentro de tu radio de salto configurado.";
+
+/* load.py: Explanatory tooltip during background search query; In files: load.py:212:214 */
+"Querying regional databases and evaluating gravitational body capacities in the background." = "Consultando bases de datos regionales y evaluando las capacidades de los cuerpos gravitacionales en segundo plano.";
+
+/* load.py: Button or action label to trigger a search; In files: load.py:110:110 */
 "Search" = "Buscar";
 
-/* load.py: Status message shown while querying around a specific star system; In files: load.py:155:155 */
+/* load.py: Status message shown while querying around a specific star system; In files: load.py:204:204 */
 "Searching around {system}..." = "Buscando alrededor de {system}...";
 
-/* load.py: Label for star system input or display; In files: load.py:91:91 */
+/* load.py: Warning message when the system is permit-locked and parking is impossible; In files: load.py:266:268 */
+"System {name} is permit-locked: parking is not possible here!" = "¡El sistema {name} requiere permiso: el estacionamiento no es posible aquí!";
+
+/* load.py: Label for star system input or display; In files: load.py:140:140 */
 "System:" = "Sistema:";
 
-/* load.py: Status message while waiting for client/journal updates; In files: load.py:77:77 */
+/* load.py: Explanatory tooltip for empirical data confirmation; In files: load.py:301:303 */
+"Verified using precise, real-time player journal telemetry reported for specific celestial bodies in this system." = "Verificado utilizando telemetría precisa en tiempo real del diario de jugadores reportada para cuerpos celestes específicos en este sistema.";
+
+/* load.py: Status message while waiting for client/journal updates; In files: load.py:117:117 */
 "Waiting for game data..." = "Esperando datos del juego...";
