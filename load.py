@@ -18,7 +18,7 @@ from config import appname, config
 from parking_finder import ParkingSystemFinder
 
 # Semantic Versioning compliance for EDMC Plugin Registry
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 # Official EDMC localization setup for plugins
 plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
