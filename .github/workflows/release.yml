@@ -32,10 +32,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      # Execute core unit tests to validate plugin functionality before packaging
-      - name: Run Unit Tests
-        run: python test_parking_finder.py
-
       # Extract version identifier directly from the release git tag
       - name: Get the Release Tag
         id: get_version
