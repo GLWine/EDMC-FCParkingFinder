@@ -68,8 +68,8 @@ jobs:
               '.pytest_cache',
               '.vscode',
               'script',
-              'test_parking_finder.py',
               '.gitignore',
+              'pyproject.toml',
               zip_filename
           }
 
