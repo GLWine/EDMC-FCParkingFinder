@@ -270,7 +270,7 @@ class ParkingPluginUI:
                 self.result_tooltip.update_text(
                     # LANG: Explanatory tooltip for permit-locked restriction
                     plugin_tl(
-                        "Access to this star system is restricted by a regional permit. You cannot jump or park here without acquiring it first."
+                        "Access to this system requires a permit. You cannot jump or park here."
                     )
                 )
                 return
