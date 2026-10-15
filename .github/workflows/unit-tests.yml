@@ -16,7 +16,7 @@ jobs:
 
     steps:
       # Check out the repository source code
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Configure the target Python runtime environment
       - name: Set up Python 3.14
