@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Scan distribution files with VirusTotal
-        uses: cssnr/virustotal-action@v1
+        uses: cssnr/virustotal-action@v2
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
           # Scan all files located in the distribution scope
