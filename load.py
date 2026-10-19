@@ -6,15 +6,14 @@ Adapts the EDR parking search logic to identify available parking slots nearby.
 from __future__ import annotations
 
 import functools
-import logging
 import threading
 import tkinter as tk
-from pathlib import Path
 from tkinter import ttk
 
 import l10n
-from config import appname, config
+from config import config
 
+from logger_utils import logger
 from parking_finder import ParkingSystemFinder
 
 # Semantic Versioning compliance for EDMC Plugin Registry
@@ -22,10 +21,6 @@ __version__ = "1.3.1"
 
 # Official EDMC localization setup for plugins
 plugin_tl = functools.partial(l10n.translations.tl, context=__file__)
-
-# Official EDMC logging configuration for plugins
-plugin_name = Path(__file__).parent.name
-logger = logging.getLogger(f"{appname}.{plugin_name}")
 
 # Global plugin user interface instance and runtime journal state for FC data
 plugin_ui_instance: ParkingPluginUI | None = None
@@ -36,14 +31,14 @@ latest_carrier_journal_data: dict = {}
 class ToolTip:
     """Lightweight tooltip management integrated with EDMC's native style."""
 
-    def __init__(self, widget, text: str) -> None:
+    def __init__(self, widget: tk.Widget, text: str) -> None:
         self.widget = widget
         self.text = text
         self.tooltip_window = None
         self.widget.bind("<Enter>", self.show_tooltip)
         self.widget.bind("<Leave>", self.hide_tooltip)
 
-    def show_tooltip(self, event=None) -> None:
+    def show_tooltip(self, event: tk.Event | None = None) -> None:
         if self.tooltip_window or not self.text:
             return
         x = self.widget.winfo_rootx() + 10
@@ -63,7 +58,7 @@ class ToolTip:
         )
         label.pack()
 
-    def hide_tooltip(self, event=None) -> None:
+    def hide_tooltip(self, event: tk.Event | None = None) -> None:
         if self.tooltip_window:
             self.tooltip_window.destroy()
             self.tooltip_window = None
@@ -158,19 +153,19 @@ class ParkingPluginUI:
         self.system_entry.bind("<FocusIn>", self._on_entry_focus_in)
         self.system_entry.bind("<FocusOut>", self._on_entry_focus_out)
 
-    def _on_entry_focus_in(self, event) -> None:
+    def _on_entry_focus_in(self, event: tk.Event) -> None:
         """Handle entry focus-in event to clear placeholder text."""
         if self.system_var.get() == self.placeholder:
             self.system_var.set("")
             self.system_entry.config(foreground="black")
 
-    def _on_entry_focus_out(self, event) -> None:
+    def _on_entry_focus_out(self, event: tk.Event) -> None:
         """Handle entry focus-out event to restore placeholder if empty."""
         if not self.system_var.get().strip():
             self.system_var.set(self.placeholder)
             self.system_entry.config(foreground="gray")
 
-    def _validate_input(self, *args) -> None:
+    def _validate_input(self, *args: object) -> None:
         """Enable or disable the search button based on whether the entry has valid text."""
         val = self.system_var.get().strip()
         if not val or val == self.placeholder:
