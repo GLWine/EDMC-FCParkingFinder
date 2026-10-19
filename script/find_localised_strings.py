@@ -172,7 +172,7 @@ def scan_directory(
     return out
 
 
-def parse_template(path) -> set[str]:
+def parse_template(path: str | pathlib.Path) -> set[str]:
     """
     Parse a lang.template file.
 
@@ -283,7 +283,7 @@ def generate_lang_template(data: dict[pathlib.Path, list[ast.Call]]) -> str:
             )
 
         comment_set = set()
-        for comment, loc in zip(entry.comments, entry.locations):
+        for comment, loc in zip(entry.comments, entry.locations, strict=True):
             if comment:
                 comment_set.add(f"{loc.path.name}: {comment};")
 
