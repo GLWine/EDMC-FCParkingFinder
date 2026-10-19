@@ -3,23 +3,28 @@
 from __future__ import annotations
 
 import json
-import logging
 import re
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import requests
 from config import appname
 
-# Official EDMC logging configuration for plugins
-plugin_name = Path(__file__).parent.name
-logger = logging.getLogger(f"{appname}.{plugin_name}")
+from logger_utils import logger, plugin_name
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from typing import Any
 
 
 class ParkingSystemFinder:
     """Finds systems with available fleet carrier parking slots nearby using EDSM data."""
 
     def __init__(
-        self, star_system: str, callback=None, fc_data: dict | None = None
+        self,
+        star_system: str,
+        callback: Callable[..., Any] | None = None,
+        fc_data: dict | None = None,
     ) -> None:
         """Initialize the parking system finder.
 
