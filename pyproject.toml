@@ -1,5 +1,15 @@
 [tool.ruff]
-# Unified Ruff configuration for EDMC Parking Finder
+# Target Python version
+target-version = "py310"
+# Indentation width in spaces (default: 4)
+indent-width = 4
+# Automatically ignore files present in .gitignore
+respect-gitignore = true
+# Specific folders or files to completely exclude from Ruff checks
+exclude = [
+    ".git",
+    ".venv"
+]
 
 [tool.ruff.lint]
 # Complete set of activated rules
@@ -74,7 +84,6 @@ ignore = [
     "PLW0603", # pylint: global-statement (allowed for plugin state lifecycle)
 
     # Type annotations and unused argument relaxations for plugin hooks
-    "ANN001", # flake8-annotations: missing type annotation for function argument
     "ANN002", # flake8-annotations: missing type annotation for *args
     "ARG001", # flake8-unused-arguments: unused function argument
     "ARG002", # flake8-unused-arguments: unused method argument
@@ -85,47 +94,37 @@ ignore = [
     # Other specific rules raised by logs
     "TRY003", # tryceratops: avoid specifying long messages outside exception class
     "TRY400", # tryceratops: use logging.exception instead of logging.error
-    "RET505", # flake8-return: superfluous-else-return
-    "B905",   # flake8-bugbear: zip-builtin-without-strict
     "CPY001", # copyright: missing copyright notice
     "INP001", # flake8-no-pep420: implicit namespace package
     "PT009",  # flake8-pytest-style: use-pytest-assert
 ]
 
-# Allowed automatic fixes
-fixable = [
-    "E",
-    "W",
-    "F",
-    "I",
-    "SIM",
-    "C4",
-    "PIE",
-    "Q",
-    "COM",
-    "ISC",
-    "PTH",
-    "D",
-    "UP037",
-    "RUF019",
-    "RUF100",
-]
-
 # Blocked automatic fixes for safety
 unfixable = [
-    "F401",
-    "F403",
-    "F405",
-    "S",
-    "ANN",
-    "PL",
-    "TRY",
-    "RSE",
-    "LOG",
-    "PERF",
-    "N",
-    "A",
-    "RET",
+    # Imports and critical names
+    "F401", # Pyflakes: unused-import (prevents automatic deletion of useful or temporary imports)
+    "F403", # Pyflakes: undefined-local-with-import-star (dangerous star imports)
+    "F405", # Pyflakes: undefined-local-with-import-star-usage (names used via star imports)
+
+    # Security and Types
+    "S",    # flake8-bandit: security (security-related changes require human review)
+    "ANN",  # flake8-annotations: type hints (prevents automatic insertion of incorrect or generic types)
+
+    # Code Quality and Structure
+    "PL",   # pylint: metrics and quality rules (require logical refactoring)
+    "TRY",  # tryceratops: exception handling (changes to error flow)
+    "RSE",  # flake8-raise: raise style (choice of exception types)
+    "LOG",  # flake8-logging: logging practices (impacts monitoring/debugging)
+    "PERF", # perflint: performance optimizations (to be evaluated on a case-by-case basis)
+    "RET",  # flake8-return: return handling (impacts indentation and readability)
+
+    # Names and Scope
+    "N",    # pep8-naming: naming conventions (prevents breaking links between files/APIs)
+    "A",    # flake8-builtins: shadowing of built-ins (choosing a new name is up to you)
+
+    # Temporary Cleanup and Debugging (Additions)
+    "ERA",  # eradicate: commented-out code (prevents automatic deletion of drafts or notes)
+    "T20",  # flake8-print: print/pprint (prevents automatic removal of print statements) debug)
 ]
 
 [tool.ruff.format]
