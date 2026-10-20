@@ -28,8 +28,8 @@ class ParkingSearchServiceTests(unittest.TestCase):
             {
                 "name": "  Test System  ",
                 "distance": 0,
-                "information": {"bodyCount": 2},
-                "bodies": [],
+                "information": {"bodyCount": 2, "requirePermit": False},
+                "bodies": [{"name": "Test System A 1"}, {"name": "Test System A 2"}],
             },
             {"name": "", "distance": 3},
         ]
@@ -44,7 +44,37 @@ class ParkingSearchServiceTests(unittest.TestCase):
         self.assertEqual(result["name"], "Test System")
         self.assertEqual(result["distance"], 0)
         self.assertEqual(result["parking"]["slots"], 32)
+        self.assertEqual(result["access_status"], "allowed")
+        self.assertIsNone(result["access_reason"])
+        self.assertEqual(result["parking"]["theoretical_slots"], 32)
+        self.assertIsNone(result["parking"]["confirmed_available_slots"])
+        self.assertEqual(
+            result["parking"]["body_details"],
+            [{"name": "Test System A 1"}, {"name": "Test System A 2"}],
+        )
+        self.assertEqual(result["parking"]["body_name_list"], None)
+        self.assertFalse(result["parking"]["is_empirical"])
         self.assertEqual(records[0]["name"], "  Test System  ")
+
+    def test_missing_access_and_occupancy_data_remain_unknown(self) -> None:
+        """Legacy records do not imply reported access or confirmed capacity."""
+        client = Mock()
+        client.search_systems_around.return_value = [
+            {
+                "name": "Test System",
+                "distance": 1,
+                "information": {"bodyCount": 1},
+            }
+        ]
+
+        result = ParkingSearchService(client).search("Reference")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result["access_status"], "unknown")
+        self.assertEqual(result["access_reason"], "permit_status_not_reported")
+        self.assertEqual(result["parking"]["theoretical_slots"], 16)
+        self.assertIsNone(result["parking"]["confirmed_available_slots"])
+        self.assertEqual(result["parking"]["slots"], 16)
 
     def test_search_wraps_provider_errors_and_preserves_cause(self) -> None:
         """Provider failures are exposed as service errors with their cause."""
