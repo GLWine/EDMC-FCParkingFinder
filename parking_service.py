@@ -85,6 +85,8 @@ class ParkingSearchService:
             body_count = (
                 information.get("bodyCount") if isinstance(information, dict) else None
             )
+            if body_count is None:
+                body_count = record.get("body_count")
             permit_required = (
                 information.get("requirePermit")
                 if isinstance(information, dict)
@@ -131,6 +133,8 @@ class ParkingSearchService:
                 "information": dict(information),
                 "bodies": [dict(body) for body in bodies],
             }
+            if body_count is not None:
+                normalized_record["information"].setdefault("bodyCount", body_count)
             normalized.append(normalized_record)
 
         return normalized
