@@ -40,6 +40,7 @@ class ParkingSearchService:
         if not isinstance(system_name, str) or not system_name.strip():
             raise ValueError("A non-empty reference system name is required.")
 
+        system_name = system_name.strip()
         finder = ParkingSystemFinder(system_name, fc_data=fc_data)
         try:
             records = self.client.search_systems_around(
@@ -51,7 +52,24 @@ class ParkingSearchService:
             ) from error
 
         normalized_records = self._normalize_systems(records)
-        return finder.search_sync(nearby_systems=normalized_records)
+        normalized_name = system_name.strip().casefold()
+        starting_system = next(
+            (
+                record
+                for record in normalized_records
+                if record["name"].strip().casefold() == normalized_name
+            ),
+            None,
+        )
+        nearby_systems = [
+            record
+            for record in normalized_records
+            if record["name"].strip().casefold() != normalized_name
+        ]
+        return finder.search_sync(
+            starting_system=starting_system,
+            nearby_systems=nearby_systems,
+        )
 
     @staticmethod
     def _normalize_systems(records: list[dict]) -> list[dict]:
@@ -60,7 +78,9 @@ class ParkingSearchService:
         for index, record in enumerate(records):
             name = record.get("name")
             distance = record.get("distance")
-            information = record.get("information", {})
+            information = record.get("information")
+            if information is None:
+                information = {}
             bodies = record.get("bodies", [])
             body_count = (
                 information.get("bodyCount") if isinstance(information, dict) else None
