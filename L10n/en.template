@@ -1,106 +1,76 @@
 /* Language name */
 "!Language" = "English";
 
-/* parking_ui.py: Marker shown when the provider data is older than 24 hours.; In files: parking_ui.py:419:419 */
+/* parking_ui.py: Marker shown when the provider data is older than 24 hours.; In files: parking_ui.py:384:384 */
 "(stale data)" = "(stale data)";
 
-/* parking_ui.py: Additional access-detail line for the selected system result.; In files: parking_ui.py:399:399 */
-"Access detail: {detail}" = "Access detail: {detail}";
-
-/* parking_ui.py: Tooltip line summarizing the provider's access status.; In files: parking_ui.py:447:447 */
-"Access status from the provider: {status}" = "Access status from the provider: {status}";
-
-/* parking_ui.py: Access status line for the selected system result.; In files: parking_ui.py:397:397 */
-"Access: {status}" = "Access: {status}";
-
-/* parking_ui.py: Access status shown when a system is permitted without restriction.; In files: parking_ui.py:239:239 */
-"Allowed" = "Allowed";
-
-/* parking_ui.py: Tooltip explaining why confirmed availability cannot be asserted.; In files: parking_ui.py:462:464 */
+/* parking_ui.py: Tooltip explaining why confirmed availability cannot be asserted.; In files: parking_ui.py:421:423 */
 "Confirmed availability remains unknown because the plugin did not receive occupancy data." = "Confirmed availability remains unknown because the plugin did not receive occupancy data.";
 
-/* parking_ui.py: Confirmed-availability line for the selected system result.; In files: parking_ui.py:403:403 */
+/* parking_ui.py: Confirmed-availability line for the selected system result.; In files: parking_ui.py:368:368 */
 "Confirmed availability: {slots}" = "Confirmed availability: {slots}";
 
 /* parking_ui.py: Placeholder text for the star system entry field; In files: parking_ui.py:119:119 */
 "Enter system name..." = "Enter system name...";
 
-/* parking_ui.py: Tooltip explaining why the estimated availability is unknown.; In files: parking_ui.py:469:471 */
+/* parking_ui.py: Tooltip explaining why the estimated availability is unknown.; In files: parking_ui.py:428:430 */
 "Estimated availability is unknown because Spansh did not provide station data." = "Estimated availability is unknown because Spansh did not provide station data.";
 
-/* parking_ui.py: Estimated-availability line for the selected system result.; In files: parking_ui.py:407:407 */
+/* parking_ui.py: Estimated-availability line for the selected system result.; In files: parking_ui.py:372:372 */
 "Estimated availability: {slots}" = "Estimated availability: {slots}";
 
-/* parking_ui.py: Body names taken from journal data without claiming confirmed player-slot placement.; In files: parking_ui.py:437:437 */
+/* parking_ui.py: Body names taken from journal data without claiming confirmed player-slot placement.; In files: parking_ui.py:402:402 */
 "Journal body data: {bodies}" = "Journal body data: {bodies}";
 
 /* parking_ui.py: Explanatory tooltip for theoretical max slots fallback; In files: parking_ui.py:149:151 */
 "Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots." = "Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots.";
 
-/* parking_ui.py: Error message when no valid parking location is found in range; In files: parking_ui.py:477:477 */
+/* parking_ui.py: Error message when no valid parking location is found in range; In files: parking_ui.py:436:436 */
 "No suitable parking system found within range." = "No suitable parking system found within range.";
 
-/* parking_ui.py: Explanatory tooltip when search yields no matches; In files: parking_ui.py:481:483 */
+/* parking_ui.py: Explanatory tooltip when search yields no matches; In files: parking_ui.py:440:442 */
 "No systems matching safety and distance criteria were found within your configured jump radius." = "No systems matching safety and distance criteria were found within your configured jump radius.";
 
-/* parking_ui.py: Detail explaining that permit status was not reported by the provider.; In files: parking_ui.py:253:253 */
-"Permit status was not reported by the provider." = "Permit status was not reported by the provider.";
-
-/* parking_ui.py: Body list taken from provider data without claiming an exact landing location.; In files: parking_ui.py:426:426 */
+/* parking_ui.py: Body list taken from provider data without claiming an exact landing location.; In files: parking_ui.py:391:391 */
 "Provider body data: {bodies}" = "Provider body data: {bodies}";
 
-/* parking_ui.py: Explanatory tooltip during background search query; In files: parking_ui.py:296:298 */
+/* parking_ui.py: Explanatory tooltip during background search query; In files: parking_ui.py:269:271 */
 "Querying regional databases and evaluating gravitational body capacities in the background." = "Querying regional databases and evaluating gravitational body capacities in the background.";
-
-/* parking_ui.py: Access status shown when a system is explicitly blocked.; In files: parking_ui.py:236:236 */
-"Restricted" = "Restricted";
-
-/* parking_ui.py: Access status shown when the provider explicitly rejects a system due to a permit requirement.; In files: parking_ui.py:234:234 */
-"Restricted (permit required)" = "Restricted (permit required)";
 
 /* parking_ui.py: Button or action label to trigger a search; In files: parking_ui.py:134:134 */
 "Search" = "Search";
 
-/* parking_ui.py: Error message for a generic provider or network failure.; In files: parking_ui.py:340:340 */
+/* parking_ui.py: Error message for a generic provider or network failure.; In files: parking_ui.py:313:313 */
 "Search failed: provider or network error." = "Search failed: provider or network error.";
 
-/* parking_ui.py: Error message for a Spansh API response failure.; In files: parking_ui.py:337:337 */
+/* parking_ui.py: Error message for a Spansh API response failure.; In files: parking_ui.py:310:310 */
 "Search failed: Spansh API error." = "Search failed: Spansh API error.";
 
-/* parking_ui.py: Error message for a timed-out Spansh request.; In files: parking_ui.py:332:334 */
+/* parking_ui.py: Error message for a timed-out Spansh request.; In files: parking_ui.py:305:307 */
 "Search failed: timeout while contacting Spansh." = "Search failed: timeout while contacting Spansh.";
 
-/* parking_ui.py: Status message shown while querying around a specific star system; In files: parking_ui.py:288:288 */
+/* parking_ui.py: Status message shown while querying around a specific star system; In files: parking_ui.py:261:261 */
 "Searching around {system}..." = "Searching around {system}...";
 
-/* parking_ui.py: Tooltip explaining where to find details about search failures; In files: parking_ui.py:499:499 */
+/* parking_ui.py: Tooltip explaining where to find details about search failures; In files: parking_ui.py:458:458 */
 "See the EDMC log for technical details." = "See the EDMC log for technical details.";
 
-/* parking_ui.py: Provider-reported carrier count for the selected system result.; In files: parking_ui.py:414:414 */
+/* parking_ui.py: Provider-reported carrier count for the selected system result.; In files: parking_ui.py:379:379 */
 "Spansh carrier count: {count}" = "Spansh carrier count: {count}";
 
-/* parking_ui.py: Tooltip warning that provider data is stale and therefore heuristic.; In files: parking_ui.py:455:457 */
+/* parking_ui.py: Tooltip warning that provider data is stale and therefore heuristic.; In files: parking_ui.py:414:416 */
 "Spansh data is older than 24 hours, so this is only a heuristic estimate." = "Spansh data is older than 24 hours, so this is only a heuristic estimate.";
-
-/* parking_ui.py: Detail explaining that the provider explicitly reports access.; In files: parking_ui.py:251:251 */
-"Spansh explicitly reports access is allowed." = "Spansh explicitly reports access is allowed.";
-
-/* parking_ui.py: Detail explaining a provider-reported permit block.; In files: parking_ui.py:248:248 */
-"Spansh flagged this system as requiring a permit." = "Spansh flagged this system as requiring a permit.";
 
 /* parking_ui.py: Label for star system input or display; In files: parking_ui.py:164:164 */
 "System:" = "System:";
 
-/* parking_ui.py: Result header showing the selected system and distance.; In files: parking_ui.py:393:393 */
+/* parking_ui.py: Result header showing the selected system and distance.; In files: parking_ui.py:362:362 */
 "System: {name} ({distance:.1f} Ly)" = "System: {name} ({distance:.1f} Ly)";
 
-/* parking_ui.py: Theoretical capacity line for the selected system result.; In files: parking_ui.py:401:401 */
+/* parking_ui.py: Theoretical capacity line for the selected system result.; In files: parking_ui.py:366:366 */
 "Theoretical capacity: {slots}" = "Theoretical capacity: {slots}";
 
-/* parking_ui.py: Access status shown when the provider did not report permit status.; In files: parking_ui.py:241:241 */
-"Unknown" = "Unknown";
-
-/* parking_ui.py: Placeholder text for unknown parking occupancy values.; In files: parking_ui.py:260:260 */
+/* parking_ui.py: Placeholder text for unknown parking occupancy values.; In files: parking_ui.py:233:233 */
 "unknown" = "unknown";
 
 /* parking_ui.py: Status message while waiting for client/journal updates; In files: parking_ui.py:141:141 */
