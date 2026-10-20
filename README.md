@@ -17,7 +17,7 @@ This project extracts and adapts the parking search logic from the renowned **[E
 
 ## Features
 * **Automatic System Tracking**: Automatically syncs with your current in-game location via EDMC journal events.
-* **Manual Search & Dynamic UI**: Allows searching for parking availability around any arbitrary star system by name. Features a smart search button that enables/disables automatically based on input validation and clean placeholder support.
+* **Manual Search & Dynamic UI**: Allows searching for parking availability around any arbitrary star system by name. Start a search with the **Search** button or press **Enter** while the system field is focused. The button enables/disables automatically based on input validation, and the field expands to accommodate longer system names.
 * **Spansh System Search**: Retrieves nearby system records from Spansh and normalizes them in a dedicated service before evaluation.
 * **Permit Filtering**: The nearby-systems search asks Spansh to exclude systems marked as requiring a permit; no local permit list or periodic update is needed.
 * **Theoretical Parking Calculation**: Estimates potential capacity from the supplied system body counts, up to 128 slots per system.
@@ -75,7 +75,7 @@ Ensure your plugin folder contains the required production files (`load.py`, `pa
 ## Usage
 1. Launch EDMC.
 2. Go to the **FC Parking Finder** tab/panel from the main interface.
-3. The system field tracks your current system from journal events. You can also enter another system name; press **Search** to scan nearby systems. Results show theoretical capacity; journal telemetry may identify body details but does not confirm total system occupancy.
+3. The system field tracks your current system from journal events. You can also enter another system name; press **Search** or **Enter** while the field is focused to scan nearby systems. Results show theoretical capacity; journal telemetry may identify body details but does not confirm total system occupancy.
 
 ---
 

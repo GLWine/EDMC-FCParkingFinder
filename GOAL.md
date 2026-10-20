@@ -12,7 +12,7 @@
 4. Per ogni nuova stringa visibile, usare `plugin_tl("...")` in `parking_ui.py` e aggiungere un commento `# LANG: ...`. Il contesto di traduzione resta `load.py`.
 5. `version` è l'unica fonte della versione del plugin; `load.py` la legge all'avvio. Mantenere `0.x.x` durante la pre-release e riservare `1.0.0` alla release finale. Aggiornare la versione per release o traguardi funzionali concordati, non per modifiche esclusivamente documentali o di pianificazione.
 6. Aggiornare `README.md` per descrivere solo comportamenti effettivamente implementati e verificati. Aggiornare lo stato qui dopo ogni task completato.
-7. Prima di chiudere ogni task, controllare se il lavoro completato è una release o un traguardo funzionale: aggiornare `version` quando lo è, lasciarla invariata per modifiche solo documentali/pianificazione e indicare sempre nel riepilogo finale il valore precedente e quello finale con la motivazione.
+7. Aggiornare `version` quando si prepara una release; per modifiche non ancora rilasciate, lasciarla al valore dell'ultima release. Il workflow di release aggiorna il file dal tag GitHub.
 
 ## Obiettivo
 Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel quale la capacità teorica di parcheggio non risulti esaurita e che non sia noto come soggetto a permesso. Rendere esplicito quando il risultato è solo teorico: non dichiarare disponibilità reale/confermata senza dati sufficienti sull'occupazione dei Fleet Carrier. Presentare risultati ed errori nell'interfaccia EDMC con traduzioni compatibili.
@@ -22,7 +22,7 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] Core standalone rispetto a rete e UI: filtra candidati entro raggio, esclude i record che Spansh segnala come soggetti a permesso e ordina i candidati per distanza.
 - [x] Calcolo della capacità teorica: 16 slot per corpo, massimo 128 per sistema, basato sul numero di corpi fornito.
 - [x] Integrazione provider/core tramite `parking_service.py`, con normalizzazione dei record e inoltro degli errori.
-- [x] UI separata in `parking_ui.py`, input manuale, aggiornamento del sistema corrente dal journal e ricerca asincrona.
+- [x] UI separata in `parking_ui.py`, input manuale, ricerca con pulsante o tasto Invio, campo adattivo, aggiornamento del sistema corrente dal journal e ricerca asincrona.
 - [x] Localizzazione delle stringhe UI con `plugin_tl` e marcatori `# LANG`; contesto di traduzione `load.py`.
 - [x] `load.py` legge la versione dal file `version`.
 - [x] La ricerca Spansh dei sistemi vicini applica `needs_permit: false`; non esiste una lista locale, un servizio di aggiornamento o una GitHub Action per i permessi.
@@ -72,4 +72,3 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] Verificare che messaggi e dettagli non vengano presentati come disponibilità o posizione confermata senza dati che lo dimostrino.
 - [x] Eseguire i controlli mirati e la suite disponibile prima di dichiarare completato ciascun comportamento.
 - [x] Aggiornare README e stato del goal alle funzionalità realmente verificate.
-- [x] Verificare l'eventuale aggiornamento di `version`: resta invariata perché il completamento della verifica e la correzione del callback d'errore non costituiscono una release o un traguardo funzionale concordato.
