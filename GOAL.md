@@ -54,12 +54,18 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 
 ### 5. UI, localizzazione e errori
 - [ ] Mappare il contratto dei risultati in `parking_ui.py`, mostrando in modo distinto capacità teorica, disponibilità confermata o stato sconosciuto.
+- [ ] Mostrare lo stato e il motivo di accesso previsti dal contratto; distinguere accesso consentito, limitato e sconosciuto senza trattare l'assenza del flag Spansh come conferma di accessibilità.
+- [ ] Presentare nomi e dettagli dei corpi come informazioni del provider o del journal, senza descriverli come posizione verificata del Fleet Carrier se i dati non dimostrano una corrispondenza effettiva.
 - [ ] Tradurre ogni nuovo testo visibile con `plugin_tl` e `# LANG` nel componente UI.
 - [ ] Distinguere nella UI gli errori di timeout/rete/API dagli esiti validi senza risultati, mantenendo l'aggiornamento Tkinter sul thread UI.
-- [ ] Verificare le stringhe sorgente e aggiornare le traduzioni/documentazione necessarie.
+- [ ] Rigenerare `L10n/en.template` con `script/find_localised_strings.py` quando cambiano le stringhe UI e usare l'opzione `--compare-lang` per verificare il template; aggiornare le traduzioni mantenute dal progetto e la documentazione necessaria.
 
 ### 6. Verifica e rilascio
-- [ ] Ampliare i test per core, provider, service e UI nei limiti consentiti dai test esistenti, usando risposte di rete simulate.
+- [ ] Aggiungere test del core per permessi, ordinamento per distanza, limite di raggio, capacità ai limiti e dati mancanti o non validi.
+- [ ] Aggiungere test del client Spansh con risposte simulate per payload, timeout, errori HTTP, JSON non valido e strutture di risposta supportate.
+- [ ] Ampliare i test del service per i record normalizzati, il contratto condiviso e i casi di dati incompleti.
+- [ ] Aggiungere test UI per risultati teorici, disponibilità sconosciuta o confermata, accesso sconosciuto o limitato, nessun risultato ed errori; verificare che gli aggiornamenti Tkinter avvengano sul thread UI.
+- [ ] Verificare che messaggi e dettagli non vengano presentati come disponibilità o posizione confermata senza dati che lo dimostrino.
 - [ ] Eseguire i controlli mirati e la suite disponibile prima di dichiarare completato ciascun comportamento.
 - [ ] Aggiornare README e stato del goal alle funzionalità realmente verificate.
 - [ ] Aggiornare `version` quando una modifica costituisce un rilascio o un traguardo funzionale concordato.
