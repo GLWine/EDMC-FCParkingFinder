@@ -26,7 +26,7 @@ class SpanshAPIError(SpanshError):
 class SpanshClient:
     """Client for interacting with Spansh APIs (https://spansh.co.uk/api)."""
 
-    SEARCH_SYSTEMS_URL = "https://spansh.co.uk/api/search/systems"
+    SEARCH_SYSTEMS_URL = "https://spansh.co.uk/api/systems/search"
 
     def __init__(self, timeout: int = 15) -> None:
         """Initialize the Spansh API client.
@@ -121,11 +121,19 @@ class SpanshClient:
                 logger.error("Failed to parse JSON response from Spansh API: %s", e)
                 raise SpanshAPIError(f"Invalid JSON response from Spansh: {e}") from e
 
-            results = []
             if isinstance(data, list):
                 results = data
             elif isinstance(data, dict):
-                results = data.get("results", data.get("systems", []))
+                results = data.get("results", data.get("systems"))
+            else:
+                results = None
+
+            if not isinstance(results, list) or not all(
+                isinstance(result, dict) for result in results
+            ):
+                error_msg = "Spansh API returned an invalid systems response structure."
+                logger.error(error_msg)
+                raise SpanshAPIError(error_msg)
 
             logger.debug(
                 "Spansh search successful. Retrieved %d systems.", len(results)
