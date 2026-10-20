@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-from logger_utils import logger
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
-    from typing import Any
+try:
+    from logger_utils import logger
+except ImportError:
+    logger = logging.getLogger(__name__)
 
 
 class ParkingSystemFinder:
@@ -25,7 +24,6 @@ class ParkingSystemFinder:
     def __init__(
         self,
         star_system: str,
-        callback: Callable[..., Any] | None = None,
         fc_data: dict | None = None,
     ) -> None:
         """Create a finder for a reference system.
@@ -33,9 +31,6 @@ class ParkingSystemFinder:
         Args:
             star_system: Name of the reference system. Comparisons are
                 case-insensitive and ignore surrounding whitespace.
-            callback: Optional callback retained for compatibility with existing
-                callers. Searches are synchronous and this callback is not
-                invoked by :meth:`search_sync`.
             fc_data: Optional Fleet Carrier journal telemetry. When the
                 telemetry belongs to the reference system, it is attached to
                 the evaluated record and used to identify the current body.
@@ -47,7 +42,6 @@ class ParkingSystemFinder:
         """
         self.star_system = star_system
         self.radius = 25
-        self.callback = callback
         self.fc_data = fc_data
         self.known_permits = self._load_known_permits()
 
