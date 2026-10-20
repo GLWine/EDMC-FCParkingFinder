@@ -70,6 +70,14 @@ class ParkingSystemFinder:
                         permits = {
                             p.strip().lower() for p in data if isinstance(p, str)
                         }
+                    elif isinstance(data, dict) and isinstance(
+                        data.get("systems"), list
+                    ):
+                        permits = {
+                            p.strip().lower()
+                            for p in data["systems"]
+                            if isinstance(p, str)
+                        }
                 logger.debug("Loaded %d known permit systems from file.", len(permits))
             else:
                 logger.warning("known_permits.json not found at %s", data_path)
