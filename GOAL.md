@@ -12,6 +12,7 @@
 4. Per ogni nuova stringa visibile, usare `plugin_tl("...")` in `parking_ui.py` e aggiungere un commento `# LANG: ...`. Il contesto di traduzione resta `load.py`.
 5. `version` è l'unica fonte della versione del plugin; `load.py` la legge all'avvio. Mantenere `0.x.x` durante la pre-release e riservare `1.0.0` alla release finale. Aggiornare la versione per release o traguardi funzionali concordati, non per modifiche esclusivamente documentali o di pianificazione.
 6. Aggiornare `README.md` per descrivere solo comportamenti effettivamente implementati e verificati. Aggiornare lo stato qui dopo ogni task completato.
+7. Prima di chiudere ogni task, controllare se il lavoro completato è una release o un traguardo funzionale: aggiornare `version` quando lo è, lasciarla invariata per modifiche solo documentali/pianificazione e indicare sempre nel riepilogo finale il valore precedente e quello finale con la motivazione.
 
 ## Obiettivo
 Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel quale la capacità teorica di parcheggio non risulti esaurita e che non sia noto come soggetto a permesso. Rendere esplicito quando il risultato è solo teorico: non dichiarare disponibilità reale/confermata senza dati sufficienti sull'occupazione dei Fleet Carrier. Presentare risultati ed errori nell'interfaccia EDMC con traduzioni compatibili.
@@ -38,14 +39,14 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] Garantire che il sistema richiesto venga identificato con corrispondenza esatta e valutato prima degli altri candidati.
 - [x] Verificare come la risposta reale di Spansh rappresenta il sistema di riferimento; usare il provider e i payload supportati, senza presumere un endpoint target dedicato.
 - [x] Se il target non è idoneo, valutare i candidati forniti entro 25 Ly in ordine crescente di distanza.
-- [ ] Definire e testare gli esiti per target assente, pieno secondo i dati disponibili e non accessibile. Il target assente e quello non accessibile sono coperti; il payload Spansh verificato non espone l'occupazione dei carrier, quindi non è possibile classificare o testare un target come pieno finché non esiste una fonte affidabile per tale dato (vedi task 3).
+- [x] Definire e testare gli esiti per target assente, pieno secondo i dati disponibili e non accessibile. Target assente e non accessibile attivano il fallback; un target con carrier Spansh pari alla capacità teorica viene saltato. L'occupazione resta una stima del provider, non una disponibilità confermata.
 
 ### 3. Capacità e disponibilità
-- [ ] Verificare, con fixture rappresentative dei payload Spansh, quali dati di Fleet Carrier, corpi e saturazione sono effettivamente disponibili.
-- [ ] Mantenere la capacità teorica (16 per corpo, massimo 128 per sistema) distinta dalla disponibilità confermata.
-- [ ] Implementare l'assegnazione degli slot ai corpi e il conteggio dei carrier occupanti solo se i dati sorgente consentono una stima affidabile; documentare limiti e assunzioni.
-- [ ] Se non è possibile determinare l'occupazione reale, dichiarare la disponibilità confermata come sconosciuta e non scartare sistemi sulla base di una supposizione.
-- [ ] Testare limiti, corpi mancanti, saturazione, sistema pieno e casi con dati incompleti.
+- [x] Verificare, con fixture rappresentative dei payload Spansh, quali dati di Fleet Carrier, corpi e saturazione sono effettivamente disponibili. La documentazione e le risposte reali espongono `body_count`, `bodies` e `stations`; i carrier sono riconoscibili dal tipo `Drake-Class Carrier`. Non è presente un campo di saturazione o di slot liberi, quindi il conteggio è una stima derivata.
+- [x] Mantenere la capacità teorica (16 per corpo, massimo 128 per sistema) distinta dalla disponibilità confermata; esporre separatamente la stima basata sui carrier elencati da Spansh.
+- [x] Implementare l'assegnazione stimata ai corpi e il conteggio dei carrier Spansh. Confrontare le distanze di arrivo radiali in km, assegnare ogni carrier con distanza valida al corpo più vicino con meno di 16 assegnazioni e passare al successivo quando raggiunge 16; omettere e registrare a livello debug le carrier senza distanza. Se `updated_at` indica dati più vecchi di 24 ore, marcarli obsoleti e registrarlo a livello debug, ma scartare comunque i sistemi stimati pieni. Questa è un'euristica, non una posizione/occupazione confermata; la capacità totale resta limitata a 128.
+- [x] Se Spansh non fornisce la lista delle stazioni, mantenere occupazione e disponibilità stimate come sconosciute e non scartare il sistema per supposizione; la disponibilità confermata resta sempre sconosciuta.
+- [x] Testare limiti, corpi mancanti, saturazione per corpo, sistema pieno e dati incompleti.
 
 ### 4. Permessi e motivi di esclusione
 - [ ] Unificare i segnali dalla lista `data/known_permits.json` e dal flag Spansh nel contratto del risultato.
