@@ -83,6 +83,20 @@ class ParkingPluginUITests(unittest.TestCase):
         ui.result_tooltip = Mock()
         return ui
 
+    def test_enter_starts_search_only_when_search_button_is_enabled(self) -> None:
+        """Enter mirrors the button and cannot bypass its disabled state."""
+        ui = self.make_ui()
+        ui.start_search = Mock()
+
+        ui.search_btn.instate.return_value = True
+        self.assertEqual(ui._on_entry_return(Mock()), "break")
+        ui.start_search.assert_called_once_with()
+
+        ui.start_search.reset_mock()
+        ui.search_btn.instate.return_value = False
+        self.assertEqual(ui._on_entry_return(Mock()), "break")
+        ui.start_search.assert_not_called()
+
     @staticmethod
     def make_result(**overrides: object) -> dict:
         """Build a contract-shaped result with conservative availability data."""

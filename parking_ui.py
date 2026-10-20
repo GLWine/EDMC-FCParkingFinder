@@ -121,29 +121,22 @@ class ParkingPluginUI:
         # Main container frame strictly complying with EDMC plugin_app return standards (tk.Frame)
         self.frame: tk.Frame = tk.Frame(self.parent)
 
-        # Styled LabelFrame inside the base frame
-        self.labelframe: ttk.LabelFrame = ttk.LabelFrame(
-            self.frame,
-            # LANG: Name of the plugin or UI title
-            text=plugin_tl("Carrier Parking Finder"),
-        )
-
         # StringVar to track input changes reactively
         self.system_var = tk.StringVar()
-        self.system_var.trace_add("write", self._validate_input)
+        self.system_var.trace_add("write", self._on_system_var_changed)
 
         self.system_entry: ttk.Entry = ttk.Entry(
-            self.labelframe, width=18, textvariable=self.system_var
+            self.frame, width=18, textvariable=self.system_var
         )
         self.search_btn: ttk.Button = ttk.Button(
-            self.labelframe,
+            self.frame,
             # LANG: Button or action label to trigger a search
             text=plugin_tl("Search"),
             command=self.start_search,
             state="disabled",  # Starts disabled because field starts with placeholder
         )
         self.result_label: ttk.Label = ttk.Label(
-            self.labelframe,
+            self.frame,
             # LANG: Status message while waiting for client/journal updates
             text=plugin_tl("Waiting for game data..."),
             foreground="gray",
@@ -163,23 +156,37 @@ class ParkingPluginUI:
 
     def _setup_ui(self) -> None:
         """Set up the layout and widgets following EDMC styling guidelines."""
-        self.frame.pack(fill=tk.X, padx=5, pady=5)
-        self.labelframe.pack(fill=tk.X, padx=2, pady=2, ipadx=5, ipady=5)
+        self.frame.pack(fill=tk.X, padx=0, pady=0)
+        self.frame.grid_columnconfigure(1, weight=1)
 
         # Star system input field
         # LANG: Label for star system input or display
-        ttk.Label(self.labelframe, text=plugin_tl("System:")).grid(
-            row=0, column=0, sticky=tk.W, padx=2, pady=2
+        ttk.Label(self.frame, text=plugin_tl("System:")).grid(
+            row=0, column=0, sticky=tk.W, padx=(0, 4), pady=2
         )
-        self.system_entry.grid(row=0, column=1, padx=2, pady=2)
+        self.system_entry.grid(row=0, column=1, sticky=tk.EW, padx=(0, 4), pady=2)
 
         # Button to trigger manual search
-        self.search_btn.grid(row=0, column=2, padx=2, pady=2)
+        self.search_btn.grid(row=0, column=2, sticky=tk.W, pady=2)
 
         # Label to display search status and results
         self.result_label.grid(
-            row=1, column=0, columnspan=3, sticky=tk.W, padx=2, pady=4
+            row=1, column=0, columnspan=3, sticky=tk.W, pady=(2, 2)
         )
+
+    def _on_system_var_changed(self, *args: object) -> None:
+        """Keep the search button and field width synced with the current text."""
+        self._validate_input(*args)
+        self._sync_entry_width()
+
+    def _sync_entry_width(self) -> None:
+        """Match EDMC's compact UI by keeping the field readable without making it too narrow."""
+        value = self.system_var.get().strip()
+        if not value or value == self.placeholder:
+            width = 18
+        else:
+            width = max(18, min(len(value) + 2, 34))
+        self.system_entry.configure(width=width)
 
     def _init_placeholder(self) -> None:
         """Initialize placeholder text and event bindings for the system entry field."""
@@ -188,18 +195,27 @@ class ParkingPluginUI:
 
         self.system_entry.bind("<FocusIn>", self._on_entry_focus_in)
         self.system_entry.bind("<FocusOut>", self._on_entry_focus_out)
+        self.system_entry.bind("<Return>", self._on_entry_return)
+
+    def _on_entry_return(self, event: tk.Event) -> str:
+        """Start a search on Enter when the Search button is enabled."""
+        if self.search_btn.instate(["!disabled"]):
+            self.start_search()
+        return "break"
 
     def _on_entry_focus_in(self, event: tk.Event) -> None:
         """Handle entry focus-in event to clear placeholder text."""
         if self.system_var.get() == self.placeholder:
             self.system_var.set("")
             self.system_entry.config(foreground="black")
+        self._sync_entry_width()
 
     def _on_entry_focus_out(self, event: tk.Event) -> None:
         """Handle entry focus-out event to restore placeholder if empty."""
         if not self.system_var.get().strip():
             self.system_var.set(self.placeholder)
             self.system_entry.config(foreground="gray")
+        self._sync_entry_width()
 
     def _validate_input(self, *args: object) -> None:
         """Enable or disable the search button based on whether the entry has valid text."""
@@ -255,6 +271,7 @@ class ParkingPluginUI:
             self.current_system = system_name
             self.system_var.set(system_name)
             self.system_entry.config(foreground="black")
+            self._sync_entry_width()
 
     def start_search(self) -> None:
         """Initiate the parking search in a separate background thread to avoid freezing EDMC."""
