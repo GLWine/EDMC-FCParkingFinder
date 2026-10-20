@@ -14,11 +14,11 @@ except ImportError:
 
 
 class ParkingSystemFinder:
-    """Evaluate supplied system records for Fleet Carrier parking availability.
+    """Evaluate Fleet Carrier parking availability from supplied system data.
 
-    The finder does not retrieve system data from any API. Callers provide the
-    starting system and nearby-system records to :meth:`search_sync`; records
-    are expected to contain the fields used by the parking calculations.
+    Callers provide the starting system and nearby-system records to
+    :meth:`search_sync`. Records are expected to contain the fields used by
+    the parking calculations.
     """
 
     def __init__(
@@ -92,14 +92,13 @@ class ParkingSystemFinder:
     ) -> dict | None:
         """Return the best parking location from caller-supplied system data.
 
-        Neither the starting system nor nearby candidates are retrieved here:
-        callers are responsible for supplying records from any desired data
-        source. The starting record is included in the search and checked
-        first. If it is available for parking, it is the closest result
-        (distance zero) and is returned immediately. If it is unavailable,
-        permit-locked, or otherwise unsuitable, nearby candidates are filtered
-        for known permits and radius, sorted by distance, and checked until the
-        closest suitable system is found. Permit-locked systems are skipped.
+        Only supplied records are evaluated. The starting record is included
+        in the search and checked first. If it is available for parking, it is
+        the closest result (distance zero) and is returned immediately. If it
+        is unavailable, permit-locked, or otherwise unsuitable, nearby
+        candidates are filtered for known permits and radius, sorted by
+        distance, and checked until the closest suitable system is found.
+        Permit-locked systems are skipped.
 
         Expected record fields are:
 
@@ -119,9 +118,9 @@ class ParkingSystemFinder:
         Returns:
             A copy of the selected system record with a ``parking`` mapping
             containing ``slots``, ``body_name_list``, and ``is_empirical``.
-            Returns ``None`` if no suitable record is found or no data is
-            supplied. Permit-locked systems are skipped rather than returned.
-            Input records are not modified.
+            Returns ``None`` if no suitable record is found. Permit-locked
+            systems are skipped rather than returned. Input records are not
+            modified.
 
         """
         logger.debug(
@@ -132,10 +131,6 @@ class ParkingSystemFinder:
         start_result = self._check_starting_system(starting_system)
         if start_result:
             return start_result
-
-        if starting_system is None and nearby_systems is None:
-            logger.error("Parking search requires supplied system data.")
-            return None
 
         return self._search_sphere_systems(nearby_systems or [])
 
