@@ -1,67 +1,67 @@
-# 🎯 GOAL.md: Plugin EDMC Spansh Fleet Carrier Parking Finder
+# Goal: EDMC Spansh Fleet Carrier Parking Finder
 
-## ⚠️ Regole Operative per gli Agenti
-1. **Esecuzione Sequenziale:** Esegui **un solo task alla volta** in ordine progressivo.
-2. **Richiesta Conferma:** Dopo aver completato un singolo task, fermati e attendi la conferma esplicita dell'utente prima di passare al task successivo.
-3. **Indipendenza Core:** Il modulo `parking_finder.py` deve rimanere completamente **standalone** (senza dipendenze EDMC dirette all'infuori della logica pura di ricerca e payload).
-4. **Localizzazione EDMC:** Qualsiasi stringa di testo visibile nell'interfaccia deve usare `plugin_tl("...")` con il relativo commento marcatore `# LANG: ...` nel componente UI; il contesto di traduzione resta `load.py`.
-5. **Versionamento:** Mantenere la versione `0.x.x` durante la pre-release; `1.0.0` è riservato alla release finale. Incrementare il patch per i task e gli aggiornamenti incrementali; incrementare il minor (azzerando il patch) quando viene completato un traguardo funzionale significativo.
-6. **Verifica documentazione a ogni task:** Dopo aver completato ciascun task, aggiornare subito lo stato in `GOAL.md`, incrementare `version` secondo il punto 4.2 e aggiornare il `README.md` secondo il punto 4.1, documentando progressivamente solo le funzionalità effettivamente completate.
-7. **Separazione dei ruoli tra componenti:** distinguere chiaramente:
-   - `load.py`: bootstrap e lifecycle del plugin EDMC; registra/interfaccia i componenti e inoltra input/eventi, senza contenere logica di acquisizione, elaborazione o presentazione.
-   - Provider di informazioni (per esempio `spansh_client.py`): acquisiscono i dati esterni e riportano errori di rete/API; non decidono la disponibilità di parcheggio e non gestiscono la UI.
-   - Core (per esempio `parking_finder.py`): elabora i dati già forniti e restituisce risultati strutturati e puri; non effettua richieste di rete e non dipende da EDMC o UI.
-   - Componente di comunicazione/integrazione (per esempio `parking_service.py`): collega provider e core, richiede e normalizza i dati, li passa al core e consegna il risultato o l'errore al chiamante; non contiene widget o logica di visualizzazione.
-   - UI: gestisce widget, input utente e presentazione localizzata di risultati ed errori; usa il componente di comunicazione senza incorporare il protocollo Spansh né la logica core.
-   Mantenere file, responsabilità e test distinti; `load.py` avvia il flusso e collega lifecycle/eventi EDMC alla UI e al servizio.
+## Regole operative
+1. Procedere in ordine, completando un solo task per volta; dopo ogni task fermarsi e attendere la conferma esplicita dell'utente.
+2. Mantenere `parking_finder.py` indipendente da rete, UI e API EDMC: il core riceve dati e produce risultati strutturati.
+3. Rispettare la separazione dei componenti:
+   - `load.py`: bootstrap e lifecycle EDMC; inoltra eventi e input ai componenti dedicati.
+   - `spansh_client.py`: richieste Spansh, payload e gestione degli errori del provider.
+   - `parking_service.py`: acquisisce e normalizza i dati, invoca il core e inoltra risultati/errori.
+   - `parking_finder.py`: logica pura per valutare i dati ricevuti.
+   - `parking_ui.py`: widget, input e presentazione localizzata; non implementa protocollo Spansh o logica di parcheggio.
+4. Per ogni nuova stringa visibile, usare `plugin_tl("...")` in `parking_ui.py` e aggiungere un commento `# LANG: ...`. Il contesto di traduzione resta `load.py`.
+5. `version` è l'unica fonte della versione del plugin; `load.py` la legge all'avvio. Mantenere `0.x.x` durante la pre-release e riservare `1.0.0` alla release finale. Aggiornare la versione per release o traguardi funzionali concordati, non per modifiche esclusivamente documentali o di pianificazione.
+6. Aggiornare `README.md` per descrivere solo comportamenti effettivamente implementati e verificati. Aggiornare lo stato qui dopo ogni task completato.
 
----
+## Obiettivo
+Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel quale la capacità teorica di parcheggio non risulti esaurita e che non sia noto come soggetto a permesso. Rendere esplicito quando il risultato è solo teorico: non dichiarare disponibilità reale/confermata senza dati sufficienti sull'occupazione dei Fleet Carrier. Presentare risultati ed errori nell'interfaccia EDMC con traduzioni compatibili.
 
-## 📌 Obiettivo Finale (Goal)
-* [ ] Il plugin funziona completamente: verifica la disponibilità di spazio nel sistema richiesto dall'utente, altrimenti cerca nei sistemi vicini entro 25 Ly tramite le API e i payload di Spansh, mantenendo la piena compatibilità con il sistema di traduzione ad hoc di EDMC e aggiornando documentazione (`README.md`) e versione (`version`, partendo dalla versione attuale `0.3.2`).
+Versione corrente: `0.4.0` (file `version`).
 
----
+## Stato già implementato
+- [x] Client Spansh con payload per ricerca sistemi entro un raggio, timeout ed errori espliciti.
+- [x] Core standalone rispetto a rete e UI: filtra candidati entro raggio, esclude sistemi con permesso noto o segnalato e ordina i candidati per distanza.
+- [x] Calcolo della capacità teorica: 16 slot per corpo, massimo 128 per sistema, basato sul numero di corpi fornito.
+- [x] Integrazione provider/core tramite `parking_service.py`, con normalizzazione dei record e inoltro degli errori.
+- [x] UI separata in `parking_ui.py`, input manuale, aggiornamento del sistema corrente dal journal e ricerca asincrona.
+- [x] Localizzazione delle stringhe UI con `plugin_tl` e marcatori `# LANG`; contesto di traduzione `load.py`.
+- [x] `load.py` legge la versione dal file `version`.
+- [x] README descrive la capacità corrente come teorica e segnala che query target dedicata e assegnazione live degli slot non sono implementate.
 
-## ✅ Elementi Fatti
-- [x] Struttura base del client Spansh (`spansh_client.py`) con gestione di timeout, eccezioni personalizzate e header di rete.
-- [x] Costruzione del payload JSON per le query di ricerca sistemi per distanza ed entro il raggio di ricerca in `spansh_client.py`.
-- [x] Predisposizione del sistema di traduzione nativo EDMC con `plugin_tl` e tag `# LANG:` nel file principale `load.py`.
-- [x] Interfaccia grafica base e gestione multithread asincrona dei dati di gioco/journal in `load.py`.
+## Roadmap (un task per volta)
 
----
+### 1. Contratto unificato dei risultati
+- [ ] Definire e documentare la struttura di risultato condivisa tra core, service e UI.
+- [ ] Includere almeno nome sistema, distanza, stato/motivo di accesso, capacità teorica, disponibilità confermata opzionale e dettagli dei corpi.
+- [ ] Distinguere esplicitamente i dati mancanti da zero slot confermati; non presentare una stima teorica come disponibilità reale.
+- [ ] Aggiungere test del contratto e della compatibilità con i record attuali.
 
-## ⏳ Elementi da Fare (Nuovi)
+### 2. Valutazione del target e fallback
+- [ ] Garantire che il sistema richiesto venga identificato con corrispondenza esatta e valutato prima degli altri candidati.
+- [ ] Verificare come la risposta reale di Spansh rappresenta il sistema di riferimento; usare il provider e i payload supportati, senza presumere un endpoint target dedicato.
+- [ ] Se il target non è idoneo, valutare i candidati forniti entro 25 Ly in ordine crescente di distanza.
+- [ ] Definire e testare gli esiti per target assente, pieno secondo i dati disponibili e non accessibile.
 
-### 1. Architettura Standalone (`parking_finder.py`)
-- [x] **1.1** Rimuovere ogni dipendenza residua dalle API EDSM all'interno di `ParkingSystemFinder`.
-- [x] **1.2** Mantenere `parking_finder.py` del tutto privo di riferimenti alla GUI o alle funzioni di traduzione di EDMC, restituendo solo strutture dati "pure" (`dict`/`list`/`bool`) per consentirne l'uso standalone.
-- [x] **1.3** Assicurarsi che `SpanshClient` funzioni come dovrebbe, eventualmente chiedere informazioni al creatore.
-- [x] **1.4** Integrare provider Spansh e core tramite un componente di comunicazione dedicato che acquisisce/normalizza i dati, invoca `ParkingSystemFinder` e inoltra risultati/errori. Mantenere `load.py` per bootstrap/lifecycle EDMC, il provider per l'acquisizione, il core per l'elaborazione e un componente UI separato per input e presentazione; nessuno deve assorbire le responsabilità degli altri.
-- [ ] **1.5** Definire un modello di risposta unificato per `parking_finder.py` che contenga: nome sistema, distanza, lock da permesso, slot teorici/reali e dettagli corpi celesti.
+### 3. Capacità e disponibilità
+- [ ] Verificare, con fixture rappresentative dei payload Spansh, quali dati di Fleet Carrier, corpi e saturazione sono effettivamente disponibili.
+- [ ] Mantenere la capacità teorica (16 per corpo, massimo 128 per sistema) distinta dalla disponibilità confermata.
+- [ ] Implementare l'assegnazione degli slot ai corpi e il conteggio dei carrier occupanti solo se i dati sorgente consentono una stima affidabile; documentare limiti e assunzioni.
+- [ ] Se non è possibile determinare l'occupazione reale, dichiarare la disponibilità confermata come sconosciuta e non scartare sistemi sulla base di una supposizione.
+- [ ] Testare limiti, corpi mancanti, saturazione, sistema pieno e casi con dati incompleti.
 
-### 2. Logica di Parcheggio & Verifica Slot
-- [ ] **2.1** Costruire la query di verifica diretta sul sistema target inserito dall'utente.
-- [ ] **2.2** Implementare la logica di fallback sferica: estendere la ricerca ai sistemi entro 25 Ly ordinati per distanza se il sistema target è pieno o bloccato da permesso.
-- [ ] **2.3** Calcolare gli slot Fleet Carrier disponibili usando i dati Spansh: verificare per primo il totale di FC nel sistema e scartare subito i sistemi con almeno 128 FC, senza elaborare le assegnazioni ai corpi; altrimenti associare ogni FC al pianeta o alla stella con distanza dall'arrivo più simile, assegnandolo al successivo corpo disponibile se quello più vicino ha già 16 FC. Considerare un massimo di 16 FC per corpo e 128 FC per sistema.
-- [ ] **2.4** Verificare ed escludere i sistemi richiedenti permesso tramite lista locale (`known_permits.json`) o flag restituiti da Spansh.
+### 4. Permessi e motivi di esclusione
+- [ ] Unificare i segnali dalla lista `data/known_permits.json` e dal flag Spansh nel contratto del risultato.
+- [ ] Stabilire se un target bloccato viene restituito con il motivo di esclusione per spiegare il fallback, mentre i candidati bloccati non vengono selezionati.
+- [ ] Aggiungere test per permesso noto, flag API, segnali discordanti e fallback.
 
-### 3. Localizzazione & Conformità EDMC (`load.py`)
-- [ ] **3.1** Racchiudere ogni stringa utente nuova/aggiornata nella funzione `plugin_tl("...")`.
-- [ ] **3.2** Aggiungere il marcatore `# LANG: <descrizione>` su ogni riga di testo visualizzabile per consentire l'estrazione automatica via script EDMC.
-- [ ] **3.3** Mappare i risultati restituiti da `parking_finder.py` nelle label UI e nei tooltip localizzati di `load.py`.
+### 5. UI, localizzazione e errori
+- [ ] Mappare il contratto dei risultati in `parking_ui.py`, mostrando in modo distinto capacità teorica, disponibilità confermata o stato sconosciuto.
+- [ ] Tradurre ogni nuovo testo visibile con `plugin_tl` e `# LANG` nel componente UI.
+- [ ] Distinguere nella UI gli errori di timeout/rete/API dagli esiti validi senza risultati, mantenendo l'aggiornamento Tkinter sul thread UI.
+- [ ] Verificare le stringhe sorgente e aggiornare le traduzioni/documentazione necessarie.
 
-### 4. Rilascio, Documentazione e Versione
-- [ ] **4.1** Mantenere il file `README.md` aggiornato durante lo sviluppo: dopo ogni task completato, documentare le modifiche e le funzionalità effettivamente disponibili, senza anticipare comportamenti non ancora implementati.
-- [ ] **4.2** Dopo aver completato ogni singolo task, aggiornare immediatamente il file `version`: incrementare il patch per modifiche incrementali (ad esempio `0.3.3` → `0.3.4`) e il minor, azzerando il patch, per traguardi funzionali significativi (ad esempio `0.3.6` → `0.4.0`). Mantenere la progressione `0.x.x` durante la pre-release; passare a `1.0.0` solo per la release finale.
-
----
-
-## 🔄 Elementi da Rifare e Ottimizzare
-
-### 1. Refactoring Parser Spansh (`spansh_client.py` & `parking_finder.py`)
-- [ ] **R1.1** Rifare il parsing dei risultati JSON di Spansh per isolare la struttura dati dei corpi celesti (pianeti/lune) e i dettagli di saturazione.
-- [ ] **R1.2** Adattare la funzione `_clean_body_name` per gestire la nomenclatura dei corpi restituita dal payload Spansh.
-
-### 2. Gestione Thread & Risposte UI (`load.py`)
-- [ ] **R2.1** Refattorizzare il callback asincrono `_update_result` per gestire in modo sicuro le eccezioni sollevate da Spansh (`SpanshTimeoutError`, `SpanshAPIError`).
-- [ ] **R2.2** Aggiornare la visualizzazione degli errori nell'interfaccia utente (es. timeout, rete offline, sistema non trovato) applicando le dovute stringhe localizzate.
+### 6. Verifica e rilascio
+- [ ] Ampliare i test per core, provider, service e UI nei limiti consentiti dai test esistenti, usando risposte di rete simulate.
+- [ ] Eseguire i controlli mirati e la suite disponibile prima di dichiarare completato ciascun comportamento.
+- [ ] Aggiornare README e stato del goal alle funzionalità realmente verificate.
+- [ ] Aggiornare `version` quando una modifica costituisce un rilascio o un traguardo funzionale concordato.
