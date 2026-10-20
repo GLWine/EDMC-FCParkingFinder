@@ -1,4 +1,4 @@
-"""Core parking search logic based on EDR algorithms and EDSM API integration."""
+"""Core parking search logic based on supplied system data."""
 
 from __future__ import annotations
 
@@ -7,10 +7,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import requests
-from config import appname
-
-from logger_utils import logger, plugin_name
+from logger_utils import logger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -18,7 +15,12 @@ if TYPE_CHECKING:
 
 
 class ParkingSystemFinder:
-    """Finds systems with available fleet carrier parking slots nearby using EDSM data."""
+    """Evaluate supplied system records for Fleet Carrier parking availability.
+
+    The finder does not retrieve system data from any API. Callers provide the
+    starting system and nearby-system records to :meth:`search_sync`; records
+    are expected to contain the fields used by the parking calculations.
+    """
 
     def __init__(
         self,
@@ -26,27 +28,37 @@ class ParkingSystemFinder:
         callback: Callable[..., Any] | None = None,
         fc_data: dict | None = None,
     ) -> None:
-        """Initialize the parking system finder.
+        """Create a finder for a reference system.
 
         Args:
-            star_system (str): The name of the reference star system.
-            callback (callable, optional): Optional callback function upon completion.
-            fc_data (dict | None, optional): Fleet carrier position and saturation data from journal.
+            star_system: Name of the reference system. Comparisons are
+                case-insensitive and ignore surrounding whitespace.
+            callback: Optional callback retained for compatibility with existing
+                callers. Searches are synchronous and this callback is not
+                invoked by :meth:`search_sync`.
+            fc_data: Optional Fleet Carrier journal telemetry. When the
+                telemetry belongs to the reference system, it is attached to
+                the evaluated record and used to identify the current body.
+
+        The search radius defaults to 25 light-years. Known permit-locked
+        system names are loaded from ``data/known_permits.json`` when the
+        finder is created.
+
         """
         self.star_system = star_system
         self.radius = 25
-        self.rank = 0
         self.callback = callback
         self.fc_data = fc_data
-        # Set an identifying User-Agent to avoid EDSM Cloudflare blocks
-        self.headers = {"User-Agent": f"{appname}-{plugin_name}"}
         self.known_permits = self._load_known_permits()
 
     def _load_known_permits(self) -> set[str]:
-        """Load known permit-locked systems from data/known_permits.json.
+        """Read permit-locked system names from the local JSON data file.
 
         Returns:
-            set[str]: Lowercase set of known permit system names.
+            A set of system names normalized to lowercase. If the file is
+            absent, malformed, or cannot be read, logs the issue and returns
+            an empty set.
+
         """
         permits = set()
         try:
@@ -66,159 +78,160 @@ class ParkingSystemFinder:
         return permits
 
     def within_radius(self, radius: int) -> None:
-        """Set the search radius in light years.
+        """Set the maximum accepted distance for nearby-system candidates.
 
         Args:
-            radius (int): Search radius limit.
+            radius: Maximum distance from the reference system, in light-years.
+                Candidates farther than this value are ignored. The supplied
+                nearby records must already have their distances calculated.
+
+        This setting does not fetch candidates or calculate distances. It only
+        filters the records passed to :meth:`search_sync`.
+
         """
         self.radius = radius
 
-    def nb_to_pick(self, rank: int) -> None:
-        """Set the result index rank to pick from candidates.
+    def search_sync(
+        self,
+        starting_system: dict | None = None,
+        nearby_systems: list[dict] | None = None,
+    ) -> dict | None:
+        """Return the best parking location from caller-supplied system data.
 
-        Args:
-            rank (int): Index rank.
-        """
-        self.rank = rank
+        Neither the starting system nor nearby candidates are retrieved here:
+        callers are responsible for supplying records from any desired data
+        source. The starting record is included in the search and checked
+        first. If it is available for parking, it is the closest result
+        (distance zero) and is returned immediately. If it is unavailable,
+        permit-locked, or otherwise unsuitable, nearby candidates are filtered
+        for known permits and radius, sorted by distance, and checked until the
+        closest suitable system is found. Permit-locked systems are skipped.
 
-    def search_sync(self) -> dict | None:
-        """Synchronously search for a nearby system suitable for fleet carrier parking.
+        Expected record fields are:
 
-        If the target system doesn't have parking, it falls back to searching
-        progressively through nearby systems within the radius.
+        * ``name``: system name.
+        * ``distance``: numeric distance in light-years for nearby candidates.
+        * ``information.requirePermit``: optional boolean permit requirement.
+        * ``information.bodyCount``: optional number of bodies used to estimate
+          theoretical parking capacity.
+        * ``bodies``: optional list of body records, each optionally containing
+          a ``name``. Body names are reported only when matching Fleet Carrier
+          telemetry is available.
+
+        The starting-system record must have a ``name`` matching the finder's
+        reference system. Nearby records should not include the starting
+        system; a zero-distance record with a different name is rejected.
 
         Returns:
-            dict | None: System details including parking data, or None if not found.
+            A copy of the selected system record with a ``parking`` mapping
+            containing ``slots``, ``body_name_list``, and ``is_empirical``.
+            Returns ``None`` if no suitable record is found or no data is
+            supplied. Permit-locked systems are skipped rather than returned.
+            Input records are not modified.
+
         """
         logger.debug(
-            "Starting parking search for system '%s' (Radius: %sLy, Rank: %s)",
+            "Starting parking search for system '%s' (Radius: %sLy)",
             self.star_system,
             self.radius,
-            self.rank,
         )
-        try:
-            # 0 & 1. Check starting system
-            start_result = self._check_starting_system()
-            if start_result:
-                return start_result
+        start_result = self._check_starting_system(starting_system)
+        if start_result:
+            return start_result
 
-            # 2. Search via spherical systems within the specified radius
-            return self._search_sphere_systems()
+        if starting_system is None and nearby_systems is None:
+            logger.error("Parking search requires supplied system data.")
+            return None
 
-        except requests.Timeout as e:
-            logger.error("EDSM API request timed out: %s", e)
-        except requests.RequestException as e:
-            logger.error("EDSM API communication error: %s", e)
-        except Exception:
-            logger.exception("Unexpected critical error during search_sync")
+        return self._search_sphere_systems(nearby_systems or [])
 
-        return None
+    def _check_starting_system(self, system: dict | None) -> dict | None:
+        """Evaluate a supplied record for the reference system.
 
-    def _check_starting_system(self) -> dict | None:
-        """Check if the starting system is a permit or valid parking choice.
+        Args:
+            system: Record for the reference system, or ``None`` if the caller
+                has no record for it. The record must have a matching ``name``
+                and may contain ``information`` and ``bodies`` fields.
 
         Returns:
-            dict | None: System evaluation dictionary or None.
+            A parking result when the system is suitable, or ``None`` when it
+            is missing, mismatched, permit-locked, or otherwise unsuitable.
+            Returning ``None`` for a permit-locked system allows
+            :meth:`search_sync` to continue with nearby candidates.
+
         """
         norm_start = self.star_system.strip().lower()
         if norm_start in self.known_permits:
             logger.debug(
-                "Starting system '%s' is natively recognized as a permit system.",
+                "Starting system '%s' is permit-locked; continuing search.",
                 self.star_system,
             )
-            return {"name": self.star_system, "permit_locked": True}
-
-        logger.debug("Querying EDSM API for starting system: %s", self.star_system)
-        sys_resp = requests.get(
-            "https://www.edsm.net/api-v1/system",
-            params={
-                "systemName": self.star_system,
-                "showInformation": 1,
-                "showPermit": 1,
-                "showBodies": 1,
-            },
-            headers=self.headers,
-            timeout=10,
-        )
-
-        if sys_resp.status_code != 200:
             return None
 
-        sys_data = sys_resp.json()
-        if not sys_data or "name" not in sys_data:
+        if (
+            not system
+            or "name" not in system
+            or system["name"].strip().lower() != norm_start
+        ):
             return None
 
-        info = sys_data.get("information", {})
+        info = system.get("information", {})
         if info.get("requirePermit", False):
             logger.debug(
-                "Starting system '%s' requires permit according to EDSM.",
-                sys_data["name"],
+                "Starting system '%s' requires a permit; continuing search.",
+                system["name"],
             )
-            return {"name": sys_data["name"], "permit_locked": True}
+            return None
 
-        the_system = {
-            "name": sys_data["name"],
-            "requirePermit": False,
-            "distance": 0,
-            "information": info,
-            "bodies": sys_data.get("bodies", []),
-        }
+        the_system = {**system, "distance": 0, "information": info}
 
         # Attach telemetry if available
         if self.fc_data:
             the_system["fc_telemetry"] = self.fc_data
 
-        if self.rank == 0 and self._check_system(the_system):
+        if self._check_system(the_system):
             logger.debug(
-                "Starting system '%s' is suitable for parking (Rank 0 match).",
+                "Starting system '%s' is the closest suitable parking location.",
                 the_system["name"],
             )
             return the_system
 
         return None
 
-    def _search_sphere_systems(self) -> dict | None:
-        """Query and evaluate nearby systems within radius.
+    def _search_sphere_systems(self, systems: list[dict]) -> dict | None:
+        """Evaluate and select from supplied nearby-system records.
+
+        Candidates are copied, filtered against the configured radius and
+        local permit list, sorted by distance, and evaluated in order. The
+        first suitable candidate is returned, ensuring the result is the
+        closest available system after the starting system has been checked.
+
+        Args:
+            systems: Nearby system records. Each candidate should contain a
+                string ``name``, numeric ``distance`` in light-years, and the
+                optional ``information`` and ``bodies`` fields documented by
+                :meth:`search_sync`.
 
         Returns:
-            dict | None: Chosen system dictionary or None.
+            The selected candidate with its parking evaluation, or ``None`` if
+            no supplied candidate is suitable.
+
         """
         logger.debug(
-            "Querying EDSM sphere-systems around '%s' (Radius: %sLy)",
+            "Evaluating supplied systems around '%s' (Radius: %sLy)",
             self.star_system,
             self.radius,
         )
-        sphere_resp = requests.get(
-            "https://www.edsm.net/api-v1/sphere-systems",
-            params={
-                "systemName": self.star_system,
-                "radius": self.radius,
-                "showInformation": 1,
-                "showPermit": 1,
-                "showBodies": 1,
-            },
-            headers=self.headers,
-            timeout=15,
-        )
-
-        if sphere_resp.status_code != 200:
-            return None
-
-        sphere_data = sphere_resp.json()
-        if not isinstance(sphere_data, list):
-            return None
 
         filtered_sphere = []
-        for s in sphere_data:
-            s_name = s.get("name", "").strip().lower()
-            if s_name in self.known_permits:
-                continue
-            filtered_sphere.append(s)
+        for system in systems:
+            candidate = self._filter_candidate(system)
+            if candidate:
+                filtered_sphere.append(candidate)
 
         sorted_systems = sorted(filtered_sphere, key=lambda s: s.get("distance", 0))
-        candidates = []
-
-        for system in sorted_systems:
+        for candidate in sorted_systems:
+            system = {**candidate}
             if (
                 self.fc_data
                 and system.get("name", "").strip().lower()
@@ -227,30 +240,56 @@ class ParkingSystemFinder:
                 system["fc_telemetry"] = self.fc_data
 
             if self._check_system(system):
-                candidates.append(system)
-                if len(candidates) > self.rank:
-                    chosen = candidates[self.rank]
-                    logger.debug(
-                        "Selected parking system '%s' at %.2fLy (Rank %s)",
-                        chosen.get("name"),
-                        chosen.get("distance", 0),
-                        self.rank,
-                    )
-                    return chosen
-
-        if candidates:
-            return candidates[-1]
+                logger.debug(
+                    "Selected closest parking system '%s' at %.2fLy",
+                    system.get("name"),
+                    system.get("distance", 0),
+                )
+                return system
 
         return None
 
-    def _check_system(self, system: dict | None) -> bool:
-        """Evaluate whether a system is accessible and has available parking slots.
+    def _filter_candidate(self, system: dict) -> dict | None:
+        """Reject malformed or out-of-range candidates and copy accepted ones.
 
         Args:
-            system (dict | None): System dictionary retrieved from EDSM.
+            system: Candidate record to validate. Its ``name`` must be a
+                string, and its ``distance`` must be numeric and no greater
+                than the configured radius.
 
         Returns:
-            bool: True if suitable for parking, False otherwise.
+            A shallow copy of the candidate when valid and not known to be
+            permit-locked; otherwise, ``None``. Copying lets evaluation attach
+            parking details without changing the caller's input dictionary.
+
+        """
+        if not isinstance(system, dict):
+            return None
+
+        name = system.get("name", "")
+        distance = system.get("distance", 0)
+        if (
+            not isinstance(name, str)
+            or name.strip().lower() in self.known_permits
+            or not isinstance(distance, (int, float))
+            or distance > self.radius
+        ):
+            return None
+        return {**system}
+
+    def _check_system(self, system: dict | None) -> bool:
+        """Determine whether a system is accessible and has parking capacity.
+
+        Args:
+            system: Supplied record. The optional
+                ``information.requirePermit`` field is used to reject systems
+                requiring permits; body count is used to estimate capacity.
+
+        Returns:
+            ``True`` when the record is accessible and has at least one
+            theoretical parking slot. On success, adds a ``parking`` mapping
+            to the record; otherwise returns ``False`` without adding it.
+
         """
         if not system:
             return False
@@ -293,14 +332,16 @@ class ParkingSystemFinder:
         return True
 
     def _clean_body_name(self, raw_name: str, sys_name: str) -> str:
-        """Clean and shorten a body name by removing system prefix and whitespace.
+        """Remove a system-name prefix and whitespace from a body name.
 
         Args:
-            raw_name (str): Raw body name from data.
-            sys_name (str): Star system name.
+            raw_name: Full body name as supplied by the system record or journal.
+            sys_name: System name whose leading occurrence should be removed.
 
         Returns:
-            str: Cleaned short body name string.
+            Body name with a case-insensitive leading system name removed and
+            all remaining whitespace deleted.
+
         """
         cleaned = raw_name
         if cleaned.lower().startswith(sys_name.lower()):
@@ -310,14 +351,20 @@ class ParkingSystemFinder:
     def _extract_body_names(
         self, system: dict, sys_name: str
     ) -> tuple[str | None, bool]:
-        """Extract and format short body names from telemetry or bodies list.
+        """Find body names matching the Fleet Carrier's journal telemetry.
 
         Args:
-            system (dict): System dictionary.
-            sys_name (str): Name of the star system.
+            system: System record, including optional ``fc_telemetry`` and
+                ``bodies`` fields.
+            sys_name: Name of the system being evaluated.
 
         Returns:
-            tuple[str | None, bool]: Formatted body names string and empirical status flag.
+            Pair of the formatted body name(s) and an empirical-data flag.
+            Names are returned only when telemetry identifies the same
+            system; otherwise returns ``(None, False)``. If body records are
+            available, their names take precedence over the telemetry's
+            ``body_name`` value.
+
         """
         fc_telemetry = system.get("fc_telemetry")
         if (
@@ -347,13 +394,16 @@ class ParkingSystemFinder:
         return None, False
 
     def _theoretical_parking_slots(self, system: dict | None) -> int:
-        """Calculate theoretical parking slots based on the body count (16 slots per body, max 128).
+        """Estimate parking capacity from the system's reported body count.
 
         Args:
-            system (dict | None): System dictionary.
+            system: System record with optional ``information.bodyCount``.
 
         Returns:
-            int: Calculated number of available parking slots.
+            Estimated theoretical slot count: 16 per body, capped at 128.
+            Missing or non-positive body counts are treated as one body;
+            ``None`` input produces zero slots.
+
         """
         if not system:
             return 0
