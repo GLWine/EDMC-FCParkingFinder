@@ -1,0 +1,77 @@
+name: Localization template sync
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'parking_ui.py'
+      - 'script/find_localised_strings.py'
+      - 'L10n/**'
+      - '.github/workflows/localization-template-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Check for localization drift
+        id: check
+        shell: bash
+        run: |
+          set +e
+          python script/find_localised_strings.py --directory . --compare-lang L10n/en.template > /tmp/localization-drift.txt 2>&1
+          status=$?
+          cat /tmp/localization-drift.txt
+          if [ "$status" -eq 0 ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Regenerate localization template
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          mkdir -p L10n
+          python script/find_localised_strings.py --directory . --lang L10n/en.template
+
+      - name: Build commit summary
+        if: steps.check.outputs.changed == 'true'
+        shell: bash
+        run: |
+          {
+            echo "Update localization template"
+            echo
+            echo "Changed strings:"
+            grep '^NEW! ' /tmp/localization-drift.txt | sed 's/^NEW! //' || true
+            echo
+            echo "Removed strings:"
+            grep '^No longer used:' /tmp/localization-drift.txt | sed 's/^No longer used: //' || true
+          } > /tmp/localization-commit-msg.txt
+
+      - name: Commit and push updated template
+        if: steps.check.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add L10n/en.template
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -F /tmp/localization-commit-msg.txt
+          git push origin HEAD:${GITHUB_REF_NAME}
