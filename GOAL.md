@@ -57,12 +57,12 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] Documentare che il provider può omettere il target e che il plugin non può conoscere il motivo dell'omissione.
 
 ### 5. UI, localizzazione e errori
-- [ ] Mappare il contratto dei risultati in `parking_ui.py`, mostrando in modo distinto capacità teorica, disponibilità confermata o stato sconosciuto.
-- [ ] Mostrare lo stato e il motivo di accesso previsti dal contratto; distinguere accesso consentito, limitato e sconosciuto senza trattare l'assenza del flag Spansh come conferma di accessibilità.
-- [ ] Presentare nomi e dettagli dei corpi come informazioni del provider o del journal, senza descriverli come posizione verificata del Fleet Carrier se i dati non dimostrano una corrispondenza effettiva.
-- [ ] Tradurre ogni nuovo testo visibile con `plugin_tl` e `# LANG` nel componente UI.
-- [ ] Distinguere nella UI gli errori di timeout/rete/API dagli esiti validi senza risultati, mantenendo l'aggiornamento Tkinter sul thread UI.
-- [ ] Rigenerare `L10n/en.template` con `script/find_localised_strings.py` quando cambiano le stringhe UI e usare l'opzione `--compare-lang` per verificare il template; aggiornare le traduzioni mantenute dal progetto e la documentazione necessaria.
+- [x] Mappare il contratto dei risultati in `parking_ui.py`, mostrando in modo distinto capacità teorica, disponibilità confermata o stato sconosciuto.
+- [x] Mostrare lo stato e il motivo di accesso previsti dal contratto; distinguere accesso consentito, limitato e sconosciuto senza trattare l'assenza del flag Spansh come conferma di accessibilità.
+- [x] Presentare nomi e dettagli dei corpi come informazioni del provider o del journal, senza descriverli come posizione verificata del Fleet Carrier se i dati non dimostrano una corrispondenza effettiva.
+- [x] Tradurre ogni nuovo testo visibile con `plugin_tl` e `# LANG` nel componente UI.
+- [x] Distinguere nella UI gli errori di timeout/rete/API dagli esiti validi senza risultati, mantenendo l'aggiornamento Tkinter sul thread UI.
+- [x] Rigenerare `L10n/en.template` con `script/find_localised_strings.py` quando cambiano le stringhe UI e usare l'opzione `--compare-lang` per verificare il template; aggiornare le traduzioni mantenute dal progetto e la documentazione necessaria.
 
 ### 6. Verifica e rilascio
 - [ ] Aggiungere test del core per permessi, ordinamento per distanza, limite di raggio, capacità ai limiti e dati mancanti o non validi.
