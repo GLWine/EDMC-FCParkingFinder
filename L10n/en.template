@@ -64,9 +64,6 @@
 /* parking_ui.py: Button or action label to trigger a search; In files: parking_ui.py:141:141 */
 "Search" = "Search";
 
-/* parking_ui.py: Error shown when the parking search service fails; In files: parking_ui.py:476:476 */
-"Search failed. Check the EDMC log for details." = "Search failed. Check the EDMC log for details.";
-
 /* parking_ui.py: Error message for a generic provider or network failure.; In files: parking_ui.py:321:321 */
 "Search failed: provider or network error." = "Search failed: provider or network error.";
 
@@ -79,7 +76,7 @@
 /* parking_ui.py: Status message shown while querying around a specific star system; In files: parking_ui.py:271:271 */
 "Searching around {system}..." = "Searching around {system}...";
 
-/* parking_ui.py: Tooltip explaining where to find details about search failures; In files: parking_ui.py:481:481 */
+/* parking_ui.py: Tooltip explaining where to find details about search failures; In files: parking_ui.py:480:480 */
 "See the EDMC log for technical details." = "See the EDMC log for technical details.";
 
 /* parking_ui.py: Provider-reported carrier count for the selected system result.; In files: parking_ui.py:395:395 */
