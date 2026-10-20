@@ -312,7 +312,9 @@ class ParkingPluginUI:
                 cause = exc.__cause__
                 if isinstance(cause, SpanshTimeoutError):
                     # LANG: Error message for a timed-out Spansh request.
-                    message = plugin_tl("Search failed: timeout while contacting Spansh.")
+                    message = plugin_tl(
+                        "Search failed: timeout while contacting Spansh."
+                    )
                 elif isinstance(cause, SpanshAPIError):
                     # LANG: Error message for a Spansh API response failure.
                     message = plugin_tl("Search failed: Spansh API error.")
@@ -468,12 +470,11 @@ class ParkingPluginUI:
         """Store the latest carrier telemetry received from EDMC's journal."""
         self.carrier_journal_data = data
 
-    def _update_error(self) -> None:
+    def _update_error(self, message: str) -> None:
         """Show a search error after its details have been logged."""
         self._validate_input()
         self.result_label.config(
-            # LANG: Error shown when the parking search service fails
-            text=plugin_tl("Search failed. Check the EDMC log for details."),
+            text=message,
             foreground="red",
         )
         self.result_tooltip.update_text(
