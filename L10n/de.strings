@@ -1,41 +1,111 @@
 /* Language name */
 "!Language" = "Deutsch";
 
-/* load.py: Name of the plugin or UI title; In files: load.py:97:97 */
+/* parking_ui.py: Marker shown when the provider data is older than 24 hours.; In files: parking_ui.py:400:400 */
+"(stale data)" = "(veraltete Daten)";
+
+/* parking_ui.py: Additional access-detail line for the selected system result.; In files: parking_ui.py:380:380 */
+"Access detail: {detail}" = "Zugriffdetails: {detail}";
+
+/* parking_ui.py: Tooltip line summarizing the provider's access status.; In files: parking_ui.py:428:428 */
+"Access status from the provider: {status}" = "Zugriffsstatus des Anbieters: {status}";
+
+/* parking_ui.py: Access status line for the selected system result.; In files: parking_ui.py:378:378 */
+"Access: {status}" = "Zugriff: {status}";
+
+/* parking_ui.py: Access status shown when a system is permitted without restriction.; In files: parking_ui.py:223:223 */
+"Allowed" = "Erlaubt";
+
+/* parking_ui.py: Name of the plugin or UI title; In files: parking_ui.py:128:128 */
 "Carrier Parking Finder" = "Carrier-Parkplatzfinder";
 
-/* load.py: Placeholder text for the star system entry field; In files: load.py:88:88 */
+/* parking_ui.py: Tooltip explaining why confirmed availability cannot be asserted.; In files: parking_ui.py:443:445 */
+"Confirmed availability remains unknown because the plugin did not receive occupancy data." = "Die bestätigte Verfügbarkeit bleibt unbekannt, da das Plugin keine Belegungsdaten erhalten hat.";
+
+/* parking_ui.py: Confirmed-availability line for the selected system result.; In files: parking_ui.py:384:384 */
+"Confirmed availability: {slots}" = "Bestätigte Verfügbarkeit: {slots}";
+
+/* parking_ui.py: Placeholder text for the star system entry field; In files: parking_ui.py:119:119 */
 "Enter system name..." = "Systemnamen eingeben...";
 
-/* load.py: Status message showing the max theoretical parking slots and distance; In files: load.py:307:309 */
-"Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}" = "Gefunden: {name} ({dist:.1f} Lj) - Max. theoretische Plätze: {slots}";
+/* parking_ui.py: Tooltip explaining why the estimated availability is unknown.; In files: parking_ui.py:450:452 */
+"Estimated availability is unknown because Spansh did not provide station data." = "Die geschätzte Verfügbarkeit ist unbekannt, da Spansh keine Stationsdaten bereitgestellt hat.";
 
-/* load.py: Status message showing the found parking body name and distance; In files: load.py:296:298 */
-"Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}" = "Gefunden: {name} ({dist:.1f} Lj) - Parken bei Himmelskörper: {body_name_list}";
+/* parking_ui.py: Estimated-availability line for the selected system result.; In files: parking_ui.py:388:388 */
+"Estimated availability: {slots}" = "Geschätzte Verfügbarkeit: {slots}";
 
-/* load.py: Explanatory tooltip for theoretical max slots fallback; In files: load.py:125:127; load.py:313:315 */
+/* parking_ui.py: Body names taken from journal data without claiming confirmed player-slot placement.; In files: parking_ui.py:418:418 */
+"Journal body data: {bodies}" = "Journal-Körperdaten: {bodies}";
+
+/* parking_ui.py: Explanatory tooltip for theoretical max slots fallback; In files: parking_ui.py:156:158 */
 "Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots." = "Live-Carrier-Telemetrie ist für dieses System nicht verfügbar. Die Anzahl der Plätze spiegelt die maximale theoretische Kapazität der Himmelskörper wider, ohne derzeit belegte Plätze herauszufiltern.";
 
-/* load.py: Error message when no valid parking location is found in range; In files: load.py:322:322 */
+/* parking_ui.py: Error message when no valid parking location is found in range; In files: parking_ui.py:458:458 */
 "No suitable parking system found within range." = "Kein geeignetes Parksystem in Reichweite gefunden.";
 
-/* load.py: Explanatory tooltip when search yields no matches; In files: load.py:326:328 */
+/* parking_ui.py: Explanatory tooltip when search yields no matches; In files: parking_ui.py:462:464 */
 "No systems matching safety and distance criteria were found within your configured jump radius." = "Es wurden keine Systeme gefunden, die den Sicherheits- und Distanzkriterien innerhalb Ihres konfigurierten Sprungradius entsprechen.";
 
-/* load.py: Explanatory tooltip during background search query; In files: load.py:212:214 */
+/* parking_ui.py: Detail explaining that permit status was not reported by the provider.; In files: parking_ui.py:237:237 */
+"Permit status was not reported by the provider." = "Der Anbieter hat keinen Genehmigungsstatus gemeldet.";
+
+/* parking_ui.py: Body list taken from provider data without claiming an exact landing location.; In files: parking_ui.py:407:407 */
+"Provider body data: {bodies}" = "Anbieter-Körperdaten: {bodies}";
+
+/* parking_ui.py: Explanatory tooltip during background search query; In files: parking_ui.py:279:281 */
 "Querying regional databases and evaluating gravitational body capacities in the background." = "Regionale Datenbanken werden abgefragt und die Kapazitäten der Himmelskörper im Hintergrund ausgewertet.";
 
-/* load.py: Button or action label to trigger a search; In files: load.py:110:110 */
+/* parking_ui.py: Access status shown when a system is explicitly blocked.; In files: parking_ui.py:220:220 */
+"Restricted" = "Eingeschränkt";
+
+/* parking_ui.py: Access status shown when the provider explicitly rejects a system due to a permit requirement.; In files: parking_ui.py:218:218 */
+"Restricted (permit required)" = "Eingeschränkt (Genehmigung erforderlich)";
+
+/* parking_ui.py: Button or action label to trigger a search; In files: parking_ui.py:141:141 */
 "Search" = "Suchen";
 
-/* load.py: Status message shown while querying around a specific star system; In files: load.py:204:204 */
+/* parking_ui.py: Error message for a generic provider or network failure.; In files: parking_ui.py:321:321 */
+"Search failed: provider or network error." = "Suche fehlgeschlagen: Anbieter- oder Netzwerkfehler.";
+
+/* parking_ui.py: Error message for a Spansh API response failure.; In files: parking_ui.py:318:318 */
+"Search failed: Spansh API error." = "Suche fehlgeschlagen: Spansh-API-Fehler.";
+
+/* parking_ui.py: Error message for a timed-out Spansh request.; In files: parking_ui.py:315:315 */
+"Search failed: timeout while contacting Spansh." = "Suche fehlgeschlagen: Zeitüberschreitung beim Kontakt mit Spansh.";
+
+/* parking_ui.py: Status message shown while querying around a specific star system; In files: parking_ui.py:271:271 */
 "Searching around {system}..." = "Suche um {system}...";
 
-/* load.py: Label for star system input or display; In files: load.py:140:140 */
+/* parking_ui.py: Tooltip explaining where to find details about search failures; In files: parking_ui.py:480:480 */
+"See the EDMC log for technical details." = "Siehe EDMC-Protokoll für technische Details.";
+
+/* parking_ui.py: Provider-reported carrier count for the selected system result.; In files: parking_ui.py:395:395 */
+"Spansh carrier count: {count}" = "Spansh-Frachtträgeranzahl: {count}";
+
+/* parking_ui.py: Tooltip warning that provider data is stale and therefore heuristic.; In files: parking_ui.py:436:438 */
+"Spansh data is older than 24 hours, so this is only a heuristic estimate." = "Die Spansh-Daten sind älter als 24 Stunden, daher ist dies nur eine heuristische Schätzung.";
+
+/* parking_ui.py: Detail explaining that the provider explicitly reports access.; In files: parking_ui.py:235:235 */
+"Spansh explicitly reports access is allowed." = "Spansh meldet ausdrücklich, dass der Zugriff erlaubt ist.";
+
+/* parking_ui.py: Detail explaining a provider-reported permit block.; In files: parking_ui.py:232:232 */
+"Spansh flagged this system as requiring a permit." = "Spansh hat dieses System als genehmigungspflichtig gekennzeichnet.";
+
+/* parking_ui.py: Label for star system input or display; In files: parking_ui.py:171:171 */
 "System:" = "System:";
 
-/* load.py: Explanatory tooltip for empirical data confirmation; In files: load.py:301:303 */
-"Verified using precise, real-time player journal telemetry reported for specific celestial bodies in this system." = "Verifiziert mithilfe präziser Echtzeit-Spielerjournal-Telemetrie, die für bestimmte Himmelskörper in diesem System gemeldet wurde.";
+/* parking_ui.py: Result header showing the selected system and distance.; In files: parking_ui.py:374:374 */
+"System: {name} ({distance:.1f} Ly)" = "System: {name} ({distance:.1f} Lj)";
 
-/* load.py: Status message while waiting for client/journal updates; In files: load.py:117:117 */
+/* parking_ui.py: Theoretical capacity line for the selected system result.; In files: parking_ui.py:382:382 */
+"Theoretical capacity: {slots}" = "Theoretische Kapazität: {slots}";
+
+/* parking_ui.py: Access status shown when the provider did not report permit status.; In files: parking_ui.py:225:225 */
+"Unknown" = "Unbekannt";
+
+/* parking_ui.py: Placeholder text for unknown parking occupancy values.; In files: parking_ui.py:244:244 */
+"unknown" = "unbekannt";
+
+/* parking_ui.py: Status message while waiting for client/journal updates; In files: parking_ui.py:148:148 */
 "Waiting for game data..." = "Warte auf Spieldaten...";
+
