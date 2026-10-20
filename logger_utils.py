@@ -22,6 +22,7 @@ def setup_logger() -> logging.Logger:
 
     Returns:
         logging.Logger: The fully configured logger instance.
+
     """
     logger = logging.getLogger(f"{appname}.{plugin_name}")
 

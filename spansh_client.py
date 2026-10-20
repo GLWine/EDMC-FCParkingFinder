@@ -33,6 +33,7 @@ class SpanshClient:
 
         Args:
             timeout (int): Request timeout in seconds. Defaults to 15.
+
         """
         self.timeout = timeout
         self.headers = {
@@ -52,6 +53,7 @@ class SpanshClient:
 
         Returns:
             dict: Structured dictionary payload for the POST request.
+
         """
         return {
             "filters": {
@@ -81,6 +83,7 @@ class SpanshClient:
         Raises:
             SpanshTimeoutError: If the request times out.
             SpanshAPIError: If the API returns a non-200 status or malformed structure.
+
         """
         payload = self._build_system_search_payload(reference_system, radius, limit)
 

@@ -32,6 +32,13 @@ class ToolTip:
     """Lightweight tooltip management integrated with EDMC's native style."""
 
     def __init__(self, widget: tk.Widget, text: str) -> None:
+        """Bind a tooltip to a widget.
+
+        Args:
+            widget: Widget whose enter and leave events control the tooltip.
+            text: Text displayed in the tooltip window.
+
+        """
         self.widget = widget
         self.text = text
         self.tooltip_window = None
@@ -39,6 +46,12 @@ class ToolTip:
         self.widget.bind("<Leave>", self.hide_tooltip)
 
     def show_tooltip(self, event: tk.Event | None = None) -> None:
+        """Display the tooltip below the widget unless it is already visible.
+
+        Args:
+            event: Tkinter event supplied by the widget binding.
+
+        """
         if self.tooltip_window or not self.text:
             return
         x = self.widget.winfo_rootx() + 10
@@ -59,11 +72,23 @@ class ToolTip:
         label.pack()
 
     def hide_tooltip(self, event: tk.Event | None = None) -> None:
+        """Destroy the tooltip window when it is open.
+
+        Args:
+            event: Tkinter event supplied by the widget binding.
+
+        """
         if self.tooltip_window:
             self.tooltip_window.destroy()
             self.tooltip_window = None
 
     def update_text(self, new_text: str) -> None:
+        """Replace the text displayed the next time the tooltip is shown.
+
+        Args:
+            new_text: New tooltip content.
+
+        """
         self.text = new_text
 
 
@@ -178,6 +203,7 @@ class ParkingPluginUI:
 
         Args:
             system_name (str): The name of the current star system.
+
         """
         if system_name and system_name != self.current_system:
             self.current_system = system_name
@@ -221,6 +247,7 @@ class ParkingPluginUI:
 
         Args:
             system_name (str): The target star system to search around.
+
         """
         # Insert Fleet Carrier position and saturation info from the journal as filters
         # only if the current system matches the one being verified.
@@ -248,6 +275,7 @@ class ParkingPluginUI:
 
         Args:
             result (dict | None): The system information dictionary or None if not found.
+
         """
         # Re-enable button only if there is valid text in the entry
         self._validate_input()
@@ -332,6 +360,7 @@ def plugin_start3(plugin_dir: str) -> str:
 
     Returns:
         str: Name of the plugin.
+
     """
     logger.info("Starting ED Parking Finder plugin v%s.", __version__)
     return "ED Parking Finder"
@@ -345,6 +374,7 @@ def plugin_app(parent: tk.Widget) -> tk.Widget:
 
     Returns:
         tk.Widget: The initialized plugin UI frame.
+
     """
     global plugin_ui_instance
     plugin_ui_instance = ParkingPluginUI(parent)
@@ -372,6 +402,7 @@ def journal_entry(
         station (str): Current station name.
         entry (dict): Raw journal event payload.
         state (dict): Current game state snapshot.
+
     """
     global latest_carrier_journal_data
     if system:
