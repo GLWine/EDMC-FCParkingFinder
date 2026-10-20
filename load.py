@@ -258,7 +258,7 @@ class ParkingPluginUI:
         ):
             fc_filter_data = latest_carrier_journal_data
 
-        finder = ParkingSystemFinder(system_name, callback=None, fc_data=fc_filter_data)
+        finder = ParkingSystemFinder(system_name, fc_data=fc_filter_data)
         result = finder.search_sync()
 
         # Check shutdown state before triggering tkinter updates to avoid hanging
