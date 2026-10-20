@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from parking_result import AccessStatus, ParkingDetails, ParkingResult
+    from parking_result import ParkingDetails, ParkingResult
 
 try:
     from logger_utils import logger
@@ -114,17 +114,6 @@ class ParkingSystemFinder:
             return start_result
 
         return self._search_sphere_systems(nearby_systems or [])
-
-    def _access_details(
-        self, information: dict, needs_permit: object = None
-    ) -> tuple[AccessStatus, str | None]:
-        """Return access status from Spansh's permit flag."""
-        permit_flags = (information.get("requirePermit"), needs_permit)
-        if any(flag is True for flag in permit_flags):
-            return "restricted", "spansh_requires_permit"
-        if any(flag is False for flag in permit_flags):
-            return "allowed", None
-        return "unknown", "permit_status_not_reported"
 
     def _check_starting_system(self, system: dict | None) -> ParkingResult | None:
         """Evaluate a supplied record for the reference system.
@@ -284,14 +273,14 @@ class ParkingSystemFinder:
         information = system.get("information", {})
         if not isinstance(information, dict):
             information = {}
-        access_status, access_reason = self._access_details(
-            information, system.get("needs_permit")
+        permit_required = (
+            information.get("requirePermit") is True
+            or system.get("needs_permit") is True
         )
-        if access_status == "restricted":
+        if permit_required:
             logger.debug(
-                "System '%s' rejected: access restricted (%s).",
+                "System '%s' rejected: Spansh reports a permit requirement.",
                 sys_name,
-                access_reason,
             )
             return None
 
@@ -338,8 +327,6 @@ class ParkingSystemFinder:
         result: ParkingResult = {
             "name": sys_name,
             "distance": float(distance),
-            "access_status": access_status,
-            "access_reason": access_reason,
             "parking": parking,
         }
 

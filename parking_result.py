@@ -12,15 +12,14 @@ alone to reject a system as full.
 ``parking.slots``, ``body_name_list``, and ``is_empirical`` remain as
 compatibility fields for existing consumers.
 Spansh's systems query filters out systems reported as requiring a permit.
-Returned records with an explicit ``requirePermit`` value are checked again
-by the core before selection.
+The core also rejects returned records whose ``requirePermit`` or
+``needs_permit`` flag explicitly requires a permit. Permit metadata is not
+included in the result contract.
 """
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict
-
-AccessStatus = Literal["allowed", "restricted", "unknown"]
+from typing import TypedDict
 
 
 class ParkingDetails(TypedDict):
@@ -39,16 +38,8 @@ class ParkingDetails(TypedDict):
 
 
 class ParkingResult(TypedDict):
-    """Normalized result shared by the core, service, and UI.
-
-    ``access_reason`` is a stable reason code when access is unknown or
-    restricted, and ``None`` when Spansh explicitly reports access. The
-    selected system itself has ``allowed`` or ``unknown`` access status;
-    restricted systems are excluded by the finder.
-    """
+    """Normalized result shared by the core, service, and UI."""
 
     name: str
     distance: float
-    access_status: AccessStatus
-    access_reason: str | None
     parking: ParkingDetails

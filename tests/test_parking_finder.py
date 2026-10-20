@@ -39,7 +39,7 @@ class ParkingSystemFinderTests(unittest.TestCase):
 
         self.assertIsNotNone(result)
         self.assertEqual(result["name"], "Allowed")
-        self.assertEqual(result["access_status"], "allowed")
+        self.assertEqual(set(result), {"name", "distance", "parking"})
 
     def test_nearest_eligible_candidate_is_selected(self) -> None:
         """Candidate input order does not override distance order."""

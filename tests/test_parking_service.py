@@ -48,8 +48,7 @@ class ParkingSearchServiceTests(unittest.TestCase):
         self.assertEqual(result["name"], "Test System")
         self.assertEqual(result["distance"], 0)
         self.assertEqual(result["parking"]["slots"], 32)
-        self.assertEqual(result["access_status"], "allowed")
-        self.assertIsNone(result["access_reason"])
+        self.assertEqual(set(result), {"name", "distance", "parking"})
         self.assertEqual(result["parking"]["theoretical_slots"], 32)
         self.assertIsNone(result["parking"]["confirmed_available_slots"])
         self.assertIsNone(result["parking"]["spansh_reported_carrier_count"])
@@ -64,8 +63,8 @@ class ParkingSearchServiceTests(unittest.TestCase):
         self.assertFalse(result["parking"]["is_empirical"])
         self.assertEqual(records[0]["name"], "  Test System  ")
 
-    def test_missing_access_and_occupancy_data_remain_unknown(self) -> None:
-        """Legacy records do not imply reported access or confirmed capacity."""
+    def test_missing_permit_and_occupancy_data_do_not_add_result_metadata(self) -> None:
+        """Missing flags stay out of the result and occupancy remains unknown."""
         client = Mock()
         client.search_systems_around.return_value = [
             {
@@ -78,8 +77,7 @@ class ParkingSearchServiceTests(unittest.TestCase):
         result = ParkingSearchService(client).search("Reference")
 
         self.assertIsNotNone(result)
-        self.assertEqual(result["access_status"], "unknown")
-        self.assertEqual(result["access_reason"], "permit_status_not_reported")
+        self.assertEqual(set(result), {"name", "distance", "parking"})
         self.assertEqual(result["parking"]["theoretical_slots"], 16)
         self.assertIsNone(result["parking"]["confirmed_available_slots"])
         self.assertIsNone(result["parking"]["spansh_reported_carrier_count"])
@@ -102,10 +100,7 @@ class ParkingSearchServiceTests(unittest.TestCase):
         result = ParkingSearchService(client).search("Reference")
 
         self.assertIsNotNone(result)
-        self.assertEqual(
-            set(result),
-            {"name", "distance", "access_status", "access_reason", "parking"},
-        )
+        self.assertEqual(set(result), {"name", "distance", "parking"})
         self.assertEqual(
             set(result["parking"]),
             {
@@ -121,8 +116,6 @@ class ParkingSearchServiceTests(unittest.TestCase):
                 "is_empirical",
             },
         )
-        self.assertEqual(result["access_status"], "unknown")
-        self.assertEqual(result["access_reason"], "permit_status_not_reported")
         self.assertEqual(result["parking"]["theoretical_slots"], 16)
         self.assertIsNone(result["parking"]["confirmed_available_slots"])
         self.assertIsNone(result["parking"]["spansh_reported_carrier_count"])
@@ -226,13 +219,11 @@ class ParkingSearchServiceTests(unittest.TestCase):
 
         self.assertIsNotNone(result)
         self.assertEqual(result["name"], "Reference System")
-        self.assertEqual(result["access_status"], "unknown")
-        self.assertEqual(result["access_reason"], "permit_status_not_reported")
         self.assertEqual(result["parking"]["theoretical_slots"], 16)
         self.assertIsNone(result["parking"]["confirmed_available_slots"])
 
-    def test_top_level_needs_permit_flag_sets_access_status(self) -> None:
-        """Spansh's current top-level flag is normalized for the result contract."""
+    def test_top_level_needs_permit_flag_is_not_added_to_result(self) -> None:
+        """The permit flag filters candidates but is not returned as metadata."""
         client = Mock()
         client.search_systems_around.return_value = [
             {
@@ -246,8 +237,7 @@ class ParkingSearchServiceTests(unittest.TestCase):
         result = ParkingSearchService(client).search("Reference System")
 
         self.assertIsNotNone(result)
-        self.assertEqual(result["access_status"], "allowed")
-        self.assertIsNone(result["access_reason"])
+        self.assertEqual(set(result), {"name", "distance", "parking"})
 
     def test_top_level_permit_required_flag_triggers_fallback(self) -> None:
         """The provider's top-level restriction is rejected before selection."""
@@ -271,7 +261,6 @@ class ParkingSearchServiceTests(unittest.TestCase):
 
         self.assertIsNotNone(result)
         self.assertEqual(result["name"], "Nearby System")
-        self.assertEqual(result["access_status"], "allowed")
 
     def test_theoretical_capacity_uses_floor_and_system_cap(self) -> None:
         """Reported body counts produce theoretical slots within the defined bounds."""
