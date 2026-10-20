@@ -115,8 +115,6 @@ class ParkingPluginUITests(unittest.TestCase):
         result = {
             "name": "Candidate",
             "distance": 2.5,
-            "access_status": "unknown",
-            "access_reason": "permit_status_not_reported",
             "parking": parking,
         }
         result.update(overrides)
@@ -128,30 +126,28 @@ class ParkingPluginUITests(unittest.TestCase):
         ui._update_result(result)
         return ui.result_label.config.call_args.kwargs["text"]
 
-    def test_theoretical_result_keeps_unknown_availability_and_access_explicit(
-        self,
-    ) -> None:
+    def test_theoretical_result_keeps_unknown_availability_explicit(self) -> None:
         """Unknown values are shown as unknown, not as zero or confirmed."""
         result = self.make_result()
         result["parking"]["body_name_list"] = "A 1"
 
-        text = self.render(result)
+        ui = self.make_ui()
+        ui._update_result(result)
+        text = ui.result_label.config.call_args.kwargs["text"]
+        tooltip = ui.result_tooltip.update_text.call_args.args[0]
 
         self.assertIn("Theoretical capacity: 32", text)
         self.assertIn("Confirmed availability: unknown", text)
         self.assertIn("Estimated availability: unknown", text)
-        self.assertIn("Access: Unknown", text)
-        self.assertIn("Permit status was not reported by the provider.", text)
         self.assertIn("Provider body data: A 1", text)
+        self.assertNotIn("access", text.casefold())
+        self.assertNotIn("access", tooltip.casefold())
         self.assertNotIn("confirmed location", text.casefold())
         self.assertNotIn("confirmed landing", text.casefold())
 
     def test_confirmed_zero_is_distinguished_from_unknown(self) -> None:
         """A measured zero remains numeric while estimates stay independent."""
-        result = self.make_result(
-            access_status="allowed",
-            access_reason=None,
-        )
+        result = self.make_result()
         result["parking"]["confirmed_available_slots"] = 0
         result["parking"]["estimated_available_slots"] = 12
 
@@ -159,20 +155,6 @@ class ParkingPluginUITests(unittest.TestCase):
 
         self.assertIn("Confirmed availability: 0", text)
         self.assertIn("Estimated availability: 12", text)
-        self.assertIn("Access: Allowed", text)
-
-    def test_restricted_access_is_not_presented_as_allowed(self) -> None:
-        """The UI renders an explicit provider permit restriction distinctly."""
-        result = self.make_result(
-            access_status="restricted",
-            access_reason="spansh_requires_permit",
-        )
-
-        text = self.render(result)
-
-        self.assertIn("Access: Restricted (permit required)", text)
-        self.assertIn("Spansh flagged this system as requiring a permit.", text)
-        self.assertNotIn("Access: Allowed", text)
 
     def test_no_result_is_presented_as_no_suitable_system(self) -> None:
         """An empty valid search has its own result text, not an error."""

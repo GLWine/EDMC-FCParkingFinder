@@ -226,33 +226,6 @@ class ParkingPluginUI:
             self.search_btn.config(state="normal")
 
     @staticmethod
-    def _access_status_label(status: str | None, reason: str | None) -> str:
-        """Return the localized access status for the selected system."""
-        if status == "restricted":
-            if reason == "spansh_requires_permit":
-                # LANG: Access status shown when the provider explicitly rejects a system due to a permit requirement.
-                return plugin_tl("Restricted (permit required)")
-            # LANG: Access status shown when a system is explicitly blocked.
-            return plugin_tl("Restricted")
-        if status == "allowed":
-            # LANG: Access status shown when a system is permitted without restriction.
-            return plugin_tl("Allowed")
-        # LANG: Access status shown when the provider did not report permit status.
-        return plugin_tl("Unknown")
-
-    @staticmethod
-    def _access_status_detail(status: str | None) -> str:
-        """Describe why access is allowed, restricted, or still uncertain."""
-        if status == "restricted":
-            # LANG: Detail explaining a provider-reported permit block.
-            return plugin_tl("Spansh flagged this system as requiring a permit.")
-        if status == "allowed":
-            # LANG: Detail explaining that the provider explicitly reports access.
-            return plugin_tl("Spansh explicitly reports access is allowed.")
-        # LANG: Detail explaining that permit status was not reported by the provider.
-        return plugin_tl("Permit status was not reported by the provider.")
-
-    @staticmethod
     def _describe_slot_value(value: int | None) -> str:
         """Convert slot values and unknown states to user-readable text."""
         if value is None:
@@ -366,8 +339,6 @@ class ParkingPluginUI:
         if result:
             name = result.get("name", "Unknown")
             dist = result.get("distance", 0.0)
-            access_status = result.get("access_status", "unknown")
-            access_reason = result.get("access_reason")
             parking = result.get("parking", {})
             slots = parking.get("theoretical_slots", parking.get("slots", 0))
             confirmed = parking.get("confirmed_available_slots")
@@ -386,17 +357,11 @@ class ParkingPluginUI:
                 body_name_list or body_details,
             )
 
-            access_label = self._access_status_label(access_status, access_reason)
-            access_detail = self._access_status_detail(access_status)
             lines = [
                 # LANG: Result header showing the selected system and distance.
                 plugin_tl("System: {name} ({distance:.1f} Ly)").format(
                     name=name, distance=dist
                 ),
-                # LANG: Access status line for the selected system result.
-                plugin_tl("Access: {status}").format(status=access_label),
-                # LANG: Additional access-detail line for the selected system result.
-                plugin_tl("Access detail: {detail}").format(detail=access_detail),
                 # LANG: Theoretical capacity line for the selected system result.
                 plugin_tl("Theoretical capacity: {slots}").format(slots=slots),
                 # LANG: Confirmed-availability line for the selected system result.
@@ -442,13 +407,7 @@ class ParkingPluginUI:
             text = "\n".join(lines)
             self.result_label.config(text=text, foreground="green")
 
-            tooltip_lines = [
-                # LANG: Tooltip line summarizing the provider's access status.
-                plugin_tl("Access status from the provider: {status}").format(
-                    status=access_label
-                ),
-                self._access_status_detail(access_status),
-            ]
+            tooltip_lines = []
             if provider_stale:
                 tooltip_lines.append(
                     # LANG: Tooltip warning that provider data is stale and therefore heuristic.
