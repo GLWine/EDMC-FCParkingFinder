@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from config import config
@@ -13,7 +14,7 @@ from parking_ui import ParkingPluginUI
 if TYPE_CHECKING:
     import tkinter as tk
 
-__version__ = "1.3.1"
+__version__ = Path(__file__).with_name("version").read_text(encoding="utf-8").strip()
 
 plugin_ui_instance: ParkingPluginUI | None = None
 latest_carrier_journal_data: dict = {}
