@@ -67,9 +67,9 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 ### 6. Verifica e rilascio
 - [x] Aggiungere test del core per permessi, ordinamento per distanza, limite di raggio, capacità ai limiti e dati mancanti o non validi.
 - [x] Aggiungere test del client Spansh con risposte simulate per payload, timeout, errori HTTP, JSON non valido e strutture di risposta supportate.
-- [ ] Ampliare i test del service per i record normalizzati, il contratto condiviso e i casi di dati incompleti.
-- [ ] Aggiungere test UI per risultati teorici, disponibilità sconosciuta o confermata, accesso sconosciuto o limitato, nessun risultato ed errori; verificare che gli aggiornamenti Tkinter avvengano sul thread UI.
-- [ ] Verificare che messaggi e dettagli non vengano presentati come disponibilità o posizione confermata senza dati che lo dimostrino.
-- [ ] Eseguire i controlli mirati e la suite disponibile prima di dichiarare completato ciascun comportamento.
-- [ ] Aggiornare README e stato del goal alle funzionalità realmente verificate.
-- [ ] Aggiornare `version` quando una modifica costituisce un rilascio o un traguardo funzionale concordato.
+- [x] Ampliare i test del service per i record normalizzati, il contratto condiviso e i casi di dati incompleti.
+- [x] Aggiungere test UI per risultati teorici, disponibilità sconosciuta o confermata, accesso sconosciuto o limitato, nessun risultato ed errori; verificare che gli aggiornamenti Tkinter avvengano sul thread UI.
+- [x] Verificare che messaggi e dettagli non vengano presentati come disponibilità o posizione confermata senza dati che lo dimostrino.
+- [x] Eseguire i controlli mirati e la suite disponibile prima di dichiarare completato ciascun comportamento.
+- [x] Aggiornare README e stato del goal alle funzionalità realmente verificate.
+- [x] Verificare l'eventuale aggiornamento di `version`: resta invariata perché il completamento della verifica e la correzione del callback d'errore non costituiscono una release o un traguardo funzionale concordato.

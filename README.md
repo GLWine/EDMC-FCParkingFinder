@@ -80,7 +80,7 @@ Ensure your plugin folder contains the required production files (`load.py`, `pa
 ---
 
 ## Troubleshooting & Support
-For Spansh connectivity or API errors, check the EDMC log for details. Search failures are shown in the plugin interface.
+Search failures are shown in the plugin interface with distinct messages for Spansh timeouts, API errors, and other provider or network errors. Check the EDMC log for technical details.
 
 ---
 
