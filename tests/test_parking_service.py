@@ -7,11 +7,13 @@ import types
 import unittest
 from datetime import datetime, timedelta, timezone
 from importlib import import_module
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 config_stub = types.ModuleType("config")
-config_stub.appname = "EDMC"
-config_stub.config = types.SimpleNamespace(shutting_down=False)
+config_stub.__dict__.update(
+    appname="EDMC",
+    config=types.SimpleNamespace(shutting_down=False),
+)
 sys.modules.setdefault("config", config_stub)
 
 parking_service = import_module("parking_service")
@@ -85,6 +87,105 @@ class ParkingSearchServiceTests(unittest.TestCase):
         self.assertIsNone(result["parking"]["body_assignment_complete"])
         self.assertIsNone(result["parking"]["provider_data_stale"])
         self.assertEqual(result["parking"]["slots"], 16)
+
+    def test_incomplete_record_preserves_the_shared_result_contract(self) -> None:
+        """Missing provider fields remain unknown throughout the result contract."""
+        client = Mock()
+        client.search_systems_around.return_value = [
+            {
+                "name": "Partial System",
+                "distance": 3,
+                "information": None,
+            }
+        ]
+
+        result = ParkingSearchService(client).search("Reference")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(
+            set(result),
+            {"name", "distance", "access_status", "access_reason", "parking"},
+        )
+        self.assertEqual(
+            set(result["parking"]),
+            {
+                "theoretical_slots",
+                "confirmed_available_slots",
+                "spansh_reported_carrier_count",
+                "estimated_available_slots",
+                "body_assignment_complete",
+                "provider_data_stale",
+                "body_details",
+                "slots",
+                "body_name_list",
+                "is_empirical",
+            },
+        )
+        self.assertEqual(result["access_status"], "unknown")
+        self.assertEqual(result["access_reason"], "permit_status_not_reported")
+        self.assertEqual(result["parking"]["theoretical_slots"], 16)
+        self.assertIsNone(result["parking"]["confirmed_available_slots"])
+        self.assertIsNone(result["parking"]["spansh_reported_carrier_count"])
+        self.assertIsNone(result["parking"]["estimated_available_slots"])
+        self.assertIsNone(result["parking"]["body_assignment_complete"])
+        self.assertIsNone(result["parking"]["provider_data_stale"])
+        self.assertEqual(result["parking"]["body_details"], [])
+
+    def test_no_carrier_records_are_distinct_from_missing_occupancy_data(self) -> None:
+        """An empty provider list estimates capacity without confirming it."""
+        for stations, carrier_count, estimated_slots in (
+            (None, None, None),
+            ([], 0, 16),
+        ):
+            with self.subTest(stations=stations):
+                client = Mock()
+                record = {
+                    "name": "Reference System",
+                    "distance": 0,
+                    "body_count": 1,
+                }
+                if stations is not None:
+                    record["stations"] = stations
+                client.search_systems_around.return_value = [record]
+
+                result = ParkingSearchService(client).search("Reference System")
+
+                self.assertIsNotNone(result)
+                parking = result["parking"]
+                self.assertEqual(
+                    parking["spansh_reported_carrier_count"], carrier_count
+                )
+                self.assertEqual(parking["estimated_available_slots"], estimated_slots)
+                self.assertIsNone(parking["confirmed_available_slots"])
+
+    def test_normalized_records_are_copies_with_core_compatible_fields(self) -> None:
+        """Provider names, distances, access, counts, and bodies are normalized."""
+        source_record = {
+            "name": "  Example System  ",
+            "distance": 2,
+            "needs_permit": False,
+            "body_count": 2,
+            "information": {"provider_field": "preserved"},
+            "bodies": [{"name": "Example System A 1"}],
+        }
+
+        normalized = ParkingSearchService._normalize_systems([source_record])
+
+        self.assertEqual(len(normalized), 1)
+        record = normalized[0]
+        self.assertEqual(record["name"], "Example System")
+        self.assertEqual(record["distance"], 2.0)
+        self.assertEqual(
+            record["information"],
+            {"provider_field": "preserved", "requirePermit": False, "bodyCount": 2},
+        )
+        self.assertEqual(record["bodies"], [{"name": "Example System A 1"}])
+        self.assertIsNot(record, source_record)
+        self.assertIsNot(record["information"], source_record["information"])
+        self.assertIsNot(record["bodies"], source_record["bodies"])
+        self.assertEqual(source_record["name"], "  Example System  ")
+        self.assertEqual(source_record["information"], {"provider_field": "preserved"})
+        self.assertNotIn("bodyCount", source_record["information"])
 
     def test_exact_target_is_evaluated_before_closer_candidates(self) -> None:
         """The exact reference system is checked before nearby records."""
@@ -298,7 +399,7 @@ class ParkingSearchServiceTests(unittest.TestCase):
             }
         ]
 
-        with unittest.mock.patch.object(parking_finder.logger, "debug") as debug:
+        with patch.object(parking_finder.logger, "debug") as debug:
             result = ParkingSearchService(client).search("Reference System")
 
         self.assertIsNotNone(result)
@@ -342,7 +443,7 @@ class ParkingSearchServiceTests(unittest.TestCase):
             },
         ]
 
-        with unittest.mock.patch.object(parking_finder.logger, "debug") as debug:
+        with patch.object(parking_finder.logger, "debug") as debug:
             result = ParkingSearchService(client).search("Reference System")
 
         self.assertIsNotNone(result)
