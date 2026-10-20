@@ -19,6 +19,7 @@ This project extracts and adapts the parking search logic from the renowned **[E
 * **Automatic System Tracking**: Automatically syncs with your current in-game location via EDMC journal events.
 * **Manual Search & Dynamic UI**: Allows searching for parking availability around any arbitrary star system by name. Features a smart search button that enables/disables automatically based on input validation and clean placeholder support.
 * **Spansh System Search**: Retrieves nearby system records from Spansh and normalizes them in a dedicated service before evaluation.
+* **Monthly Permit List Refresh**: A scheduled GitHub Action fetches every system Spansh marks as requiring a permit and commits the complete, paginated result and update timestamp to `data/known_permits.json`. When the local copy is at least 30 days old, the plugin downloads this published JSON from GitHub in the background; the plugin does not query Spansh for the permit list.
 * **Theoretical Parking Calculation**: Estimates potential capacity from the supplied system body counts, up to 128 slots per system.
 * **Multi-language Support**: Fully localized for global commanders across 11 different languages.
 * **Separated Components**: Keeps EDMC lifecycle hooks, localized UI, Spansh data acquisition, service integration, and parking evaluation in distinct modules.
@@ -80,6 +81,7 @@ Ensure your plugin folder contains the required production files (`load.py`, `pa
 
 ## Troubleshooting & Support
 For Spansh connectivity or API errors, check the EDMC log for details. Search failures are shown in the plugin interface.
+If the GitHub permit-list download fails or the published file is invalid or stale, the existing local JSON file is preserved; the plugin retries after 24 hours while running. The scheduled workflow can also be started manually from the repository's Actions tab.
 
 ---
 

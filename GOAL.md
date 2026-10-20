@@ -25,6 +25,7 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] UI separata in `parking_ui.py`, input manuale, aggiornamento del sistema corrente dal journal e ricerca asincrona.
 - [x] Localizzazione delle stringhe UI con `plugin_tl` e marcatori `# LANG`; contesto di traduzione `load.py`.
 - [x] `load.py` legge la versione dal file `version`.
+- [x] Una GitHub Action mensile sincronizza `known_permits.json` dalla ricerca globale Spansh dei sistemi `needs_permit`, paginata e completa; il plugin scarica il JSON pubblicato da GitHub ogni 30 giorni senza interrogare Spansh per la lista. Il JSON registra timestamp dell'ultimo aggiornamento riuscito anche se la lista non cambia.
 - [x] README descrive la capacità corrente come teorica e segnala che query target dedicata e assegnazione live degli slot non sono implementate.
 
 ## Roadmap (un task per volta)
