@@ -19,13 +19,13 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 
 ## Stato già implementato
 - [x] Client Spansh con payload per ricerca sistemi entro un raggio, timeout ed errori espliciti.
-- [x] Core standalone rispetto a rete e UI: filtra candidati entro raggio, esclude sistemi con permesso noto o segnalato e ordina i candidati per distanza.
+- [x] Core standalone rispetto a rete e UI: filtra candidati entro raggio, esclude i record che Spansh segnala come soggetti a permesso e ordina i candidati per distanza.
 - [x] Calcolo della capacità teorica: 16 slot per corpo, massimo 128 per sistema, basato sul numero di corpi fornito.
 - [x] Integrazione provider/core tramite `parking_service.py`, con normalizzazione dei record e inoltro degli errori.
 - [x] UI separata in `parking_ui.py`, input manuale, aggiornamento del sistema corrente dal journal e ricerca asincrona.
 - [x] Localizzazione delle stringhe UI con `plugin_tl` e marcatori `# LANG`; contesto di traduzione `load.py`.
 - [x] `load.py` legge la versione dal file `version`.
-- [x] Una GitHub Action mensile sincronizza `known_permits.json` dalla ricerca globale Spansh dei sistemi `needs_permit`, paginata e completa; il plugin scarica il JSON pubblicato da GitHub ogni 30 giorni senza interrogare Spansh per la lista. Il JSON registra timestamp dell'ultimo aggiornamento riuscito anche se la lista non cambia.
+- [x] La ricerca Spansh dei sistemi vicini applica `needs_permit: false`; non esiste una lista locale, un servizio di aggiornamento o una GitHub Action per i permessi.
 - [x] README descrive la capacità corrente come teorica e segnala che query target dedicata e assegnazione live degli slot non sono implementate.
 
 ## Roadmap (un task per volta)
@@ -49,10 +49,12 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] Se Spansh non fornisce la lista delle stazioni, mantenere occupazione e disponibilità stimate come sconosciute e non scartare il sistema per supposizione; la disponibilità confermata resta sempre sconosciuta.
 - [x] Testare limiti, corpi mancanti, saturazione per corpo, sistema pieno e dati incompleti.
 
-### 4. Permessi e motivi di esclusione
-- [ ] Unificare i segnali dalla lista `data/known_permits.json` e dal flag Spansh nel contratto del risultato.
-- [ ] Stabilire se un target bloccato viene restituito con il motivo di esclusione per spiegare il fallback, mentre i candidati bloccati non vengono selezionati.
-- [ ] Aggiungere test per permesso noto, flag API, segnali discordanti e fallback.
+### 4. Filtro permessi Spansh
+- [x] Applicare il filtro `needs_permit: false` nella ricerca Spansh insieme al raggio e all'ordinamento.
+- [x] Normalizzare il flag `needs_permit` dei record Spansh nel contratto e mantenere il controllo dei record esplicitamente limitati nel core.
+- [x] Rimuovere lista locale `known_permits.json`, updater EDMC, servizio e script di sincronizzazione, workflow GitHub e relativi test.
+- [x] Testare il payload della ricerca e la normalizzazione del flag restituito dall'API.
+- [x] Documentare che il provider può omettere il target e che il plugin non può conoscere il motivo dell'omissione.
 
 ### 5. UI, localizzazione e errori
 - [ ] Mappare il contratto dei risultati in `parking_ui.py`, mostrando in modo distinto capacità teorica, disponibilità confermata o stato sconosciuto.
