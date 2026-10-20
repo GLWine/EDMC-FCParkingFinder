@@ -130,6 +130,48 @@ class ParkingSearchServiceTests(unittest.TestCase):
         self.assertEqual(result["parking"]["theoretical_slots"], 16)
         self.assertIsNone(result["parking"]["confirmed_available_slots"])
 
+    def test_top_level_needs_permit_flag_sets_access_status(self) -> None:
+        """Spansh's current top-level flag is normalized for the result contract."""
+        client = Mock()
+        client.search_systems_around.return_value = [
+            {
+                "name": "Reference System",
+                "distance": 0,
+                "needs_permit": False,
+                "information": {"bodyCount": 1},
+            }
+        ]
+
+        result = ParkingSearchService(client).search("Reference System")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result["access_status"], "allowed")
+        self.assertIsNone(result["access_reason"])
+
+    def test_top_level_permit_required_flag_triggers_fallback(self) -> None:
+        """The provider's top-level restriction is rejected before selection."""
+        client = Mock()
+        client.search_systems_around.return_value = [
+            {
+                "name": "Reference System",
+                "distance": 0,
+                "needs_permit": True,
+                "information": {"bodyCount": 1},
+            },
+            {
+                "name": "Nearby System",
+                "distance": 2,
+                "needs_permit": False,
+                "information": {"bodyCount": 1},
+            },
+        ]
+
+        result = ParkingSearchService(client).search("Reference System")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result["name"], "Nearby System")
+        self.assertEqual(result["access_status"], "allowed")
+
     def test_theoretical_capacity_uses_floor_and_system_cap(self) -> None:
         """Reported body counts produce theoretical slots within the defined bounds."""
         for body_count, expected_slots in (
