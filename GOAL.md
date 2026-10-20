@@ -27,7 +27,7 @@
 
 ### 1. Architettura Standalone (`parking_finder.py`)
 - [x] **1.1** Rimuovere ogni dipendenza residua dalle API EDSM all'interno di `ParkingSystemFinder`.
-- [ ] **1.2** Mantenere `parking_finder.py` del tutto privo di riferimenti alla GUI o alle funzioni di traduzione di EDMC, restituendo solo strutture dati "pure" (`dict`/`list`/`bool`) per consentirne l'uso standalone.
+- [x] **1.2** Mantenere `parking_finder.py` del tutto privo di riferimenti alla GUI o alle funzioni di traduzione di EDMC, restituendo solo strutture dati "pure" (`dict`/`list`/`bool`) per consentirne l'uso standalone.
 - [ ] **1.3** Integrare `SpanshClient` in `ParkingSystemFinder` come motore primario di ricerca.
 - [ ] **1.4** Definire un modello di risposta unificato per `parking_finder.py` che contenga: nome sistema, distanza, lock da permesso, slot teorici/reali e dettagli corpi celesti.
 
