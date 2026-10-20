@@ -299,23 +299,6 @@ class ParkingPluginUI:
         self._validate_input()
 
         if result:
-            # Show a clear warning if the input system is permit-locked
-            if result.get("permit_locked", False):
-                name = result.get("name", "Unknown")
-                logger.debug("Search result: System '%s' is permit-locked.", name)
-                # LANG: Warning message when the system is permit-locked and parking is impossible
-                text = plugin_tl(
-                    "System {name} is permit-locked: parking is not possible here!"
-                ).format(name=name)
-                self.result_label.config(text=text, foreground="orange")
-                self.result_tooltip.update_text(
-                    # LANG: Explanatory tooltip for permit-locked restriction
-                    plugin_tl(
-                        "Access to this system requires a permit. You cannot jump or park here."
-                    )
-                )
-                return
-
             name = result.get("name", "Unknown")
             dist = result.get("distance", 0.0)
             parking = result.get("parking", {})
