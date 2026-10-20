@@ -16,6 +16,7 @@ import l10n
 
 from logger_utils import logger
 from parking_service import ParkingSearchService, ParkingServiceError
+from spansh_client import SpanshAPIError, SpanshTimeoutError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -208,6 +209,41 @@ class ParkingPluginUI:
         else:
             self.search_btn.config(state="normal")
 
+    @staticmethod
+    def _access_status_label(status: str | None, reason: str | None) -> str:
+        """Return the localized access status for the selected system."""
+        if status == "restricted":
+            if reason == "spansh_requires_permit":
+                # LANG: Access status shown when the provider explicitly rejects a system due to a permit requirement.
+                return plugin_tl("Restricted (permit required)")
+            # LANG: Access status shown when a system is explicitly blocked.
+            return plugin_tl("Restricted")
+        if status == "allowed":
+            # LANG: Access status shown when a system is permitted without restriction.
+            return plugin_tl("Allowed")
+        # LANG: Access status shown when the provider did not report permit status.
+        return plugin_tl("Unknown")
+
+    @staticmethod
+    def _access_status_detail(status: str | None, reason: str | None) -> str:
+        """Describe why access is allowed, restricted, or still uncertain."""
+        if status == "restricted":
+            # LANG: Detail explaining a provider-reported permit block.
+            return plugin_tl("Spansh flagged this system as requiring a permit.")
+        if status == "allowed":
+            # LANG: Detail explaining that the provider explicitly reports access.
+            return plugin_tl("Spansh explicitly reports access is allowed.")
+        # LANG: Detail explaining that permit status was not reported by the provider.
+        return plugin_tl("Permit status was not reported by the provider.")
+
+    @staticmethod
+    def _describe_slot_value(value: int | None) -> str:
+        """Convert slot values and unknown states to user-readable text."""
+        if value is None:
+            # LANG: Placeholder text for unknown parking occupancy values.
+            return plugin_tl("unknown")
+        return str(value)
+
     def update_current_system(self, system_name: str) -> None:
         """Automatically update the system entry field when the commander jumps.
 
@@ -270,11 +306,21 @@ class ParkingPluginUI:
 
         try:
             result = self.service.search(system_name, fc_data=fc_filter_data)
-        except ParkingServiceError:
+        except ParkingServiceError as exc:
             logger.exception("Parking search failed for '%s'.", system_name)
             if not self.is_shutting_down() and self.frame:
+                cause = exc.__cause__
+                if isinstance(cause, SpanshTimeoutError):
+                    # LANG: Error message for a timed-out Spansh request.
+                    message = plugin_tl("Search failed: timeout while contacting Spansh.")
+                elif isinstance(cause, SpanshAPIError):
+                    # LANG: Error message for a Spansh API response failure.
+                    message = plugin_tl("Search failed: Spansh API error.")
+                else:
+                    # LANG: Error message for a generic provider or network failure.
+                    message = plugin_tl("Search failed: provider or network error.")
                 try:
-                    self.frame.after(0, self._update_error)
+                    self.frame.after(0, lambda: self._update_error(message))
                 except RuntimeError:
                     logger.exception("RuntimeError scheduling UI error update")
             return
@@ -301,9 +347,16 @@ class ParkingPluginUI:
         if result:
             name = result.get("name", "Unknown")
             dist = result.get("distance", 0.0)
+            access_status = result.get("access_status", "unknown")
+            access_reason = result.get("access_reason")
             parking = result.get("parking", {})
             slots = parking.get("theoretical_slots", parking.get("slots", 0))
+            confirmed = parking.get("confirmed_available_slots")
+            estimated = parking.get("estimated_available_slots")
+            carrier_count = parking.get("spansh_reported_carrier_count")
+            provider_stale = parking.get("provider_data_stale")
             body_name_list = parking.get("body_name_list")
+            body_details = parking.get("body_details", [])
             is_empirical = parking.get("is_empirical", False)
 
             logger.debug(
@@ -311,35 +364,94 @@ class ParkingPluginUI:
                 name,
                 dist,
                 slots,
-                body_name_list,
+                body_name_list or body_details,
             )
 
-            # Inform user about specific short body list if available, otherwise show theoretical max slots
-            if is_empirical and body_name_list:
-                # LANG: Status message showing the found parking body name and distance
-                text = plugin_tl(
-                    "Found: {name} ({dist:.1f} Ly) - Park at body: {body_name_list}"
-                ).format(name=name, dist=dist, body_name_list=body_name_list)
-                self.result_tooltip.update_text(
-                    # LANG: Explanatory tooltip for empirical data confirmation
-                    plugin_tl(
-                        "Verified using precise, real-time player journal telemetry reported for specific celestial bodies in this system."
+            access_label = self._access_status_label(access_status, access_reason)
+            access_detail = self._access_status_detail(access_status, access_reason)
+            lines = [
+                # LANG: Result header showing the selected system and distance.
+                plugin_tl("System: {name} ({distance:.1f} Ly)").format(
+                    name=name, distance=dist
+                ),
+                # LANG: Access status line for the selected system result.
+                plugin_tl("Access: {status}").format(status=access_label),
+                # LANG: Additional access-detail line for the selected system result.
+                plugin_tl("Access detail: {detail}").format(detail=access_detail),
+                # LANG: Theoretical capacity line for the selected system result.
+                plugin_tl("Theoretical capacity: {slots}").format(slots=slots),
+                # LANG: Confirmed-availability line for the selected system result.
+                plugin_tl("Confirmed availability: {slots}").format(
+                    slots=self._describe_slot_value(confirmed)
+                ),
+                # LANG: Estimated-availability line for the selected system result.
+                plugin_tl("Estimated availability: {slots}").format(
+                    slots=self._describe_slot_value(estimated)
+                ),
+            ]
+
+            if carrier_count is not None:
+                # LANG: Provider-reported carrier count for the selected system result.
+                carrier_text = plugin_tl("Spansh carrier count: {count}").format(
+                    count=carrier_count
+                )
+                if provider_stale:
+                    # LANG: Marker shown when the provider data is older than 24 hours.
+                    stale_text = plugin_tl("(stale data)")
+                    carrier_text = f"{carrier_text} {stale_text}"
+                lines.append(carrier_text)
+
+            if body_name_list:
+                lines.append(
+                    # LANG: Body list taken from provider data without claiming an exact landing location.
+                    plugin_tl("Provider body data: {bodies}").format(
+                        bodies=body_name_list
                     )
                 )
-            else:
-                # LANG: Status message showing the max theoretical parking slots and distance
-                text = plugin_tl(
-                    "Found: {name} ({dist:.1f} Ly) - Max Theoretical Slots: {slots}"
-                ).format(name=name, dist=dist, slots=slots)
-
-                self.result_tooltip.update_text(
-                    # LANG: Explanatory tooltip for theoretical max slots fallback
-                    plugin_tl(
-                        "Live carrier telemetry is unavailable for this system. The slot count reflects maximum theoretical body capacity without filtering out currently occupied slots."
-                    )
+            elif is_empirical and body_details:
+                body_names = ", ".join(
+                    str(body.get("name", "Unknown")) for body in body_details if body
                 )
+                if body_names:
+                    lines.append(
+                        # LANG: Body names taken from journal data without claiming confirmed player-slot placement.
+                        plugin_tl("Journal body data: {bodies}").format(
+                            bodies=body_names
+                        )
+                    )
 
+            text = "\n".join(lines)
             self.result_label.config(text=text, foreground="green")
+
+            tooltip_lines = [
+                # LANG: Tooltip line summarizing the provider's access status.
+                plugin_tl("Access status from the provider: {status}").format(
+                    status=access_label
+                ),
+                self._access_status_detail(access_status, access_reason),
+            ]
+            if provider_stale:
+                tooltip_lines.append(
+                    # LANG: Tooltip warning that provider data is stale and therefore heuristic.
+                    plugin_tl(
+                        "Spansh data is older than 24 hours, so this is only a heuristic estimate."
+                    )
+                )
+            if confirmed is None:
+                tooltip_lines.append(
+                    # LANG: Tooltip explaining why confirmed availability cannot be asserted.
+                    plugin_tl(
+                        "Confirmed availability remains unknown because the plugin did not receive occupancy data."
+                    )
+                )
+            if estimated is None:
+                tooltip_lines.append(
+                    # LANG: Tooltip explaining why the estimated availability is unknown.
+                    plugin_tl(
+                        "Estimated availability is unknown because Spansh did not provide station data."
+                    )
+                )
+            self.result_tooltip.update_text(" ".join(tooltip_lines))
         else:
             logger.debug("Search finished with no suitable parking locations found.")
             # LANG: Error message when no valid parking location is found in range
