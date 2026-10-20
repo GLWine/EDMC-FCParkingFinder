@@ -11,16 +11,17 @@
 
 A lightweight, standalone plugin for **EDMC (Elite Dangerous Market Connector)** designed to help commanders identify potential Fleet Carrier parking availability in nearby star systems.
 
-This project extracts and adapts the parking search logic from the renowned **[EDR (ED Recon)](https://github.com/lekeno/EDR)** project by **[@LeKeno](https://github.com/lekeno)**, ensuring high standards of code quality, centralized network headers (`User-Agent` compliance), and full EDSM API compatibility.
+This project extracts and adapts the parking search logic from the renowned **[EDR (ED Recon)](https://github.com/lekeno/EDR)** project by **[@LeKeno](https://github.com/lekeno)**. System data is acquired from the Spansh API through a dedicated client, then passed to the parking-search core.
 
 ---
 
 ## Features
 * **Automatic System Tracking**: Automatically syncs with your current in-game location via EDMC journal events.
 * **Manual Search & Dynamic UI**: Allows searching for parking availability around any arbitrary star system by name. Features a smart search button that enables/disables automatically based on input validation and clean placeholder support.
-* **Theoretical Parking Calculation**: Estimates available slots based on system body counts retrieved via public EDSM APIs.
+* **Spansh System Search**: Retrieves nearby system records from Spansh and normalizes them in a dedicated service before evaluation.
+* **Theoretical Parking Calculation**: Estimates potential capacity from the supplied system body counts, up to 128 slots per system.
 * **Multi-language Support**: Fully localized for global commanders across 11 different languages.
-* **EDMC Native Standards**: Utilizes centralized user-agent configurations and logging standards in full compliance with `PLUGINS.md`.
+* **Separated Components**: Keeps EDMC lifecycle hooks, localized UI, Spansh data acquisition, service integration, and parking evaluation in distinct modules.
 
 ---
 
@@ -41,11 +42,9 @@ The plugin includes native localization support for:
 ---
 
 ## Parking Logic & Algorithm
-The core logic of the plugin adapts the battle-tested search mechanisms from **EDRecon / lekeno**:
-1. **Initial System Check**: When a search is triggered, the system first evaluates the reference star system itself (if rank is set to 0). It queries the EDSM API (`/api-v1/system`) to check permit locks and fetch stellar properties. If accessible and slots are available, it returns it immediately.
-2. **Progressive Fallback & Sphere Radius Query**: If the target system lacks available parking slots or requires a permit, the search does not stop. It automatically queries EDSM's spherical database (`/api-v1/sphere-systems`) across the defined radius (default: 25 Ly).
-3. **Filtering & Sorting**: Candidate systems are filtered to discard unreachable/permit-locked systems and false positives (such as distant systems improperly returning a 0 distance). Surviving systems are sorted by increasing distance from the origin and scanned sequentially until a valid parking slot is found.
-4. **Theoretical Slot Estimation**: Parking capacity is dynamically calculated based on the total body count of the target system (multiplying bodies by 16 slots, up to a strict maximum cap of 128 slots per system).
+The integration currently retrieves nearby systems from Spansh using the reference system and a 25 Ly search radius. The service validates and normalizes the returned records, then passes them to the standalone parking core.
+
+The core filters known and API-reported permit-locked systems, orders supplied candidates by distance, and calculates theoretical capacity from body counts (16 slots per body, capped at 128 per system). Direct target-system queries and live carrier-slot assignment are not yet implemented.
 
 ---
 
@@ -77,7 +76,7 @@ Ensure your plugin folder contains the required production files (`load.py`, `pa
 ---
 
 ## Troubleshooting & Support
-If you encounter 403 errors or connectivity issues with EDSM, ensure your EDMC is fully up to date. This plugin automatically hooks into EDMC's core configuration to protect against rate-limiting blocks and respect EDSM API guidelines.
+For Spansh connectivity or API errors, check the EDMC log for details. Search failures are shown in the plugin interface.
 
 ---
 
