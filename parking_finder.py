@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-import json
 import logging
 import math
 import re
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from parking_result import ParkingDetails, ParkingResult
+    from parking_result import AccessStatus, ParkingDetails, ParkingResult
 
 try:
     from logger_utils import logger
@@ -41,49 +39,13 @@ class ParkingSystemFinder:
                 telemetry belongs to the reference system, it is attached to
                 the evaluated record and used to identify the current body.
 
-        The search radius defaults to 25 light-years. Known permit-locked
-        system names are loaded from ``data/known_permits.json`` when the
-        finder is created.
+        The search radius defaults to 25 light-years. Permit access is
+        determined by Spansh's search filter and each returned system record.
 
         """
         self.star_system = star_system
         self.radius = 25
         self.fc_data = fc_data
-        self.known_permits = self._load_known_permits()
-
-    def _load_known_permits(self) -> set[str]:
-        """Read permit-locked system names from the local JSON data file.
-
-        Returns:
-            A set of system names normalized to lowercase. If the file is
-            absent, malformed, or cannot be read, logs the issue and returns
-            an empty set.
-
-        """
-        permits = set()
-        try:
-            data_path = Path(__file__).parent / "data" / "known_permits.json"
-            if data_path.exists():
-                with data_path.open(encoding="utf-8") as f:
-                    data = json.load(f)
-                    if isinstance(data, list):
-                        permits = {
-                            p.strip().lower() for p in data if isinstance(p, str)
-                        }
-                    elif isinstance(data, dict) and isinstance(
-                        data.get("systems"), list
-                    ):
-                        permits = {
-                            p.strip().lower()
-                            for p in data["systems"]
-                            if isinstance(p, str)
-                        }
-                logger.debug("Loaded %d known permit systems from file.", len(permits))
-            else:
-                logger.warning("known_permits.json not found at %s", data_path)
-        except Exception:
-            logger.exception("Failed to load known_permits.json")
-        return permits
 
     def within_radius(self, radius: int) -> None:
         """Set the maximum accepted distance for nearby-system candidates.
@@ -110,15 +72,17 @@ class ParkingSystemFinder:
         in the search and checked first. If it is available for parking, it is
         the closest result (distance zero) and is returned immediately. If it
         is unavailable, permit-locked, or otherwise unsuitable, nearby
-        candidates are filtered for known permits and radius, sorted by
-        distance, and checked until the closest suitable system is found.
-        Permit-locked systems are skipped.
+        candidates are checked for access and radius, sorted by distance, and
+        evaluated until the closest suitable system is found. Spansh's
+        provider query excludes permit-required systems, and returned records
+        are still checked when they explicitly report a permit requirement.
 
         Expected record fields are:
 
         * ``name``: system name.
         * ``distance``: numeric distance in light-years for nearby candidates.
-        * ``information.requirePermit``: optional boolean permit requirement.
+        * ``information.requirePermit``: optional boolean permit requirement
+          after provider normalization.
         * ``information.bodyCount``: optional number of bodies used to estimate
           theoretical parking capacity.
         * ``bodies``: optional list of body records, each optionally containing
@@ -137,8 +101,7 @@ class ParkingSystemFinder:
             A :class:`ParkingResult` for the selected system, or ``None`` if no
             suitable record is found. Confirmed availability is unknown unless
             occupancy data is supplied; theoretical capacity is not a
-            confirmed slot count. Permit-locked systems are skipped rather
-            than returned. Input records are not modified.
+            confirmed slot count. Input records are not modified.
 
         """
         logger.debug(
@@ -151,6 +114,17 @@ class ParkingSystemFinder:
             return start_result
 
         return self._search_sphere_systems(nearby_systems or [])
+
+    def _access_details(
+        self, information: dict, needs_permit: object = None
+    ) -> tuple[AccessStatus, str | None]:
+        """Return access status from Spansh's permit flag."""
+        permit_flags = (information.get("requirePermit"), needs_permit)
+        if any(flag is True for flag in permit_flags):
+            return "restricted", "spansh_requires_permit"
+        if any(flag is False for flag in permit_flags):
+            return "allowed", None
+        return "unknown", "permit_status_not_reported"
 
     def _check_starting_system(self, system: dict | None) -> ParkingResult | None:
         """Evaluate a supplied record for the reference system.
@@ -167,28 +141,17 @@ class ParkingSystemFinder:
             :meth:`search_sync` to continue with nearby candidates.
 
         """
-        norm_start = self.star_system.strip().lower()
-        if norm_start in self.known_permits:
-            logger.debug(
-                "Starting system '%s' is permit-locked; continuing search.",
-                self.star_system,
-            )
-            return None
-
         if (
             not system
             or "name" not in system
-            or system["name"].strip().lower() != norm_start
+            or not isinstance(system["name"], str)
+            or system["name"].strip().casefold() != self.star_system.strip().casefold()
         ):
             return None
 
         info = system.get("information", {})
-        if info.get("requirePermit", False):
-            logger.debug(
-                "Starting system '%s' requires a permit; continuing search.",
-                system["name"],
-            )
-            return None
+        if not isinstance(info, dict):
+            info = {}
 
         the_system = {**system, "distance": 0, "information": info}
 
@@ -209,10 +172,11 @@ class ParkingSystemFinder:
     def _search_sphere_systems(self, systems: list[dict]) -> ParkingResult | None:
         """Evaluate and select from supplied nearby-system records.
 
-        Candidates are copied, filtered against the configured radius and
-        local permit list, sorted by distance, and evaluated in order. The
-        first suitable candidate is returned, ensuring the result is the
-        closest available system after the starting system has been checked.
+        Candidates are copied, filtered against the configured radius,
+        checked for access restrictions, sorted by distance, and evaluated in
+        order. The first suitable candidate is returned, ensuring the result
+        is the closest available system after the starting system has been
+        checked.
 
         Args:
             systems: Nearby system records. Each candidate should contain a
@@ -267,9 +231,9 @@ class ParkingSystemFinder:
                 than the configured radius.
 
         Returns:
-            A shallow copy of the candidate when valid and not known to be
-            permit-locked; otherwise, ``None``. Copying lets evaluation attach
-            parking details without changing the caller's input dictionary.
+            A shallow copy of the candidate when valid; otherwise, ``None``.
+            Copying lets evaluation attach parking details without changing
+            the caller's input dictionary.
 
         """
         if not isinstance(system, dict):
@@ -279,7 +243,6 @@ class ParkingSystemFinder:
         distance = system.get("distance", 0)
         if (
             not isinstance(name, str)
-            or name.strip().lower() in self.known_permits
             or not isinstance(distance, (int, float))
             or distance > self.radius
         ):
@@ -291,8 +254,9 @@ class ParkingSystemFinder:
 
         Args:
             system: Supplied record. The optional
-                ``information.requirePermit`` field is used to reject systems
-                requiring permits; body count is used to estimate capacity.
+                ``                information.requirePermit`` field or Spansh's top-level
+                ``needs_permit`` flag is used to reject systems requiring permits;
+                body count is used to estimate capacity.
 
         Returns:
             A structured result when the record is accessible and has at
@@ -309,18 +273,18 @@ class ParkingSystemFinder:
             logger.debug("System '%s' rejected: false positive distance 0.", sys_name)
             return None
 
-        if sys_name.strip().lower() in self.known_permits:
-            logger.debug("System '%s' rejected: found in known_permits set.", sys_name)
-            return None
-
         information = system.get("information", {})
-        accessible = not (
-            information.get("requirePermit", False)
-            if isinstance(information, dict)
-            else False
+        if not isinstance(information, dict):
+            information = {}
+        access_status, access_reason = self._access_details(
+            information, system.get("needs_permit")
         )
-        if not accessible:
-            logger.debug("System '%s' rejected: permit required.", sys_name)
+        if access_status == "restricted":
+            logger.debug(
+                "System '%s' rejected: access restricted (%s).",
+                sys_name,
+                access_reason,
+            )
             return None
 
         slots = self._theoretical_parking_slots(system)
@@ -363,16 +327,11 @@ class ParkingSystemFinder:
             "body_name_list": body_name_list,
             "is_empirical": is_empirical,
         }
-        permit_required = (
-            information.get("requirePermit") if isinstance(information, dict) else None
-        )
         result: ParkingResult = {
             "name": sys_name,
             "distance": float(distance),
-            "access_status": "allowed" if permit_required is False else "unknown",
-            "access_reason": (
-                None if permit_required is False else "permit_status_not_reported"
-            ),
+            "access_status": access_status,
+            "access_reason": access_reason,
             "parking": parking,
         }
 
