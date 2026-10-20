@@ -241,10 +241,18 @@ class ParkingSystemFinder:
 
         name = system.get("name", "")
         distance = system.get("distance", 0)
+        if not isinstance(name, str) or isinstance(distance, bool):
+            return None
+        if not isinstance(distance, (int, float)):
+            return None
+        try:
+            normalized_distance = float(distance)
+        except OverflowError:
+            return None
         if (
-            not isinstance(name, str)
-            or not isinstance(distance, (int, float))
-            or distance > self.radius
+            not math.isfinite(normalized_distance)
+            or normalized_distance < 0
+            or normalized_distance > self.radius
         ):
             return None
         return {**system}
@@ -569,9 +577,13 @@ class ParkingSystemFinder:
             return 0
 
         info = system.get("information", {})
-        body_count = info.get("bodyCount", None)
+        body_count = info.get("bodyCount") if isinstance(info, dict) else None
 
-        if body_count is None or body_count <= 0:
+        if (
+            isinstance(body_count, bool)
+            or not isinstance(body_count, int)
+            or body_count <= 0
+        ):
             body_count = 1
 
         return min(128, body_count * 16)
