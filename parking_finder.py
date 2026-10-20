@@ -6,6 +6,10 @@ import json
 import logging
 import re
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from parking_result import ParkingDetails, ParkingResult
 
 try:
     from logger_utils import logger
@@ -89,7 +93,7 @@ class ParkingSystemFinder:
         self,
         starting_system: dict | None = None,
         nearby_systems: list[dict] | None = None,
-    ) -> dict | None:
+    ) -> ParkingResult | None:
         """Return the best parking location from caller-supplied system data.
 
         Only supplied records are evaluated. The starting record is included
@@ -116,11 +120,11 @@ class ParkingSystemFinder:
         system; a zero-distance record with a different name is rejected.
 
         Returns:
-            A copy of the selected system record with a ``parking`` mapping
-            containing ``slots``, ``body_name_list``, and ``is_empirical``.
-            Returns ``None`` if no suitable record is found. Permit-locked
-            systems are skipped rather than returned. Input records are not
-            modified.
+            A :class:`ParkingResult` for the selected system, or ``None`` if no
+            suitable record is found. Confirmed availability is unknown unless
+            occupancy data is supplied; theoretical capacity is not a
+            confirmed slot count. Permit-locked systems are skipped rather
+            than returned. Input records are not modified.
 
         """
         logger.debug(
@@ -134,7 +138,9 @@ class ParkingSystemFinder:
 
         return self._search_sphere_systems(nearby_systems or [])
 
-    def _check_starting_system(self, system: dict | None) -> dict | None:
+    def _check_starting_system(
+        self, system: dict | None
+    ) -> ParkingResult | None:
         """Evaluate a supplied record for the reference system.
 
         Args:
@@ -178,16 +184,19 @@ class ParkingSystemFinder:
         if self.fc_data:
             the_system["fc_telemetry"] = self.fc_data
 
-        if self._check_system(the_system):
+        result = self._check_system(the_system)
+        if result:
             logger.debug(
                 "Starting system '%s' is the closest suitable parking location.",
-                the_system["name"],
+                result["name"],
             )
-            return the_system
+            return result
 
         return None
 
-    def _search_sphere_systems(self, systems: list[dict]) -> dict | None:
+    def _search_sphere_systems(
+        self, systems: list[dict]
+    ) -> ParkingResult | None:
         """Evaluate and select from supplied nearby-system records.
 
         Candidates are copied, filtered against the configured radius and
@@ -228,13 +237,14 @@ class ParkingSystemFinder:
             ):
                 system["fc_telemetry"] = self.fc_data
 
-            if self._check_system(system):
+            result = self._check_system(system)
+            if result:
                 logger.debug(
                     "Selected closest parking system '%s' at %.2fLy",
-                    system.get("name"),
-                    system.get("distance", 0),
+                    result["name"],
+                    result["distance"],
                 )
-                return system
+                return result
 
         return None
 
@@ -266,7 +276,7 @@ class ParkingSystemFinder:
             return None
         return {**system}
 
-    def _check_system(self, system: dict | None) -> bool:
+    def _check_system(self, system: dict | None) -> ParkingResult | None:
         """Determine whether a system is accessible and has parking capacity.
 
         Args:
@@ -275,41 +285,67 @@ class ParkingSystemFinder:
                 requiring permits; body count is used to estimate capacity.
 
         Returns:
-            ``True`` when the record is accessible and has at least one
-            theoretical parking slot. On success, adds a ``parking`` mapping
-            to the record; otherwise returns ``False`` without adding it.
+            A structured result when the record is accessible and has at
+            least one theoretical parking slot; otherwise returns ``None``.
 
         """
         if not system:
-            return False
+            return None
 
         sys_name = system.get("name", "Unknown")
         distance = system.get("distance", 0.0)
 
         if distance == 0 and sys_name.lower() != self.star_system.lower():
             logger.debug("System '%s' rejected: false positive distance 0.", sys_name)
-            return False
+            return None
 
         if sys_name.strip().lower() in self.known_permits:
             logger.debug("System '%s' rejected: found in known_permits set.", sys_name)
-            return False
+            return None
 
-        accessible = not system.get("information", {}).get("requirePermit", False)
+        information = system.get("information", {})
+        accessible = not (
+            information.get("requirePermit", False)
+            if isinstance(information, dict)
+            else False
+        )
         if not accessible:
             logger.debug("System '%s' rejected: permit required.", sys_name)
-            return False
+            return None
 
         slots = self._theoretical_parking_slots(system)
         if slots <= 0:
             logger.debug("System '%s' rejected: 0 available slots.", sys_name)
-            return False
+            return None
 
         body_name_list, is_empirical = self._extract_body_names(system, sys_name)
-
-        system["parking"] = {
+        parking: ParkingDetails = {
+            "theoretical_slots": slots,
+            "confirmed_available_slots": None,
+            "body_details": [
+                dict(body)
+                for body in system.get("bodies", [])
+                if isinstance(body, dict)
+            ],
             "slots": slots,
             "body_name_list": body_name_list,
             "is_empirical": is_empirical,
+        }
+        permit_required = (
+            information.get("requirePermit")
+            if isinstance(information, dict)
+            else None
+        )
+        result: ParkingResult = {
+            "name": sys_name,
+            "distance": float(distance),
+            "access_status": "allowed" if permit_required is False else "unknown",
+            "access_reason": (
+                None
+                if permit_required is False
+                else "permit_status_not_reported"
+            ),
+            "parking": parking,
         }
 
         logger.debug(
@@ -318,7 +354,7 @@ class ParkingSystemFinder:
             slots,
             body_name_list,
         )
-        return True
+        return result
 
     def _clean_body_name(self, raw_name: str, sys_name: str) -> str:
         """Remove a system-name prefix and whitespace from a body name.
