@@ -65,8 +65,8 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] Rigenerare `L10n/en.template` con `script/find_localised_strings.py` quando cambiano le stringhe UI e usare l'opzione `--compare-lang` per verificare il template; aggiornare le traduzioni mantenute dal progetto e la documentazione necessaria.
 
 ### 6. Verifica e rilascio
-- [ ] Aggiungere test del core per permessi, ordinamento per distanza, limite di raggio, capacità ai limiti e dati mancanti o non validi.
-- [ ] Aggiungere test del client Spansh con risposte simulate per payload, timeout, errori HTTP, JSON non valido e strutture di risposta supportate.
+- [x] Aggiungere test del core per permessi, ordinamento per distanza, limite di raggio, capacità ai limiti e dati mancanti o non validi.
+- [x] Aggiungere test del client Spansh con risposte simulate per payload, timeout, errori HTTP, JSON non valido e strutture di risposta supportate.
 - [ ] Ampliare i test del service per i record normalizzati, il contratto condiviso e i casi di dati incompleti.
 - [ ] Aggiungere test UI per risultati teorici, disponibilità sconosciuta o confermata, accesso sconosciuto o limitato, nessun risultato ed errori; verificare che gli aggiornamenti Tkinter avvengano sul thread UI.
 - [ ] Verificare che messaggi e dettagli non vengano presentati come disponibilità o posizione confermata senza dati che lo dimostrino.
