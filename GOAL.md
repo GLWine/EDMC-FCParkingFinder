@@ -16,8 +16,6 @@
 ## Obiettivo
 Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel quale la capacità teorica di parcheggio non risulti esaurita e che non sia noto come soggetto a permesso. Rendere esplicito quando il risultato è solo teorico: non dichiarare disponibilità reale/confermata senza dati sufficienti sull'occupazione dei Fleet Carrier. Presentare risultati ed errori nell'interfaccia EDMC con traduzioni compatibili.
 
-Versione corrente: `0.4.0` (file `version`).
-
 ## Stato già implementato
 - [x] Client Spansh con payload per ricerca sistemi entro un raggio, timeout ed errori espliciti.
 - [x] Core standalone rispetto a rete e UI: filtra candidati entro raggio, esclude sistemi con permesso noto o segnalato e ordina i candidati per distanza.
@@ -31,10 +29,10 @@ Versione corrente: `0.4.0` (file `version`).
 ## Roadmap (un task per volta)
 
 ### 1. Contratto unificato dei risultati
-- [ ] Definire e documentare la struttura di risultato condivisa tra core, service e UI.
-- [ ] Includere almeno nome sistema, distanza, stato/motivo di accesso, capacità teorica, disponibilità confermata opzionale e dettagli dei corpi.
-- [ ] Distinguere esplicitamente i dati mancanti da zero slot confermati; non presentare una stima teorica come disponibilità reale.
-- [ ] Aggiungere test del contratto e della compatibilità con i record attuali.
+- [x] Definire e documentare la struttura di risultato condivisa tra core, service e UI.
+- [x] Includere almeno nome sistema, distanza, stato/motivo di accesso, capacità teorica, disponibilità confermata opzionale e dettagli dei corpi.
+- [x] Distinguere esplicitamente i dati mancanti da zero slot confermati; non presentare una stima teorica come disponibilità reale.
+- [x] Aggiungere test del contratto e della compatibilità con i record attuali.
 
 ### 2. Valutazione del target e fallback
 - [ ] Garantire che il sistema richiesto venga identificato con corrispondenza esatta e valutato prima degli altri candidati.

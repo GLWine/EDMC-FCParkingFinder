@@ -46,6 +46,9 @@ The integration currently retrieves nearby systems from Spansh using the referen
 
 The core filters known and API-reported permit-locked systems, orders supplied candidates by distance, and calculates theoretical capacity from body counts (16 slots per body, capped at 128 per system). Direct target-system queries and live carrier-slot assignment are not yet implemented.
 
+## Search Result Contract
+The core and service return a selected system as a result with `name`, `distance`, `access_status`, `access_reason`, and `parking`. The `parking` object includes `theoretical_slots`, optional confirmed occupancy data as `confirmed_available_slots`, and `body_details`. A `null` confirmed count means occupancy is unknown; `0` means occupancy was measured and no slots were confirmed available. The existing `slots`, `body_name_list`, and `is_empirical` fields remain for compatibility; `slots` is the theoretical count and does not confirm open capacity.
+
 ---
 
 ## Requirements
