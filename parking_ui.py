@@ -20,6 +20,8 @@ from parking_service import ParkingSearchService, ParkingServiceError
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from parking_result import ParkingResult
+
 plugin_tl = functools.partial(
     l10n.translations.tl, context=str(Path(__file__).with_name("load.py"))
 )
@@ -286,7 +288,7 @@ class ParkingPluginUI:
         else:
             logger.warning("EDMC is shutting down; skipping UI result update.")
 
-    def _update_result(self, result: dict | None) -> None:
+    def _update_result(self, result: ParkingResult | None) -> None:
         """Update the UI label with the search outcome.
 
         Args:
@@ -317,7 +319,7 @@ class ParkingPluginUI:
             name = result.get("name", "Unknown")
             dist = result.get("distance", 0.0)
             parking = result.get("parking", {})
-            slots = parking.get("slots", 0)
+            slots = parking.get("theoretical_slots", parking.get("slots", 0))
             body_name_list = parking.get("body_name_list")
             is_empirical = parking.get("is_empirical", False)
 
