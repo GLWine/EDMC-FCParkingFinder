@@ -92,6 +92,7 @@ class ParkingSearchService:
                 if isinstance(information, dict)
                 else None
             )
+            needs_permit = record.get("needs_permit")
 
             if (
                 not isinstance(name, str)
@@ -111,6 +112,7 @@ class ParkingSearchService:
                     permit_required is not None
                     and not isinstance(permit_required, bool)
                 )
+                or (needs_permit is not None and not isinstance(needs_permit, bool))
                 or not isinstance(bodies, list)
                 or any(
                     not isinstance(body, dict)
@@ -126,11 +128,17 @@ class ParkingSearchService:
                 )
                 continue
 
+            normalized_information = dict(information)
+            if permit_required is True or needs_permit is True:
+                normalized_information["requirePermit"] = True
+            elif permit_required is False or needs_permit is False:
+                normalized_information["requirePermit"] = False
+
             normalized_record: dict[str, Any] = {
                 **record,
                 "name": name.strip(),
                 "distance": float(distance),
-                "information": dict(information),
+                "information": normalized_information,
                 "bodies": [dict(body) for body in bodies],
             }
             if body_count is not None:
