@@ -11,6 +11,9 @@ whether the system record is older than 24 hours; stale records are not used
 alone to reject a system as full.
 ``parking.slots``, ``body_name_list``, and ``is_empirical`` remain as
 compatibility fields for existing consumers.
+Spansh's systems query filters out systems reported as requiring a permit.
+Returned records with an explicit ``requirePermit`` value are checked again
+by the core before selection.
 """
 
 from __future__ import annotations
@@ -39,8 +42,8 @@ class ParkingResult(TypedDict):
     """Normalized result shared by the core, service, and UI.
 
     ``access_reason`` is a stable reason code when access is unknown or
-    restricted, and ``None`` when the provider explicitly reports access.
-    Currently selected results have ``allowed`` or ``unknown`` access status;
+    restricted, and ``None`` when Spansh explicitly reports access. The
+    selected system itself has ``allowed`` or ``unknown`` access status;
     restricted systems are excluded by the finder.
     """
 
