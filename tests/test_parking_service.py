@@ -76,6 +76,94 @@ class ParkingSearchServiceTests(unittest.TestCase):
         self.assertIsNone(result["parking"]["confirmed_available_slots"])
         self.assertEqual(result["parking"]["slots"], 16)
 
+    def test_exact_target_is_evaluated_before_closer_candidates(self) -> None:
+        """The exact reference system is checked before nearby records."""
+        client = Mock()
+        client.search_systems_around.return_value = [
+            {
+                "name": "Reference System",
+                "distance": 8,
+                "information": {"bodyCount": 4, "requirePermit": False},
+            },
+            {
+                "name": "Reference System B",
+                "distance": 1,
+                "information": {"bodyCount": 1, "requirePermit": False},
+            },
+        ]
+
+        result = ParkingSearchService(client).search(" reference system ")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result["name"], "Reference System")
+        self.assertEqual(result["distance"], 0)
+        self.assertEqual(result["parking"]["theoretical_slots"], 64)
+
+    def test_target_with_unreported_information_is_evaluated(self) -> None:
+        """A live Spansh record with null information remains usable."""
+        client = Mock()
+        client.search_systems_around.return_value = [
+            {
+                "name": "Reference System",
+                "distance": 0,
+                "information": None,
+                "bodies": [{"name": "Reference System A 1"}],
+            }
+        ]
+
+        result = ParkingSearchService(client).search("Reference System")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result["name"], "Reference System")
+        self.assertEqual(result["access_status"], "unknown")
+        self.assertEqual(result["access_reason"], "permit_status_not_reported")
+        self.assertEqual(result["parking"]["theoretical_slots"], 16)
+        self.assertIsNone(result["parking"]["confirmed_available_slots"])
+
+    def test_missing_target_falls_back_to_nearest_candidate(self) -> None:
+        """When Spansh omits the target, the closest eligible candidate wins."""
+        client = Mock()
+        client.search_systems_around.return_value = [
+            {
+                "name": "Far System",
+                "distance": 4,
+                "information": {"bodyCount": 3, "requirePermit": False},
+            },
+            {
+                "name": "Near System",
+                "distance": 2,
+                "information": {"bodyCount": 1, "requirePermit": False},
+            },
+        ]
+
+        result = ParkingSearchService(client).search("Missing Target")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result["name"], "Near System")
+        self.assertEqual(result["distance"], 2)
+
+    def test_inaccessible_target_falls_back_to_nearby_system(self) -> None:
+        """Permit-locked targets are skipped in favor of an eligible system."""
+        client = Mock()
+        client.search_systems_around.return_value = [
+            {
+                "name": "Reference System",
+                "distance": 0,
+                "information": {"bodyCount": 2, "requirePermit": True},
+            },
+            {
+                "name": "Nearby System",
+                "distance": 3,
+                "information": {"bodyCount": 1, "requirePermit": False},
+            },
+        ]
+
+        result = ParkingSearchService(client).search("Reference System")
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result["name"], "Nearby System")
+        self.assertEqual(result["distance"], 3)
+
     def test_search_wraps_provider_errors_and_preserves_cause(self) -> None:
         """Provider failures are exposed as service errors with their cause."""
         client = Mock()
