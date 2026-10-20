@@ -6,7 +6,7 @@
 3. **Indipendenza Core:** Il modulo `parking_finder.py` deve rimanere completamente **standalone** (senza dipendenze EDMC dirette all'infuori della logica pura di ricerca e payload).
 4. **Localizzazione EDMC:** Qualsiasi stringa di testo visibile nell'interfaccia deve usare la funzione `plugin_tl("...")` con il relativo commento marcatore `# LANG: ...` in `load.py`.
 5. **Versionamento:** Durante la fase di sviluppo avanzare solo con la versione patch (`0.3.x`). La modifica del numero di versione minor/major sarà riservata alla release finale.
-6. **Verifica documentazione a ogni task:** Dopo aver completato ciascun task, verificare se `GOAL.md`, `README.md` o `version` devono essere aggiornati e apportare gli aggiornamenti pertinenti. Aggiornare subito lo stato dei task in `GOAL.md`; completare gli aggiornamenti previsti dai punti 4.1 e 4.2 alla fine dell'obiettivo, senza anticiparli con informazioni incomplete.
+6. **Verifica documentazione a ogni task:** Dopo aver completato ciascun task, verificare se `GOAL.md`, `README.md` o `version` devono essere aggiornati e apportare gli aggiornamenti pertinenti. Aggiornare subito lo stato dei task in `GOAL.md` e incrementare `version` secondo il punto 4.2 a ogni task completato. Aggiornare il `README.md` al completamento dell'obiettivo, evitando di anticipare informazioni incomplete.
 
 ---
 
@@ -28,8 +28,9 @@
 ### 1. Architettura Standalone (`parking_finder.py`)
 - [x] **1.1** Rimuovere ogni dipendenza residua dalle API EDSM all'interno di `ParkingSystemFinder`.
 - [x] **1.2** Mantenere `parking_finder.py` del tutto privo di riferimenti alla GUI o alle funzioni di traduzione di EDMC, restituendo solo strutture dati "pure" (`dict`/`list`/`bool`) per consentirne l'uso standalone.
-- [ ] **1.3** Integrare `SpanshClient` in `ParkingSystemFinder` come motore primario di ricerca.
-- [ ] **1.4** Definire un modello di risposta unificato per `parking_finder.py` che contenga: nome sistema, distanza, lock da permesso, slot teorici/reali e dettagli corpi celesti.
+- [x] **1.3** Assicurarsi che `SpanshClient` funzioni come dovrebbe, eventualmente chiedere informazioni al creatore.
+- [ ] **1.4** Integrare `SpanshClient` in `ParkingSystemFinder` come motore primario di ricerca.
+- [ ] **1.5** Definire un modello di risposta unificato per `parking_finder.py` che contenga: nome sistema, distanza, lock da permesso, slot teorici/reali e dettagli corpi celesti.
 
 ### 2. Logica di Parcheggio & Verifica Slot
 - [ ] **2.1** Costruire la query di verifica diretta sul sistema target inserito dall'utente.
@@ -44,7 +45,7 @@
 
 ### 4. Rilascio, Documentazione e Versione
 - [ ] **4.1** Aggiornare il file `README.md` documentando il passaggio alle Spansh API, le nuove funzionalità e i dettagli di ricerca nel raggio di 25 Ly.
-- [ ] **4.2** Incrementare il file `version` seguendo la progressione patch `0.x.x` (es. `0.4.3`) fino al completamento e alla release finale.
+- [ ] **4.2** Dopo aver completato ogni singolo task, incrementare immediatamente il numero patch nel file `version` (ad esempio `0.3.3` → `0.3.4`), mantenendo la progressione `0.x.x` durante lo sviluppo. Continuare l'incremento dopo ciascun task fino al completamento dell'obiettivo; l'eventuale passaggio a una versione major è riservato alla release finale.
 
 ---
 
