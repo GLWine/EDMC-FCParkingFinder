@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -114,6 +116,10 @@ class ParkingSystemFinder:
         * ``bodies``: optional list of body records, each optionally containing
           a ``name``. Body names are reported only when matching Fleet Carrier
           telemetry is available.
+        * ``stations``: optional Spansh station list. Entries with type
+          ``Drake-Class Carrier`` are counted as provider-reported occupants.
+          When arrival distances are available, carriers are assigned to the
+          nearest body by radial-distance difference, up to 16 per body.
 
         The starting-system record must have a ``name`` matching the finder's
         reference system. Nearby records should not include the starting
@@ -138,9 +144,7 @@ class ParkingSystemFinder:
 
         return self._search_sphere_systems(nearby_systems or [])
 
-    def _check_starting_system(
-        self, system: dict | None
-    ) -> ParkingResult | None:
+    def _check_starting_system(self, system: dict | None) -> ParkingResult | None:
         """Evaluate a supplied record for the reference system.
 
         Args:
@@ -194,9 +198,7 @@ class ParkingSystemFinder:
 
         return None
 
-    def _search_sphere_systems(
-        self, systems: list[dict]
-    ) -> ParkingResult | None:
+    def _search_sphere_systems(self, systems: list[dict]) -> ParkingResult | None:
         """Evaluate and select from supplied nearby-system records.
 
         Candidates are copied, filtered against the configured radius and
@@ -315,35 +317,53 @@ class ParkingSystemFinder:
 
         slots = self._theoretical_parking_slots(system)
         if slots <= 0:
-            logger.debug("System '%s' rejected: 0 available slots.", sys_name)
+            logger.debug("System '%s' rejected: 0 theoretical slots.", sys_name)
+            return None
+
+        (
+            carrier_count,
+            estimated_available_slots,
+            body_assignment_complete,
+            body_details,
+        ) = self._estimate_spansh_occupancy(system, slots)
+        provider_data_stale = self._provider_data_is_stale(system.get("updated_at"))
+        if provider_data_stale:
+            logger.debug(
+                "Spansh system data for '%s' is older than 24 hours.",
+                sys_name,
+            )
+        if estimated_available_slots == 0:
+            logger.debug(
+                "System '%s' rejected: Spansh reports %s carriers for %s theoretical slots (data stale: %s).",
+                sys_name,
+                carrier_count,
+                slots,
+                provider_data_stale,
+            )
             return None
 
         body_name_list, is_empirical = self._extract_body_names(system, sys_name)
         parking: ParkingDetails = {
             "theoretical_slots": slots,
             "confirmed_available_slots": None,
-            "body_details": [
-                dict(body)
-                for body in system.get("bodies", [])
-                if isinstance(body, dict)
-            ],
+            "spansh_reported_carrier_count": carrier_count,
+            "estimated_available_slots": estimated_available_slots,
+            "body_assignment_complete": body_assignment_complete,
+            "provider_data_stale": provider_data_stale,
+            "body_details": body_details,
             "slots": slots,
             "body_name_list": body_name_list,
             "is_empirical": is_empirical,
         }
         permit_required = (
-            information.get("requirePermit")
-            if isinstance(information, dict)
-            else None
+            information.get("requirePermit") if isinstance(information, dict) else None
         )
         result: ParkingResult = {
             "name": sys_name,
             "distance": float(distance),
             "access_status": "allowed" if permit_required is False else "unknown",
             "access_reason": (
-                None
-                if permit_required is False
-                else "permit_status_not_reported"
+                None if permit_required is False else "permit_status_not_reported"
             ),
             "parking": parking,
         }
@@ -355,6 +375,154 @@ class ParkingSystemFinder:
             body_name_list,
         )
         return result
+
+    @staticmethod
+    def _estimate_spansh_occupancy(
+        system: dict, theoretical_slots: int
+    ) -> tuple[int | None, int | None, bool | None, list[dict[str, object]]]:
+        """Estimate open slots from Spansh carrier records and arrival distances.
+
+        Carrier distances are compared with each body's distance from the
+        system arrival point. Each body is assigned at most 16 reported
+        carriers. This is a radial-distance heuristic, not a confirmed
+        carrier-to-body location or occupancy.
+        """
+        raw_bodies = system.get("bodies", [])
+        body_details = (
+            [dict(body) for body in raw_bodies if isinstance(body, dict)]
+            if isinstance(raw_bodies, list)
+            else []
+        )
+
+        stations = system.get("stations")
+        if not isinstance(stations, list):
+            return None, None, None, body_details
+
+        carriers = [
+            station
+            for station in stations
+            if isinstance(station, dict)
+            and station.get("type") == "Drake-Class Carrier"
+        ]
+        carriers_with_distance = []
+        for carrier in carriers:
+            distance = ParkingSystemFinder._arrival_distance(carrier)
+            if distance is None:
+                logger.debug(
+                    "Ignoring Spansh carrier '%s' without a valid arrival distance.",
+                    carrier.get("name", "Unknown"),
+                )
+                continue
+            carriers_with_distance.append((carrier, distance))
+
+        carrier_count = len(carriers_with_distance)
+        estimated_available_slots = max(0, theoretical_slots - carrier_count)
+
+        body_distances = [
+            (index, distance)
+            for index, body in enumerate(body_details)
+            if (distance := ParkingSystemFinder._arrival_distance(body)) is not None
+        ]
+        carrier_distances = [distance for _, distance in carriers_with_distance]
+
+        information = system.get("information", {})
+        body_count = (
+            information.get("bodyCount") if isinstance(information, dict) else None
+        )
+        body_assignment_complete = (
+            len(carrier_distances) == carrier_count
+            and len(body_distances) == len(body_details)
+            and isinstance(body_count, int)
+            and not isinstance(body_count, bool)
+            and len(body_details) >= body_count
+        )
+
+        assigned_carriers = [0] * len(body_details)
+        for carrier_distance in sorted(carrier_distances):
+            available_bodies = [
+                (index, distance)
+                for index, distance in body_distances
+                if assigned_carriers[index] < 16
+            ]
+            if not available_bodies:
+                break
+            body_index, _ = min(
+                available_bodies,
+                key=lambda body: abs(carrier_distance - body[1]),
+            )
+            assigned_carriers[body_index] += 1
+
+        body_proximity = sorted(
+            body_distances,
+            key=lambda body: (
+                min(
+                    (
+                        abs(body[1] - carrier_distance)
+                        for carrier_distance in carrier_distances
+                    ),
+                    default=body[1],
+                ),
+                body[1],
+            ),
+        )
+        body_available_slots = [0] * len(body_details)
+        remaining_slots = estimated_available_slots
+        for body_index, _ in body_proximity:
+            available_for_body = 16 - assigned_carriers[body_index]
+            allocated_slots = min(remaining_slots, available_for_body)
+            body_available_slots[body_index] = allocated_slots
+            remaining_slots -= allocated_slots
+            if remaining_slots == 0:
+                break
+
+        known_body_indices = {index for index, _ in body_distances}
+        for index, body in enumerate(body_details):
+            body["spansh_reported_carrier_count"] = (
+                assigned_carriers[index] if index in known_body_indices else None
+            )
+            body["estimated_available_slots"] = (
+                body_available_slots[index] if index in known_body_indices else None
+            )
+
+        return (
+            carrier_count,
+            estimated_available_slots,
+            body_assignment_complete,
+            body_details,
+        )
+
+    @staticmethod
+    def _arrival_distance(record: dict) -> float | None:
+        """Return a finite non-negative Spansh arrival distance, if supplied."""
+        distance = record.get("distance_to_arrival")
+        if isinstance(distance, bool) or not isinstance(distance, (int, float)):
+            return None
+        try:
+            distance = float(distance)
+        except OverflowError:
+            return None
+        if not math.isfinite(distance) or distance < 0:
+            return None
+        return distance
+
+    @staticmethod
+    def _provider_data_is_stale(updated_at: object) -> bool | None:
+        """Return whether the Spansh system record is more than 24 hours old."""
+        if not isinstance(updated_at, str) or not updated_at.strip():
+            return None
+        try:
+            timestamp = datetime.fromisoformat(
+                updated_at.strip().replace("Z", "+00:00")
+            )
+        except ValueError:
+            logger.debug(
+                "Ignoring invalid Spansh system update timestamp: %r", updated_at
+            )
+            return None
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
+        age = datetime.now(timezone.utc) - timestamp.astimezone(timezone.utc)
+        return age.total_seconds() > 24 * 60 * 60
 
     def _clean_body_name(self, raw_name: str, sys_name: str) -> str:
         """Remove a system-name prefix and whitespace from a body name.
