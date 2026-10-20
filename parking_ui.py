@@ -225,7 +225,7 @@ class ParkingPluginUI:
         return plugin_tl("Unknown")
 
     @staticmethod
-    def _access_status_detail(status: str | None, reason: str | None) -> str:
+    def _access_status_detail(status: str | None) -> str:
         """Describe why access is allowed, restricted, or still uncertain."""
         if status == "restricted":
             # LANG: Detail explaining a provider-reported permit block.
@@ -368,7 +368,7 @@ class ParkingPluginUI:
             )
 
             access_label = self._access_status_label(access_status, access_reason)
-            access_detail = self._access_status_detail(access_status, access_reason)
+            access_detail = self._access_status_detail(access_status)
             lines = [
                 # LANG: Result header showing the selected system and distance.
                 plugin_tl("System: {name} ({distance:.1f} Ly)").format(
@@ -428,7 +428,7 @@ class ParkingPluginUI:
                 plugin_tl("Access status from the provider: {status}").format(
                     status=access_label
                 ),
-                self._access_status_detail(access_status, access_reason),
+                self._access_status_detail(access_status),
             ]
             if provider_stale:
                 tooltip_lines.append(
