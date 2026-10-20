@@ -4,9 +4,16 @@
 1. **Esecuzione Sequenziale:** Esegui **un solo task alla volta** in ordine progressivo.
 2. **Richiesta Conferma:** Dopo aver completato un singolo task, fermati e attendi la conferma esplicita dell'utente prima di passare al task successivo.
 3. **Indipendenza Core:** Il modulo `parking_finder.py` deve rimanere completamente **standalone** (senza dipendenze EDMC dirette all'infuori della logica pura di ricerca e payload).
-4. **Localizzazione EDMC:** Qualsiasi stringa di testo visibile nell'interfaccia deve usare la funzione `plugin_tl("...")` con il relativo commento marcatore `# LANG: ...` in `load.py`.
-5. **Versionamento:** Durante la fase di sviluppo avanzare solo con la versione patch (`0.3.x`). La modifica del numero di versione minor/major sarà riservata alla release finale.
-6. **Verifica documentazione a ogni task:** Dopo aver completato ciascun task, verificare se `GOAL.md`, `README.md` o `version` devono essere aggiornati e apportare gli aggiornamenti pertinenti. Aggiornare subito lo stato dei task in `GOAL.md` e incrementare `version` secondo il punto 4.2 a ogni task completato. Aggiornare il `README.md` al completamento dell'obiettivo, evitando di anticipare informazioni incomplete.
+4. **Localizzazione EDMC:** Qualsiasi stringa di testo visibile nell'interfaccia deve usare `plugin_tl("...")` con il relativo commento marcatore `# LANG: ...` nel componente UI; il contesto di traduzione resta `load.py`.
+5. **Versionamento:** Mantenere la versione `0.x.x` durante la pre-release; `1.0.0` è riservato alla release finale. Incrementare il patch per i task e gli aggiornamenti incrementali; incrementare il minor (azzerando il patch) quando viene completato un traguardo funzionale significativo.
+6. **Verifica documentazione a ogni task:** Dopo aver completato ciascun task, aggiornare subito lo stato in `GOAL.md`, incrementare `version` secondo il punto 4.2 e aggiornare il `README.md` secondo il punto 4.1, documentando progressivamente solo le funzionalità effettivamente completate.
+7. **Separazione dei ruoli tra componenti:** distinguere chiaramente:
+   - `load.py`: bootstrap e lifecycle del plugin EDMC; registra/interfaccia i componenti e inoltra input/eventi, senza contenere logica di acquisizione, elaborazione o presentazione.
+   - Provider di informazioni (per esempio `spansh_client.py`): acquisiscono i dati esterni e riportano errori di rete/API; non decidono la disponibilità di parcheggio e non gestiscono la UI.
+   - Core (per esempio `parking_finder.py`): elabora i dati già forniti e restituisce risultati strutturati e puri; non effettua richieste di rete e non dipende da EDMC o UI.
+   - Componente di comunicazione/integrazione (per esempio `parking_service.py`): collega provider e core, richiede e normalizza i dati, li passa al core e consegna il risultato o l'errore al chiamante; non contiene widget o logica di visualizzazione.
+   - UI: gestisce widget, input utente e presentazione localizzata di risultati ed errori; usa il componente di comunicazione senza incorporare il protocollo Spansh né la logica core.
+   Mantenere file, responsabilità e test distinti; `load.py` avvia il flusso e collega lifecycle/eventi EDMC alla UI e al servizio.
 
 ---
 
@@ -29,7 +36,7 @@
 - [x] **1.1** Rimuovere ogni dipendenza residua dalle API EDSM all'interno di `ParkingSystemFinder`.
 - [x] **1.2** Mantenere `parking_finder.py` del tutto privo di riferimenti alla GUI o alle funzioni di traduzione di EDMC, restituendo solo strutture dati "pure" (`dict`/`list`/`bool`) per consentirne l'uso standalone.
 - [x] **1.3** Assicurarsi che `SpanshClient` funzioni come dovrebbe, eventualmente chiedere informazioni al creatore.
-- [ ] **1.4** Integrare `SpanshClient` in `ParkingSystemFinder` come motore primario di ricerca.
+- [x] **1.4** Integrare provider Spansh e core tramite un componente di comunicazione dedicato che acquisisce/normalizza i dati, invoca `ParkingSystemFinder` e inoltra risultati/errori. Mantenere `load.py` per bootstrap/lifecycle EDMC, il provider per l'acquisizione, il core per l'elaborazione e un componente UI separato per input e presentazione; nessuno deve assorbire le responsabilità degli altri.
 - [ ] **1.5** Definire un modello di risposta unificato per `parking_finder.py` che contenga: nome sistema, distanza, lock da permesso, slot teorici/reali e dettagli corpi celesti.
 
 ### 2. Logica di Parcheggio & Verifica Slot
@@ -44,8 +51,8 @@
 - [ ] **3.3** Mappare i risultati restituiti da `parking_finder.py` nelle label UI e nei tooltip localizzati di `load.py`.
 
 ### 4. Rilascio, Documentazione e Versione
-- [ ] **4.1** Aggiornare il file `README.md` documentando il passaggio alle Spansh API, le nuove funzionalità e i dettagli di ricerca nel raggio di 25 Ly.
-- [ ] **4.2** Dopo aver completato ogni singolo task, incrementare immediatamente il numero patch nel file `version` (ad esempio `0.3.3` → `0.3.4`), mantenendo la progressione `0.x.x` durante lo sviluppo. Continuare l'incremento dopo ciascun task fino al completamento dell'obiettivo; l'eventuale passaggio a una versione major è riservato alla release finale.
+- [ ] **4.1** Mantenere il file `README.md` aggiornato durante lo sviluppo: dopo ogni task completato, documentare le modifiche e le funzionalità effettivamente disponibili, senza anticipare comportamenti non ancora implementati.
+- [ ] **4.2** Dopo aver completato ogni singolo task, aggiornare immediatamente il file `version`: incrementare il patch per modifiche incrementali (ad esempio `0.3.3` → `0.3.4`) e il minor, azzerando il patch, per traguardi funzionali significativi (ad esempio `0.3.6` → `0.4.0`). Mantenere la progressione `0.x.x` durante la pre-release; passare a `1.0.0` solo per la release finale.
 
 ---
 
