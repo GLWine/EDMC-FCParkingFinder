@@ -35,10 +35,10 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] Aggiungere test del contratto e della compatibilità con i record attuali.
 
 ### 2. Valutazione del target e fallback
-- [ ] Garantire che il sistema richiesto venga identificato con corrispondenza esatta e valutato prima degli altri candidati.
-- [ ] Verificare come la risposta reale di Spansh rappresenta il sistema di riferimento; usare il provider e i payload supportati, senza presumere un endpoint target dedicato.
-- [ ] Se il target non è idoneo, valutare i candidati forniti entro 25 Ly in ordine crescente di distanza.
-- [ ] Definire e testare gli esiti per target assente, pieno secondo i dati disponibili e non accessibile.
+- [x] Garantire che il sistema richiesto venga identificato con corrispondenza esatta e valutato prima degli altri candidati.
+- [x] Verificare come la risposta reale di Spansh rappresenta il sistema di riferimento; usare il provider e i payload supportati, senza presumere un endpoint target dedicato.
+- [x] Se il target non è idoneo, valutare i candidati forniti entro 25 Ly in ordine crescente di distanza.
+- [ ] Definire e testare gli esiti per target assente, pieno secondo i dati disponibili e non accessibile. Il target assente e quello non accessibile sono coperti; il payload Spansh verificato non espone l'occupazione dei carrier, quindi non è possibile classificare o testare un target come pieno finché non esiste una fonte affidabile per tale dato (vedi task 3).
 
 ### 3. Capacità e disponibilità
 - [ ] Verificare, con fixture rappresentative dei payload Spansh, quali dati di Fleet Carrier, corpi e saturazione sono effettivamente disponibili.
