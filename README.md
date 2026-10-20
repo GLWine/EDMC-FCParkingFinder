@@ -71,7 +71,7 @@ Ensure your plugin folder contains the required production files (`load.py`, `pa
 ## Usage
 1. Launch EDMC.
 2. Go to the **FC Parking Finder** tab/panel from the main interface.
-3. View your current system's parking availability automatically or type a target system name (guided by the placeholder text) to scan nearby stellar bodies. The "Search" button will activate once valid input is provided.
+3. The system field tracks your current system from journal events. You can also enter another system name; press **Search** to scan nearby systems. Results show theoretical capacity; journal telemetry may identify body details but does not confirm total system occupancy.
 
 ---
 
