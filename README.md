@@ -42,9 +42,9 @@ The plugin includes native localization support for:
 ---
 
 ## Parking Logic & Algorithm
-The integration currently retrieves nearby systems from Spansh using the reference system and a 25 Ly search radius. The service validates and normalizes the returned records, then passes them to the standalone parking core.
+The integration retrieves nearby systems from Spansh using the reference system and a 25 Ly search radius. When Spansh returns an exact-name match for the requested system, the core evaluates it first; if it is inaccessible or otherwise unsuitable, the core checks the remaining candidates in ascending distance order. If Spansh omits the target, the nearest eligible returned candidate is used. Missing system information remains unknown rather than being treated as a report that access is allowed.
 
-The core filters known and API-reported permit-locked systems, orders supplied candidates by distance, and calculates theoretical capacity from body counts (16 slots per body, capped at 128 per system). Direct target-system queries and live carrier-slot assignment are not yet implemented.
+The core filters known and API-reported permit-locked systems and calculates theoretical capacity from body counts (16 slots per body, capped at 128 per system). Spansh's radius-search response does not provide confirmed Fleet Carrier occupancy in this integration, so a system cannot be classified as actually full and confirmed availability remains unknown. Live carrier-slot assignment is not implemented.
 
 ## Search Result Contract
 The core and service return a selected system as a result with `name`, `distance`, `access_status`, `access_reason`, and `parking`. The `parking` object includes `theoretical_slots`, optional confirmed occupancy data as `confirmed_available_slots`, and `body_details`. A `null` confirmed count means occupancy is unknown; `0` means occupancy was measured and no slots were confirmed available. The existing `slots`, `body_name_list`, and `is_empirical` fields remain for compatibility; `slots` is the theoretical count and does not confirm open capacity.
