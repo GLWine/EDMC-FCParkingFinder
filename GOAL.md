@@ -10,9 +10,9 @@
    - `parking_finder.py`: logica pura per valutare i dati ricevuti.
    - `parking_ui.py`: widget, input e presentazione localizzata; non implementa protocollo Spansh o logica di parcheggio.
 4. Per ogni nuova stringa visibile, usare `plugin_tl("...")` in `parking_ui.py` e aggiungere un commento `# LANG: ...`. Il contesto di traduzione resta `load.py`.
-5. `version` è l'unica fonte della versione del plugin; `load.py` la legge all'avvio. Mantenere `0.x.x` durante la pre-release e riservare `1.0.0` alla release finale. Aggiornare la versione per release o traguardi funzionali concordati, non per modifiche esclusivamente documentali o di pianificazione.
+5. `version` è l'unica fonte della versione del plugin; `load.py` la legge all'avvio. Mantenere `0.x.x` durante la pre-release e riservare `1.0.0` alla release finale. Incrementare la patch per modifiche funzionali successive all'ultimo tag; non cambiare versione per modifiche esclusivamente documentali o di pianificazione. Il workflow di release sincronizza il file con il tag pubblicato.
 6. Aggiornare `README.md` per descrivere solo comportamenti effettivamente implementati e verificati. Aggiornare lo stato qui dopo ogni task completato.
-7. Aggiornare `version` quando si prepara una release; per modifiche non ancora rilasciate, lasciarla al valore dell'ultima release. Il workflow di release aggiorna il file dal tag GitHub.
+7. Prima di chiudere una modifica funzionale, confrontare la versione con l'ultimo tag e aggiornare la patch se necessario; lasciare la versione invariata per soli cambi documentali. Il workflow di release sincronizza il file dal tag GitHub.
 
 ## Obiettivo
 Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel quale la capacità teorica di parcheggio non risulti esaurita e che non sia noto come soggetto a permesso. Rendere esplicito quando il risultato è solo teorico: non dichiarare disponibilità reale/confermata senza dati sufficienti sull'occupazione dei Fleet Carrier. Presentare risultati ed errori nell'interfaccia EDMC con traduzioni compatibili.
@@ -32,7 +32,7 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 
 ### 1. Contratto unificato dei risultati
 - [x] Definire e documentare la struttura di risultato condivisa tra core, service e UI.
-- [x] Includere almeno nome sistema, distanza, stato/motivo di accesso, capacità teorica, disponibilità confermata opzionale e dettagli dei corpi.
+- [x] Includere nome sistema, distanza, capacità teorica, disponibilità confermata opzionale e dettagli dei corpi; i metadati sui permessi restano fuori dal risultato.
 - [x] Distinguere esplicitamente i dati mancanti da zero slot confermati; non presentare una stima teorica come disponibilità reale.
 - [x] Aggiungere test del contratto e della compatibilità con i record attuali.
 
@@ -51,14 +51,14 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 
 ### 4. Filtro permessi Spansh
 - [x] Applicare il filtro `needs_permit: false` nella ricerca Spansh insieme al raggio e all'ordinamento.
-- [x] Normalizzare il flag `needs_permit` dei record Spansh nel contratto e mantenere il controllo dei record esplicitamente limitati nel core.
+- [x] Usare il flag `needs_permit` per filtrare i record Spansh e mantenere nel core un controllo difensivo; non includere metadati di accesso nel risultato.
 - [x] Rimuovere lista locale `known_permits.json`, updater EDMC, servizio e script di sincronizzazione, workflow GitHub e relativi test.
 - [x] Testare il payload della ricerca e la normalizzazione del flag restituito dall'API.
 - [x] Documentare che il provider può omettere il target e che il plugin non può conoscere il motivo dell'omissione.
 
 ### 5. UI, localizzazione e errori
 - [x] Mappare il contratto dei risultati in `parking_ui.py`, mostrando in modo distinto capacità teorica, disponibilità confermata o stato sconosciuto.
-- [x] Mostrare lo stato e il motivo di accesso previsti dal contratto; distinguere accesso consentito, limitato e sconosciuto senza trattare l'assenza del flag Spansh come conferma di accessibilità.
+- [x] Usare i flag permesso per il filtro interno; non mostrare stato o dettaglio dell'accesso nei risultati UI.
 - [x] Presentare nomi e dettagli dei corpi come informazioni del provider o del journal, senza descriverli come posizione verificata del Fleet Carrier se i dati non dimostrano una corrispondenza effettiva.
 - [x] Tradurre ogni nuovo testo visibile con `plugin_tl` e `# LANG` nel componente UI.
 - [x] Distinguere nella UI gli errori di timeout/rete/API dagli esiti validi senza risultati, mantenendo l'aggiornamento Tkinter sul thread UI.
@@ -68,7 +68,7 @@ Dato un sistema di riferimento, mostrare il sistema più vicino entro 25 Ly nel 
 - [x] Aggiungere test del core per permessi, ordinamento per distanza, limite di raggio, capacità ai limiti e dati mancanti o non validi.
 - [x] Aggiungere test del client Spansh con risposte simulate per payload, timeout, errori HTTP, JSON non valido e strutture di risposta supportate.
 - [x] Ampliare i test del service per i record normalizzati, il contratto condiviso e i casi di dati incompleti.
-- [x] Aggiungere test UI per risultati teorici, disponibilità sconosciuta o confermata, accesso sconosciuto o limitato, nessun risultato ed errori; verificare che gli aggiornamenti Tkinter avvengano sul thread UI.
+- [x] Aggiungere test UI per risultati teorici, disponibilità sconosciuta o confermata, nessun risultato ed errori; verificare che gli aggiornamenti Tkinter avvengano sul thread UI.
 - [x] Verificare che messaggi e dettagli non vengano presentati come disponibilità o posizione confermata senza dati che lo dimostrino.
 - [x] Eseguire i controlli mirati e la suite disponibile prima di dichiarare completato ciascun comportamento.
 - [x] Aggiornare README e stato del goal alle funzionalità realmente verificate.
