@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from logger_utils import logger
 from parking_finder import ParkingSystemFinder
 from spansh_client import SpanshClient, SpanshError
+
+if TYPE_CHECKING:
+    from parking_result import ParkingResult
 
 
 class ParkingServiceError(Exception):
@@ -26,7 +29,9 @@ class ParkingSearchService:
         """
         self.client = client or SpanshClient()
 
-    def search(self, system_name: str, fc_data: dict | None = None) -> dict | None:
+    def search(
+        self, system_name: str, fc_data: dict | None = None
+    ) -> ParkingResult | None:
         """Acquire nearby systems, normalize their records, and evaluate parking.
 
         Provider failures are exposed as :class:`ParkingServiceError` with
