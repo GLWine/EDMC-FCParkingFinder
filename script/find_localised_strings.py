@@ -87,8 +87,7 @@ def _extract_lang_comment(
 def extract_comments(
     call: ast.Call, lines: list[str], file: pathlib.Path
 ) -> str | None:
-    """
-    Extract comments from source code based on the given call.
+    """Extract comments from source code based on the given call.
 
     This returns comments on the same line as the call preferentially to comments above.
     All comments must be prefixed with LANG, ie `# LANG: `
@@ -151,8 +150,7 @@ def scan_file(path: pathlib.Path) -> list[ast.Call]:
 def scan_directory(
     path: pathlib.Path, skip: list[pathlib.Path] | None = None
 ) -> dict[pathlib.Path, list[ast.Call]]:
-    """
-    Scan a directory for expected callsites.
+    """Scan a directory for expected callsites.
 
     :param path: path to scan
     :param skip: paths to skip, if any, defaults to None
@@ -173,8 +171,7 @@ def scan_directory(
 
 
 def parse_template(path: str | pathlib.Path) -> set[str]:
-    """
-    Parse a lang.template file.
+    """Parse a lang.template file.
 
     The regexp this uses was extracted from l10n.py.
 
@@ -203,8 +200,7 @@ class FileLocation:
 
     @staticmethod
     def from_call(path: pathlib.Path, c: ast.Call) -> FileLocation:
-        """
-        Create a FileLocation from a Call and Path.
+        """Create a FileLocation from a Call and Path.
 
         :param path: Path to the file this FileLocation is in
         :param c: Call object to extract line information from
@@ -232,8 +228,7 @@ class LangEntry:
 
 
 def dedupe_lang_entries(entries: list[LangEntry]) -> list[LangEntry]:
-    """
-    Deduplicate a list of lang entries.
+    """Deduplicate a list of lang entries.
 
     This will coalesce LangEntries that have that same string but differing files and comments into a single
     LangEntry that cotains all comments and FileLocations
